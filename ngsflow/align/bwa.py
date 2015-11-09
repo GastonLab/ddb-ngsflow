@@ -7,12 +7,15 @@ import multiprocessing
 from toil.job import Job
 
 
-def run_bwa_mem(job, sample_id, sample_config, tool_config, resource_config):
+def run_bwa_mem(job, config, sample_id, fastq1, fastq2):
     """Run BWA MEM  and pipe to samtoools to sort and convert to BAM format"""
 
     # task_desc = "BWA-MEM: %s" % sample_config[sample_id]['name']
 
-    sample_config[sample_id]['sorted_bam'] = "%s.bwa.sorted.bam" % sample_config[sample_id]['name']
+    job.fileStore.logToMaster("Running BWA for sample {}\n".format(sample_id))
+
+    output_bam = "{}.bwa.sorted.bam".format(sample_id)
+    temp = "{}.bwa.sort.temp".format(sample_id)
 
     bwa_cmd = ["{}".format(config['bwa']),
                "mem",
@@ -21,7 +24,7 @@ def run_bwa_mem(job, sample_id, sample_config, tool_config, resource_config):
                "-M",
                "-v",
                "2",
-               "{}".format(config['reference_genome']),
+               "{}".format(config['reference']),
                "{}".format(fastq1),
                "{}".format(fastq2)]
 
@@ -34,10 +37,12 @@ def run_bwa_mem(job, sample_id, sample_config, tool_config, resource_config):
                 "sort",
                 "-@",
                 "{}".format(multiprocessing.cpu_count()),
-                "-o",
-                "{}".format(output_bam),
                 "-O",
                 "bam",
+                "-o",
+                "{}".format(output_bam),
+                "-T",
+                "{}".format(temp),
                 "-"]
     command = "{} | {} | {}".format(" ".join(bwa_cmd), " ".join(view_cmd), " ".join(sort_cmd))
 
@@ -45,10 +50,11 @@ def run_bwa_mem(job, sample_id, sample_config, tool_config, resource_config):
     with open(logfile, "wb") as err:
         sys.stdout.write("Executing {} and writing to logfile %s\n".format(command))
         err.write("Command: {}\n".format(command))
-        p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-        output = p.communicate()
-        code = p.returncode
-        if code:
-            sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-            sys.stdout.write("%s\n" % output)
-            sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+        job.fileStore.logToMaster("BWA Command: {}\n".format(command))
+        # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+        # output = p.communicate()
+        # code = p.returncode
+        # if code:
+        #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+        #     sys.stdout.write("%s\n" % output)
+        #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)

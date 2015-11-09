@@ -7,3 +7,4 @@ psutil
 pyexcel
 pyexcel-xlsx
 celery
+toil
