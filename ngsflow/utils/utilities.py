@@ -36,6 +36,7 @@ def run_fastqc(job, config, samples):
                "{}".format(num_cores))
 
     job.fileStore.logToMaster("FastQC Command: {}\n".format(command))
+
     # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
     # output = p.communicate()
     # code = p.returncode

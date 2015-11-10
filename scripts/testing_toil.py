@@ -1,19 +1,20 @@
-import argparse
 from toil.job import Job
 
 
-class HelloWorld(Job):
-    def __init__(self, message):
-        Job.__init__(self,  memory="2G", cores=2, disk="3G")
-        self.message = message
+def binaryStrings(job, depth, message=""):
+    if depth > 0:
+        s = [ job.addChildJobFn(binaryStrings, message + "0",
+                                depth-1).rv(),
+              job.addChildJobFn(binaryStrings, message + "1",
+                                depth-1).rv() ]
+        return job.addFollowOnFn(merge, s).rv()
+    return [message]
 
-    def run(self, fileStore):
-        fileStore.logToMaster("Hello, world!, I have a message: %s"
-                              % self.message)
+
+def merge(strings):
+    return strings[0] + strings[1]
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    Job.Runner.addToilOptions(parser)
-    options = parser.parse_args()
-    options.logLevel = "INFO"
-    Job.Runner.startToil(HelloWorld("woot"), options)
+    options = Job.Runner.getDefaultOptions("./toilWorkflowRun")
+    l = Job.Runner.startToil(Job.wrapJobFn(binaryStrings, depth=5), options)
+    print l  # Prints a list of all binary strings of length 5

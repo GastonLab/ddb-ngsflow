@@ -5,8 +5,6 @@ __author__ = 'dgaston'
 
 import sys
 
-from .. import pipeline as pipe
-
 
 def run_diagnosetargets(project_config, sample_config, tool_config, resource_config):
     """Run GATK's DiagnoseTargets against the supplied regions"""
@@ -153,7 +151,7 @@ def run_mark_duplicates(project_config, sample_config, tool_config, resource_con
     sys.stdout.write("Finished Running MarkDuplicates\n")
 
 
-def add_or_replace_readgroups(job, config, sample):
+def add_or_replace_readgroups(job, config, sample, input_bam):
     """Run AddOrReplaceReadGroups"""
 
     job.fileStore.logToMaster("Running AddOrReplaceReadGroups in sample: {}".format(sample))
@@ -161,65 +159,111 @@ def add_or_replace_readgroups(job, config, sample):
     output_bam = "{}.rg.sorted.bam".format(sample)
 
     command = ("java",
-               "-Xmx{}g".format(),
+               "-Xmx{}g".format(config['max_mem']),
                "-jar",
-               "{}".format(config['gatk']),
+               "{}".format(config['picard']),
                "AddOrReplaceReadGroups",
-               "INPUT={}".format(),
-               "OUTPUT{}".format(output_bam),
+               "INPUT={}".format(input_bam),
+               "OUTPUT={}".format(output_bam),
                "RGID={}".format(sample),
                "RGSM={}".format(sample),
                "RGLB={}".format(sample),
                "RGPL=illumina",
-               "RGPU=miseq"
-               % (tool_config['gatk']['max_mem'], tool_config['picard']['bin'], sample['working_bam'],
-                  sample['rg_bam'], sample['rg_id'], sample['rg_sm'], sample['rg_sm']))
+               "RGPU=miseq")
 
-    command2 = ("java -Xmx%sg -jar %s BuildBamIndex INPUT=%s"
-                % (tool_config['gatk']['max_mem'], tool_config['picard']['bin'], sample['rg_bam']))
+    command2 = ("java",
+                "-Xmx{}g".format(config['max_mem']),
+                "-jar",
+                "{}".format(config['picard']),
+                "BuildBamIndex",
+                "INPUT={}".format(output_bam))
 
     job.fileStore.logToMaster("GATK AddOrReplaceReadGroupsCommand Command: {}\n".format(command))
-    job.fileStore.logToMaster("GATK BuildBamIndex Command: {}\n".format(command))
+    job.fileStore.logToMaster("GATK BuildBamIndex Command: {}\n".format(command2))
+
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+
+    return output_bam
 
 
-def run_realign_indels(project_config, sample_config, tool_config, resource_config):
+def realign_indels(job, config, sample, input_bam):
     """Create Indel realignment targets and run realignment step"""
 
-    instructions = list()
-    instructions2 = list()
+    targets = "{}.targets.intervals".format(sample)
+    output_bam = "{}.realigned.sorted.bam".format(sample)
 
-    sys.stdout.write("Realigning Indels\n")
-    for sample in sample_config:
-        sys.stdout.write("Running TargetCreator for sample %s\n" % sample['name'])
+    command = ("java",
+               "-Xmx{}g".format(config['max_mem']),
+               "-jar",
+               "{}".format(config['gatk']),
+               "-T",
+               "RealignerTargetCreator",
+               "-R",
+               "{}".format(config['reference']),
+               "-known",
+               "{}".format(config['indel1']),
+               "-known",
+               "{}".format(config['indel2']),
+               "-I",
+               "{}".format(input_bam),
+               "-o",
+               "{}".format(targets))
 
-        targets = "%s.targets.intervals" % sample['name']
-        sample['realigned_bam'] = "%s.realigned.sorted.bam" % sample['name']
+    command2 = ("java",
+                "-Xmx{}g".format(config['max_mem']),
+                "-jar",
+                "{}".format(config['gatk']),
+                "-T",
+                "IndelRealigner",
+                "-I",
+                "{}".format(input_bam),
+                "-o",
+                "{}".format(output_bam),
+                "-known",
+                "{}".format(config['indel1']),
+                "-known",
+                "{}".format(config['indel2']),
+                "-targetIntervals",
+                "{}".format(targets),
+                "-R",
+                "{}".format(config['reference']),
+                "--read_filter",
+                "NotPrimaryAlignment")
 
-        logfile = "%s.targetcreator.log" % sample['name']
-        logfile2 = "%s.realignment.log" % sample['name']
+    job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
+    job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command2))
 
-        command = ("java -Xmx%sg -jar %s -T RealignerTargetCreator -R %s -known %s -known %s -I %s -o %s"
-                   % (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'],
-                      resource_config['reference_genome'], resource_config['indel1'], resource_config['indel2'],
-                      sample['working_bam'], targets))
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
 
-        command2 = ("java -Xmx%sg -jar %s -T IndelRealigner -I %s -o %s -known %s -known %s -targetIntervals %s -R %s "
-                    "--read_filter NotPrimaryAlignment" % (tool_config['gatk']['max_mem'],
-                                                           tool_config['gatk']['bin'],
-                                                           sample['working_bam'], sample['realigned_bam'],
-                                                           resource_config['indel1'], resource_config['indel2'],
-                                                           targets, resource_config['reference_genome']))
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
 
-        instructions.append((command, logfile))
-        instructions2.append((command2, logfile2))
 
-    sys.stdout.write("Realigning targets\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['gatk']['num_cores']))
-    sys.stdout.write("Finished Identifying Realignment Targets\n")
-
-    sys.stdout.write("Realigning targets\n")
-    pipe.execute_multiprocess(instructions2, int(tool_config['gatk']['num_cores']))
-    sys.stdout.write("Finished Realigning Targets\n")
 
 
 def run_recalibrator(project_config, sample_config, tool_config, resource_config):
