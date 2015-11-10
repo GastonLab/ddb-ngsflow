@@ -13,6 +13,7 @@ from ngsflow import gatk
 from ngsflow import read_sample_sheet
 from ngsflow.align import bwa
 from ngsflow.utils import utilities
+from ngsflow.variation import variation
 
 
 if __name__ == "__main__":
@@ -43,6 +44,7 @@ if __name__ == "__main__":
         recal_job = Job.wrapJobFn(gatk.recalibrator, config, sample, realign_job.rv())
 
         # Variant calling
+        spawn_variant_job = Job.wrapJobFn(utilities.spawn_variant_jobs)
         freebayes_job = Job.wrapJobFn()
         mutect_job = Job.wrapJobFn()
         vardict_job = Job.wrapJobFn()
@@ -52,7 +54,9 @@ if __name__ == "__main__":
         platypus_job = Job.wrapJobFn()
 
         # Merge results and annotate
-        merge_job = Job.wrapJobFn()
+        merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
+                                  vardict_job.rv(), scalpel_job.rv(), pindel_job.rv(), indelminer_job.rv(),
+                                  platypus_job.rv()))
         gatk_anno_filter_job = Job.wrapJobFn()
         normalization_job = Job.wrapJobFn()
         snpeff_job = Job.wrapJobFn()
@@ -64,15 +68,23 @@ if __name__ == "__main__":
         add_job.addChild(realign_job)
         realign_job.addChild(recal_job)
 
-        recal_job.addChild(freebayes_job)
-        recal_job.addChild(mutect_job)
-        recal_job.addChild(vardict_job)
-        recal_job.addChild(scalpel_job)
-        recal_job.addChild(pindel_job)
-        recal_job.addChild(indelminer_job)
-        recal_job.addChild(platypus_job)
+        recal_job.addChild(spawn_variant_job)
+        spawn_variant_job.addChild(freebayes_job)
+        spawn_variant_job.addChild(mutect_job)
+        spawn_variant_job.addChild(vardict_job)
+        spawn_variant_job.addChild(scalpel_job)
+        spawn_variant_job.addChild(pindel_job)
+        spawn_variant_job.addChild(indelminer_job)
+        spawn_variant_job.addChild(platypus_job)
 
-    # Jobs to be executed for a cohort
+        spawn_variant_job = spawn_variant_job.encapsulate()
+        spawn_variant_job.addChild(merge_job)
+        merge_job.addChild(gatk_anno_filter_job)
+        gatk_anno_filter_job.addChild(normalization_job)
+        normalization_job.addChild(snpeff_job)
+        snpeff_job.addChild(gemini_job)
+
+    # Jobs to be executed for a cohort if necessary
     root_job = root_job.encapsulate()
 
     # Start workflow execution

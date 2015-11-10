@@ -5,6 +5,8 @@ __author__ = 'dgaston'
 
 import sys
 import time
+import multiprocessing
+import subprocess as sub
 
 from ngsflow.utils import utilities
 
