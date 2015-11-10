@@ -1,10 +1,13 @@
 __author__ = 'dgaston'
 
 import sys
+import time
 import subprocess as sub
 import multiprocessing
 
 from toil.job import Job
+
+from ngsflow.utils import utilities
 
 
 def run_bwa_mem(job, config, sample_id, fastq1, fastq2):
@@ -47,6 +50,8 @@ def run_bwa_mem(job, config, sample_id, fastq1, fastq2):
     command = "{} | {} | {}".format(" ".join(bwa_cmd), " ".join(view_cmd), " ".join(sort_cmd))
 
     job.fileStore.logToMaster("BWA Command: {}\n".format(command))
+    utilities.touch("{}".format(output_bam))
+    time.sleep(2)
     # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
     # output = p.communicate()
     # code = p.returncode

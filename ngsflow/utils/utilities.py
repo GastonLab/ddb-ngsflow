@@ -1,9 +1,13 @@
 __author__ = 'dgaston'
 
-import sys
+import os
+import time
 import multiprocessing
 
-from toil.job import Job
+
+def touch(path):
+    with open(path, 'a'):
+        os.utime(path, None)
 
 
 def spawn_batch_jobs(job):
@@ -12,6 +16,8 @@ def spawn_batch_jobs(job):
     """
 
     job.fileStore.logToMaster("Initializing workflow\n")
+    touch("Initialization.bam")
+    time.sleep(2)
 
 
 def run_fastqc(job, config, samples):
@@ -36,6 +42,8 @@ def run_fastqc(job, config, samples):
                "{}".format(num_cores))
 
     job.fileStore.logToMaster("FastQC Command: {}\n".format(command))
+    touch("FastQC.bam")
+    time.sleep(2)
 
     # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
     # output = p.communicate()

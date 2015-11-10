@@ -4,6 +4,9 @@ __author__ = 'dgaston'
 # per_cohort modes. Haplotype caller, UnifiedGenotyper and MuTect are located in the variation.py file
 
 import sys
+import time
+
+from ngsflow.utils import utilities
 
 
 def run_diagnosetargets(project_config, sample_config, tool_config, resource_config):
@@ -179,8 +182,16 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
                 "INPUT={}".format(output_bam))
 
     job.fileStore.logToMaster("GATK AddOrReplaceReadGroupsCommand Command: {}\n".format(command))
+    utilities.touch("{}".format(output_bam))
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+
     job.fileStore.logToMaster("GATK BuildBamIndex Command: {}\n".format(command2))
-
     # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
     # output = p.communicate()
     # code = p.returncode
@@ -189,14 +200,7 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     #     sys.stdout.write("%s\n" % output)
     #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
 
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
-
+    time.sleep(2)
     return output_bam
 
 
@@ -214,14 +218,14 @@ def realign_indels(job, config, sample, input_bam):
                "RealignerTargetCreator",
                "-R",
                "{}".format(config['reference']),
-               "-known",
-               "{}".format(config['indel1']),
-               "-known",
-               "{}".format(config['indel2']),
                "-I",
                "{}".format(input_bam),
                "-o",
-               "{}".format(targets))
+               "{}".format(targets),
+               "-known",
+               "{}".format(config['indel1']),
+               "-known",
+               "{}".format(config['indel2']))
 
     command2 = ("java",
                 "-Xmx{}g".format(config['max_mem']),
@@ -229,6 +233,8 @@ def realign_indels(job, config, sample, input_bam):
                 "{}".format(config['gatk']),
                 "-T",
                 "IndelRealigner",
+                "-R",
+                "{}".format(config['reference']),
                 "-I",
                 "{}".format(input_bam),
                 "-o",
@@ -239,14 +245,20 @@ def realign_indels(job, config, sample, input_bam):
                 "{}".format(config['indel2']),
                 "-targetIntervals",
                 "{}".format(targets),
-                "-R",
-                "{}".format(config['reference']),
                 "--read_filter",
                 "NotPrimaryAlignment")
 
     job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+
     job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command2))
-
+    utilities.touch("{}".format(output_bam))
     # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
     # output = p.communicate()
     # code = p.returncode
@@ -255,89 +267,80 @@ def realign_indels(job, config, sample, input_bam):
     #     sys.stdout.write("%s\n" % output)
     #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
 
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    time.sleep(2)
+    return output_bam
 
 
-
-
-def run_recalibrator(project_config, sample_config, tool_config, resource_config):
+def recalibrator(job, config, sample, input_bam):
     """Recalibrate and print bases"""
 
-    sys.stdout.write("Recalibrating bases for all samples\n")
+    output_bam = "{}.recalibrated.sorted.bam".format(sample)
+    recal_config = "{}.recal".format(sample)
 
-    instructions1 = list()
-    # instructions2 = list()
-    instructions3 = list()
-    # instructions4 = list()
-    instructions5 = list()
+    # Calculate covariates
+    recal_commands = ("java",
+                      "-Xmx{}g".format(config['max_mem']),
+                      "-jar",
+                      "{}".format(config['gatk']),
+                      "-T",
+                      "BaseRecalibrator",
+                      "-R",
+                      "{}".format(config['reference']),
+                      "-I",
+                      "{}".format(input_bam),
+                      "-o",
+                      "{}".format(recal_config),
+                      "--knownSites",
+                      "{}".format(config['dbsnp']))
 
-    for sample in sample_config:
-        sys.stdout.write("Generating commands for multiprocessing steps %s\n" % sample['name'])
+    # Print recalibrated BAM
+    print_reads_command = ("java",
+                           "-Xmx{}g".format(config['max_mem']),
+                           "-jar",
+                           "{}".format(config['gatk']),
+                           "-T",
+                           "PrintReads",
+                           "-R",
+                           "{}".format(config['reference']),
+                           "-I",
+                           "{}".format(input_bam),
+                           "-o",
+                           "{}".format(output_bam),
+                           "-BQSR",
+                           "{}".format(recal_config))
 
-        logfile1 = "%s.baserecalibrator.log" % sample['name']
-        # logfile2 = "%s.baserecalibrator_second_pass.log" % sample['name']
-        logfile3 = "%s.printreads.log" % sample['name']
-        # logfile4 = "%s.printplots.log" % sample['name']
-        logfile5 = "%s.cpindex.log" % sample['name']
+    # Copy index to alternative name
+    cp_command = ("cp",
+                  "{}.recalibrated.sorted.bai".format(sample),
+                  "{}.recalibrated.sorted.bam.bai".format(sample))
 
-        recal_config = "%s.recal" % sample['name']
-        # post_recal= "%s.post.recal" % sample['name']
-        # plots = "%s.recalibration_plots.pdf" % sample['name']
-        sample['recalibrated_bam'] = "%s.recalibrated.sorted.bam" % sample['name']
+    job.fileStore.logToMaster("GATK BaseRecalibrator Command: {}\n".format(recal_commands))
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
 
-        # Calculate covariates
-        command1 = ("java -Xmx%sg -jar %s -T BaseRecalibrator -I %s -o %s -R %s --knownSites %s"
-                    % (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'], sample['working_bam'],
-                       recal_config, resource_config['reference_genome'], resource_config['dbsnp']))
+    job.fileStore.logToMaster("GATK PrintReads Command: {}\n".format(print_reads_command))
+    utilities.touch("{}".format(output_bam))
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
 
-        # Second pass after bqsr
-        # command2 = ("java %s -jar %s -T BaseRecalibrator -I %s -o %s -R %s --knownSites %s -BQSR %s"
-        #            % (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'], realigned, post_recal,
-        # resource_config['reference_genome'], resource_config['dbsnp'], recal_config))
+    job.fileStore.logToMaster("GATK Copy Command: {}\n".format(cp_command))
+    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+    # output = p.communicate()
+    # code = p.returncode
+    # if code:
+    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
+    #     sys.stdout.write("%s\n" % output)
+    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
 
-        # Print recalibrated BAM
-        command3 = ("java -Xmx%sg -jar %s -T PrintReads -I %s -o %s -R %s -BQSR %s"
-                    % (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'], sample['working_bam'],
-                       sample['recalibrated_bam'], resource_config['reference_genome'], recal_config))
-
-        # Analysis of Covariates and Plot Printing
-        # command4 = ("java %s -jar %s -T AnalyzeCovariates -before %s -after %s -plots %s"
-        #            % (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'],recal_config, post_recal,
-        #               plots))
-
-        # Copy index to alternative name
-        command5 = ("cp %s.recalibrated.sorted.bai %s.recalibrated.sorted.bam.bai" % (sample['name'], sample['name']))
-
-        instructions1.append((command1, logfile1))
-        # instructions2.append((command2, logfile2))
-        instructions3.append((command3, logfile3))
-        # instructions4.append((command4, logfile4))
-        instructions5.append((command5, logfile5))
-
-        sample['working_bam'] = sample['recalibrated_bam']
-
-    sys.stdout.write("Running multiprocessing of BaseRecalibrator\n")
-    pipe.execute_multiprocess(instructions1, int(tool_config['gatk']['num_cores']))
-
-    #
-    # sys.stdout.write("Running multiprocessing of Post Calibration BaseRecalibrator\n")
-    # pipe.execute_multiprocess(instructions2, int(tool_config['gatk']['num_cores']))
-
-    sys.stdout.write("Running multiprocessing of PrintReads\n")
-    pipe.execute_multiprocess(instructions3, int(tool_config['gatk']['num_cores']))
-
-    # sys.stdout.write("Running Analysis and Plotting of Covariates\n")
-    # pipe.execute_multiprocess(instructions4, int(tool_config['gatk']['num_cores']))
-
-    sys.stdout.write("Copying index files to alternative name for special tools\n")
-    pipe.execute_multiprocess(instructions5, tool_config['gatk']['num_cores'])
-
-    sys.stdout.write("Finished recalibrating bases\n")
-
-
+    time.sleep(2)
+    return output_bam
