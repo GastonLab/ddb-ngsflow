@@ -6,7 +6,6 @@ __author__ = 'dgaston'
 import sys
 import time
 import multiprocessing
-import subprocess as sub
 
 from ngsflow.utils import utilities
 from ngsflow import pipeline
@@ -197,12 +196,44 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     return output_bam
 
 
-def realign_indels(job, config, sample, input_bam):
-    """Create Indel realignment targets and run realignment step"""
+def realign_target_creator(job, config, sample, input_bam):
+    """Identify targets for realignment"""
 
     targets = "{}.targets.intervals".format(sample)
-    output_bam = "{}.realigned.sorted.bam".format(sample)
     targets_log = "{}.targetcreation.log".format(sample)
+
+    command = ("java",
+               "-Xmx{}g".format(config['max_mem']),
+               "-jar",
+               "{}".format(config['gatk']),
+               "-T",
+               "IndelRealigner",
+               "-R",
+               "{}".format(config['reference']),
+               "-I",
+               "{}".format(input_bam),
+               "-o",
+               "{}".format(output_bam),
+               "-known",
+               "{}".format(config['indel1']),
+               "-known",
+               "{}".format(config['indel2']),
+               "-targetIntervals",
+               "{}".format(targets),
+               "--read_filter",
+               "NotPrimaryAlignment")
+
+    job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
+    # pipeline.run_and_log_command(" ".join(command), targets_log)
+    time.sleep(1)
+
+    return targets
+
+
+def realign_indels(job, config, sample, input_bam, targets):
+    """Create Indel realignment targets and run realignment step"""
+
+    output_bam = "{}.realigned.sorted.bam".format(sample)
     realign_log = "{}.realignindels.log".format(sample)
 
     command = ("java",
@@ -220,33 +251,11 @@ def realign_indels(job, config, sample, input_bam):
                "-known",
                "{}".format(config['indel1']),
                "-known",
-               "{}".format(config['indel2']))
+               "{}".format(config['indel2']),
+               "-nt",
+               "{}".format(multiprocessing.cpu_count()))
 
-    command2 = ("java",
-                "-Xmx{}g".format(config['max_mem']),
-                "-jar",
-                "{}".format(config['gatk']),
-                "-T",
-                "IndelRealigner",
-                "-R",
-                "{}".format(config['reference']),
-                "-I",
-                "{}".format(input_bam),
-                "-o",
-                "{}".format(output_bam),
-                "-known",
-                "{}".format(config['indel1']),
-                "-known",
-                "{}".format(config['indel2']),
-                "-targetIntervals",
-                "{}".format(targets),
-                "--read_filter",
-                "NotPrimaryAlignment")
-
-    job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
-    # pipeline.run_and_log_command(" ".join(command), targets_log)
-
-    job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command2))
+    job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command))
     utilities.touch("{}".format(output_bam))
     # pipeline.run_and_log_command(" ".join(command2), realign_log)
     time.sleep(2)
@@ -277,7 +286,9 @@ def recalibrator(job, config, sample, input_bam):
                       "-o",
                       "{}".format(recal_config),
                       "--knownSites",
-                      "{}".format(config['dbsnp']))
+                      "{}".format(config['dbsnp']),
+                      "-nct",
+                      "{}".format(multiprocessing.cpu_count()))
 
     # Print recalibrated BAM
     print_reads_command = ("java",
@@ -293,7 +304,9 @@ def recalibrator(job, config, sample, input_bam):
                            "-o",
                            "{}".format(output_bam),
                            "-BQSR",
-                           "{}".format(recal_config))
+                           "{}".format(recal_config),
+                           "-nct",
+                           "{}".format(multiprocessing.cpu_count()))
 
     # Copy index to alternative name
     cp_command = ("cp",

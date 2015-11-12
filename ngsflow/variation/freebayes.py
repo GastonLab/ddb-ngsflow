@@ -15,7 +15,7 @@ def run_freebayes_single(job, config, sample, input_bam):
                "--fasta-reference",
                "{}".format(config['reference']),
                "-t",
-               "{}".format(config['merged_regions']),
+               "{}".format(config['regions']),
                "--min-alternate-fraction",
                "{}".format(config['min_alt_af']),
                "--pooled-discrete",

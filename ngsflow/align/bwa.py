@@ -1,11 +1,7 @@
 __author__ = 'dgaston'
 
-import sys
 import time
-import subprocess as sub
 import multiprocessing
-
-from toil.job import Job
 
 from ngsflow.utils import utilities
 from ngsflow import pipeline

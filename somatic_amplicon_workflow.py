@@ -38,29 +38,39 @@ if __name__ == "__main__":
     # Per sample jobs
     for sample in samples:
         # Alignment and Refinement Stages
-        align_job = Job.wrapJobFn(bwa.run_bwa_mem, config, sample, samples[sample]['fastq1'], samples[sample]['fastq2'])
-        add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, config, sample, align_job.rv())
-        realign_job = Job.wrapJobFn(gatk.realign_indels, config, sample, add_job.rv())
-        recal_job = Job.wrapJobFn(gatk.recalibrator, config, sample, realign_job.rv())
+        align_job = Job.wrapJobFn(bwa.run_bwa_mem, config, sample, samples[sample]['fastq1'], samples[sample]['fastq2'],
+                                  cores=multiprocessing.cpu_count())
+        add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, config, sample, align_job.rv(),
+                                cores=1)
+        creator_job = Job.wrapJobFn(gatk.realign_target_creator, config, sample, add_job.rv(),
+                                    cores=multiprocessing.cpu_count())
+        realign_job = Job.wrapJobFn(gatk.realign_indels, config, sample, add_job.rv(), creator_job.rv(),
+                                    cores=1)
+        recal_job = Job.wrapJobFn(gatk.recalibrator, config, sample, realign_job.rv(),
+                                  cores=multiprocessing.cpu_count())
 
         # Variant calling
         spawn_variant_job = Job.wrapJobFn(utilities.spawn_variant_jobs)
-        freebayes_job = Job.wrapJobFn()
-        mutect_job = Job.wrapJobFn()
-        vardict_job = Job.wrapJobFn()
-        scalpel_job = Job.wrapJobFn()
-        pindel_job = Job.wrapJobFn()
-        indelminer_job = Job.wrapJobFn()
-        platypus_job = Job.wrapJobFn()
+        freebayes_job = Job.wrapJobFn(config, sample, recal_job.rv(),
+                                      cores=1)
+        mutect_job = Job.wrapJobFn(config, sample, recal_job.rv())
+        vardict_job = Job.wrapJobFn(config, sample, recal_job.rv(),
+                                    cores=multiprocessing.cpu_count())
+        scalpel_job = Job.wrapJobFn(config, sample, recal_job.rv(),
+                                    cores=multiprocessing.cpu_count())
+        pindel_job = Job.wrapJobFn(config, sample, recal_job.rv(),
+                                   cores=1)
+        indelminer_job = Job.wrapJobFn(config, sample, recal_job.rv(), cores=1)
+        platypus_job = Job.wrapJobFn(config, sample, recal_job.rv())
 
         # Merge results and annotate
         merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
                                   vardict_job.rv(), scalpel_job.rv(), pindel_job.rv(), indelminer_job.rv(),
-                                  platypus_job.rv()))
+                                  platypus_job.rv()), cores=1)
         gatk_anno_filter_job = Job.wrapJobFn()
-        normalization_job = Job.wrapJobFn()
-        snpeff_job = Job.wrapJobFn()
-        gemini_job = Job.wrapJobFn()
+        normalization_job = Job.wrapJobFn(cores=1)
+        snpeff_job = Job.wrapJobFn(cores=multiprocessing.cpu_count())
+        gemini_job = Job.wrapJobFn(cores=multiprocessing.cpu_count())
 
         # Create workflow from created jobs
         root_job.addChild(align_job)

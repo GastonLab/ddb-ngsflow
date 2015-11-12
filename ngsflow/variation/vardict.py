@@ -1,9 +1,9 @@
 __author__ = 'dgaston'
 
-import sys
+import time
+import multiprocessing
 
-from helenus.workflow import pipeline as pipe
-from helenus.workflow.elements.utilities import bgzip_and_tabix_vcf_instructions, bgzip_and_tabix_vcf
+from ngsflow import pipeline
 
 
 def run_vardict_matched():
@@ -12,36 +12,47 @@ def run_vardict_matched():
     raise NotImplementedError()
 
 
-def run_vardict_single(project_config, sample_config, tool_config, resource_config):
+def run_vardict_single(job, config, sample, input_bam):
     """Run VarDict without a matched normal sample"""
 
-    instructions = list()
+    vardict_vcf = "{}.vardict.vcf".format(sample)
+    logfile = "{}.vardict.log".format(sample)
 
-    vardict_core = ("%s -G %s -z -c 1 -S 2 -E 3 -g 4 -f %s" % (tool_config['vardict']['bin'],
-                                                               resource_config['reference_genome'],
-                                                               tool_config['min_alt_af']))
+    vardict = ("{}".format(config['vardict']),
+               "-G",
+               "{}".format(config['reference']),
+               "-z",
+               "-c",
+               "1",
+               "-S",
+               "2",
+               "-E",
+               "3",
+               "-g",
+               "4",
+               "-th",
+               "{}".format(multiprocessing.cpu_count()),
+               "-f",
+               "{}".format(config['min_alt_af']),
+               "-N",
+               "{}".format(sample),
+               "-b",
+               "{}".format(input_bam),
+               "{}".format(config['regions']))
 
-    vardict2vcf_core = ("%s -E -f %s" % (tool_config['vardict2vcf']['bin'], tool_config['min_alt_af']))
+    vardict2vcf = ("{}".format(config['vardict2vcf']),
+                   "-E",
+                   "-f",
+                   "{}".format(config['min_alt_af']),
+                   "-N",
+                   "{}".format(sample))
 
-    if project_config['mode'] == "per_sample":
-        for sample in sample_config:
-            logfile = "%s.vardict.log" % sample['name']
-            sample['vardict_vcf'] = "%s.vardict.vcf" % sample['name']
-            if not project_config['ensemble_calling']:
-                sample['raw_vcf'] = sample['vardict_vcf']
+    command = ("{vardict} | {strandbias} | {vardict2vcf} > {vcf}".format(vardict=vardict,
+                                                                         strandbias=config['vardict_strandbias'],
+                                                                         vardict2vcf=vardict2vcf, vcf=vardict_vcf))
 
-            command = ("%s -N %s -b %s %s | %s | %s -N %s > %s" %
-                       (vardict_core, sample['name'], sample['recalibrated_bam'], resource_config['regions'],
-                        tool_config['vardict_strandbias']['bin'], vardict2vcf_core, sample['name'],
-                        sample['vardict_vcf']))
+    job.fileStore.logToMaster("VarDict Command: {}\n".format(command))
+    # pipeline.run_and_log_command(command, logfile)
+    time.sleep(2)
 
-            instructions.append((command, logfile))
-    elif project_config['mode'] == "per_cohort":
-        sys.stderr.write("ERROR: Not yet implemented\n")
-        sys.exit()
-    else:
-        sys.stderr.write("ERROR: Mode: %s not supported\n" % project_config['mode'])
-
-    sys.stdout.write("Running VarDict for samples in project %s\n" % project_config['project_name'])
-    pipe.execute_multiprocess(instructions, int(tool_config['vardict']['num_cores']))
-    sys.stdout.write("Finished Running VarDict\n")
+    return vardict_vcf
