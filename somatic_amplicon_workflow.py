@@ -58,14 +58,13 @@ if __name__ == "__main__":
                                     cores=multiprocessing.cpu_count())
         scalpel_job = Job.wrapJobFn(config, sample, recal_job.rv(),
                                     cores=multiprocessing.cpu_count())
-        pindel_job = Job.wrapJobFn(config, sample, recal_job.rv(),
-                                   cores=1)
-        indelminer_job = Job.wrapJobFn(config, sample, recal_job.rv(), cores=1)
+        indelminer_job = Job.wrapJobFn(config, sample, recal_job.rv(),
+                                       cores=1)
         platypus_job = Job.wrapJobFn(config, sample, recal_job.rv())
 
         # Merge results and annotate
         merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
-                                  vardict_job.rv(), scalpel_job.rv(), pindel_job.rv(), indelminer_job.rv(),
+                                  vardict_job.rv(), scalpel_job.rv(), indelminer_job.rv(),
                                   platypus_job.rv()), cores=1)
         gatk_anno_filter_job = Job.wrapJobFn()
         normalization_job = Job.wrapJobFn(cores=1)
