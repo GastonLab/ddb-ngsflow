@@ -1,9 +1,13 @@
 __author__ = 'dgaston'
 
 import os
+import sys
 import time
+import pyexcel
 import multiprocessing
 import subprocess as sub
+
+from .. import pipeline as pipe
 
 
 def touch(path):
@@ -36,6 +40,7 @@ def run_fastqc(job, config, samples):
     """Run FastQC on provided FastQ files"""
 
     job.fileStore.logToMaster("Running FastQC for all samples\n")
+    logfile = "fastqc.log"
 
     fastq_files_list = list()
     for sample in samples:
@@ -57,13 +62,8 @@ def run_fastqc(job, config, samples):
     touch("FastQC.bam")
     time.sleep(2)
 
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    # code = pipe.run_and_log_command(" ".join(command), logfile)
+    # pipe.check_return_code(code)
 
 
 def generate_fastqc_summary_report(project_config, sample_config, tool_config, resource_config):

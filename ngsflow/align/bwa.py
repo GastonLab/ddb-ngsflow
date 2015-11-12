@@ -8,17 +8,19 @@ import multiprocessing
 from toil.job import Job
 
 from ngsflow.utils import utilities
+from ngsflow import pipeline
 
 
-def run_bwa_mem(job, config, sample_id, fastq1, fastq2):
+def run_bwa_mem(job, config, sample, fastq1, fastq2):
     """Run BWA MEM  and pipe to samtoools to sort and convert to BAM format"""
 
     # task_desc = "BWA-MEM: %s" % sample_config[sample_id]['name']
 
-    job.fileStore.logToMaster("Running BWA for sample {}\n".format(sample_id))
+    job.fileStore.logToMaster("Running BWA for sample {}\n".format(sample))
 
-    output_bam = "{}.bwa.sorted.bam".format(sample_id)
-    temp = "{}.bwa.sort.temp".format(sample_id)
+    output_bam = "{}.bwa.sorted.bam".format(sample)
+    temp = "{}.bwa.sort.temp".format(sample)
+    logfile = "{}.bwa-align.log".format(sample)
 
     bwa_cmd = ["{}".format(config['bwa']),
                "mem",
@@ -52,12 +54,6 @@ def run_bwa_mem(job, config, sample_id, fastq1, fastq2):
     job.fileStore.logToMaster("BWA Command: {}\n".format(command))
     utilities.touch("{}".format(output_bam))
     time.sleep(2)
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    # pipeline.run_and_log_command(command, logfile)
 
     return output_bam

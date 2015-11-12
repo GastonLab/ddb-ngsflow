@@ -6,31 +6,27 @@ import multiprocessing
 import subprocess as sub
 
 from ngsflow.utils import utilities
+from .. import pipeline as pipe
 
 
 def merge_variant_calls(config, sample, vcf_files):
     """Use vcf-isec to merge vcfs together and create an ensemble call set report"""
 
-    isec_command_core = ("{}".format(config['vcftools']),
-                         "isec",
-                         "-n",
-                         "+1")
-
-    for file in vcf_files:
-        bgzip, tabix = bgzip_and_tabix_vcf_instructions(sample[caller])
-        bgzip_instructions.append((bgzip[0], bgzip[1]))
-        tabix_instructions.append((tabix[0], tabix[1]))
-        vcf_files.append("%s.gz" % sample[caller])
+    for vcf in vcf_files:
+        utilities.bgzip_and_tabix_vcf(vcf)
+        vcf_files.append("{}.gz".format(vcf))
     vcf_files_string = " ".join(vcf_files)
 
-    logfile = "%s.mergevariants.log" % sample['name']
-    sample['merged_vcf'] = "%s.merged.vcf" % sample['name']
-    sample['raw_vcf'] = sample['merged_vcf']
-    sample['working_vcf'] = sample['merged_vcf']
+    merged_vcf = "{}.merged.vcf".format(sample)
 
-    isec_command = ("%s %s > %s" % (isec_command_core, vcf_files_string, sample['merged_vcf']))
+    isec_command = ("{}".format(config['vcftools']),
+                    "isec",
+                    "-n",
+                    "+1",
+                    "{}".format(vcf_files_string),
+                    "{}".format(merged_vcf))
 
-    instructions.append((isec_command, logfile))
+
 
 
 def evaluate_double_strand_calls(project_config, sample_config, tool_config, resource_config):

@@ -9,6 +9,7 @@ import multiprocessing
 import subprocess as sub
 
 from ngsflow.utils import utilities
+from ngsflow import pipeline
 
 
 def run_diagnosetargets(project_config, sample_config, tool_config, resource_config):
@@ -17,8 +18,8 @@ def run_diagnosetargets(project_config, sample_config, tool_config, resource_con
     instructions = list()
     command_core = ("java -Xmx%sg -jar %s -T DiagnoseTargets -R %s -L %s --minimum_coverage %s "
                     "--coverage_status_threshold 0.001" %
-                    (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'], 
-                     resource_config['reference_genome'], resource_config['regions'], 
+                    (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'],
+                     resource_config['reference_genome'], resource_config['regions'],
                      resource_config['coverage_threshold']))
 
     for sample in sample_config:
@@ -162,6 +163,8 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     job.fileStore.logToMaster("Running AddOrReplaceReadGroups in sample: {}".format(sample))
 
     output_bam = "{}.rg.sorted.bam".format(sample)
+    logfile = "{}.addreadgroups.log".format(sample)
+    index_log = "{}.buildindex.log".format(sample)
 
     command = ("java",
                "-Xmx{}g".format(config['max_mem']),
@@ -185,22 +188,10 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
 
     job.fileStore.logToMaster("GATK AddOrReplaceReadGroupsCommand Command: {}\n".format(command))
     utilities.touch("{}".format(output_bam))
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    # pipeline.run_and_log_command(" ".join(command), logfile)
 
     job.fileStore.logToMaster("GATK BuildBamIndex Command: {}\n".format(command2))
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    # pipeline.run_and_log_command(" ".join(command2), index_log)
 
     time.sleep(2)
     return output_bam
@@ -211,6 +202,8 @@ def realign_indels(job, config, sample, input_bam):
 
     targets = "{}.targets.intervals".format(sample)
     output_bam = "{}.realigned.sorted.bam".format(sample)
+    targets_log = "{}.targetcreation.log".format(sample)
+    realign_log = "{}.realignindels.log".format(sample)
 
     command = ("java",
                "-Xmx{}g".format(config['max_mem']),
@@ -251,25 +244,13 @@ def realign_indels(job, config, sample, input_bam):
                 "NotPrimaryAlignment")
 
     job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    # pipeline.run_and_log_command(" ".join(command), targets_log)
 
     job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command2))
     utilities.touch("{}".format(output_bam))
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
-
+    # pipeline.run_and_log_command(" ".join(command2), realign_log)
     time.sleep(2)
+
     return output_bam
 
 
@@ -278,6 +259,9 @@ def recalibrator(job, config, sample, input_bam):
 
     output_bam = "{}.recalibrated.sorted.bam".format(sample)
     recal_config = "{}.recal".format(sample)
+    recal_log = "{}.recalibrate.log".format(sample)
+    print_log = "{}.printrecalibrated.log".format(sample)
+    cp_log = "{}.copy.log".format(sample)
 
     # Calculate covariates
     recal_commands = ("java",
@@ -317,32 +301,14 @@ def recalibrator(job, config, sample, input_bam):
                   "{}.recalibrated.sorted.bam.bai".format(sample))
 
     job.fileStore.logToMaster("GATK BaseRecalibrator Command: {}\n".format(recal_commands))
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    # pipeline.run_and_log_command(" ".join(recal_commands), recal_log)
 
     job.fileStore.logToMaster("GATK PrintReads Command: {}\n".format(print_reads_command))
     utilities.touch("{}".format(output_bam))
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    # pipeline.run_and_log_command(" ".join(print_reads_command), print_log)
 
     job.fileStore.logToMaster("GATK Copy Command: {}\n".format(cp_command))
-    # p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
-    # output = p.communicate()
-    # code = p.returncode
-    # if code:
-    #     sys.stdout.write("An error occurred. Please check %s for details\n" % logfile)
-    #     sys.stdout.write("%s\n" % output)
-    #     sys.stderr.write("An error occurred. Please check %s for details\n" % logfile)
+    # pipeline.run_and_log_command(" ".join(cp_command), cp_log)
 
     time.sleep(2)
     return output_bam
