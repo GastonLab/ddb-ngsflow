@@ -5,7 +5,7 @@ import time
 from ngsflow import pipeline
 
 
-def run_freebayes_single(job, config, sample, input_bam):
+def freebayes_single(job, config, sample, input_bam):
     """Run FreeBayes without a matched normal sample"""
 
     freebayes_vcf = "{}.freebayes.vcf".format(sample)
@@ -35,13 +35,13 @@ def run_freebayes_single(job, config, sample, input_bam):
     return freebayes_vcf
 
 
-def run_freebayes_pooled():
+def freebayes_pooled():
     """Use a pooled normal sample with freebayes"""
 
     raise NotImplementedError
 
 
-def run_freebayes_matched():
+def freebayes_matched():
     """Run FreeBayes in matched tumor/normal mode"""
 
     raise NotImplementedError()

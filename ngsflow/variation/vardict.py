@@ -6,13 +6,13 @@ import multiprocessing
 from ngsflow import pipeline
 
 
-def run_vardict_matched():
+def vardict_matched():
     """Run VarDict in matched tumor/normal mode"""
 
     raise NotImplementedError()
 
 
-def run_vardict_single(job, config, sample, input_bam):
+def vardict_single(job, config, sample, input_bam):
     """Run VarDict without a matched normal sample"""
 
     vardict_vcf = "{}.vardict.vcf".format(sample)

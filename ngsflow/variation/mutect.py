@@ -5,19 +5,19 @@ import time
 from ngsflow import pipeline
 
 
-def run_mutect_pon():
+def mutect_pon():
     """Run MuTect with a synthetic Panel of Normals"""
 
     raise NotImplementedError()
 
 
-def run_mutect_matched():
+def mutect_matched():
     """Run MuTect on paired tumor normal data"""
 
     raise NotImplementedError()
 
 
-def run_mutect_single(job, config, sample, input_bam):
+def mutect_single(job, config, sample, input_bam):
     """Run MuTect without paired normal samples. Use vcf-subset to remove none column"""
 
     mutect_vcf = "{}.mutect.vcf".format(sample)

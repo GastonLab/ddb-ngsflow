@@ -7,7 +7,7 @@ import multiprocessing
 from ngsflow import pipeline
 
 
-def run_scalpel_single(job, config, sample, input_bam):
+def scalpel_single(job, config, sample, input_bam):
     """Run scalpel for variant calling"""
     cwd = os.getcwd()
     output_dir = os.path.join(cwd, "{}-scalpel-output".format(sample))
