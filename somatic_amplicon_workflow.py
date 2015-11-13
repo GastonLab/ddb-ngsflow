@@ -10,6 +10,7 @@ from toil.job import Job
 
 # Package methods
 from ngsflow import gatk
+from ngsflow import annotation
 from ngsflow import read_sample_sheet
 from ngsflow.align import bwa
 from ngsflow.utils import utilities
@@ -79,11 +80,14 @@ if __name__ == "__main__":
                                   cores=1)
         gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), recal_job.rv(),
                                           cores=num_cores, memory="4G")
-        gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample,
+        gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
                                         cores=1, memory="2G")
-        normalization_job = Job.wrapJobFn(cores=1)
-        snpeff_job = Job.wrapJobFn(cores=num_cores)
-        gemini_job = Job.wrapJobFn(cores=num_cores)
+        normalization_job = Job.wrapJobFn(utilities.vt_normalization, config, sample, gatk_filter_job.rv(),
+                                          cores=1, memory="2G")
+        snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
+                                   cores=num_cores, memory="4G")
+        gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(),
+                                   cores=num_cores, memory="4G")
 
         # Create workflow from created jobs
         root_job.addChild(align_job)

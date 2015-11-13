@@ -1,76 +1,56 @@
 __author__ = 'dgaston'
 
-import sys
+import time
+import multiprocessing
 
-from .. import pipeline as pipe
+from ngsflow import pipeline
 
 
-def run_snpeff(project_config, sample_config, tool_config, resource_config):
+def snpeff(job, config, sample, input_vcf):
     """Run snpEff Annotations"""
 
-    instructions = list()
+    output_vcf = "{}.snpEff.{}.vcf".format(sample, config['snpeff_reference'])
+    logfile = "{}.snpeff.log".format(sample)
 
-    command_core = ("java -Xmx%sg -jar %s -classic -formatEff -v %s" % (tool_config['snpeff']['max_mem'],
-                                                                        tool_config['snpeff']['bin'],
-                                                                        tool_config['snpeff']['reference']))
-    if project_config['mode'] == "per_sample":
-        for sample in sample_config:
-            sample['snpeff_vcf'] = "%s.snpEff.%s.vcf" % (sample['name'], tool_config['snpeff']['reference'])
-            logfile = "%s.snpeff.log" % sample['name']
+    snpeff_command = ("java",
+                      "-Xmx{}g".format(config['max_mem']),
+                      "-jar",
+                      "{}".format(config['snpeff']),
+                      "-classic",
+                      "-formatEff",
+                      "-v",
+                      "{}".format(config['snpeff_reference']),
+                      "{}".format(input_vcf),
+                      "{}".format(output_vcf))
 
-            command = ("%s %s > %s" % (command_core, sample['working_vcf'], sample['snpeff_vcf']))
-            instructions.append((command, logfile))
-            sample['working_vcf'] = sample['snpeff_vcf']
+    job.fileStore.logToMaster("snpEff Command: {}\n".format(snpeff_command))
+    # pipeline.run_and_log_command(" ".join(snpeff_command), logfile)
+    time.sleep(2)
 
-    elif project_config['mode'] == "per_cohort":
-        project_config['snpeff_vcf'] = "%s.snpEff.%s.vcf" % (project_config['project_name'], 
-                                                             tool_config['snpeff']['reference'])
-        logfile = "%s.snpeff.log" % project_config['project_name']
-
-        command = ("%s %s > %s" % (command_core, project_config['working_vcf'], project_config['snpeff_vcf']))
-        instructions.append((command, logfile))
-        project_config['working_vcf'] = project_config['snpeff_vcf']
-    else:
-        sys.stderr.write("ERROR: Mode: %s not supported\n" % project_config['mode'])
-        sys.exit()
-
-    sys.stdout.write("Running snpEff\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['snpeff']['num_cores']))
-    sys.stdout.write("Finished snpEff\n")
+    return output_vcf
 
 
-def run_gemini(project_config, sample_config, tool_config, resource_config):
+def gemini(job, config, sample, input_vcf):
     """Run GEMINI on a per sample basis"""
 
-    if project_config['mode'] == "per_sample":
-        for sample in sample_config:
-            sample['gemini_db'] = "%s.snpEff.%s.db" % (sample['name'], tool_config['snpeff']['reference'])
-            logfile = "%s.gemini.log" % sample['name']
+    db = "{}.db".format(sample)
+    logfile = "{}.gemini.log".format(sample)
 
-            command = ("%s load --cores %s -v %s -t snpEff %s" %
-                       (tool_config['gemini']['bin'], tool_config['gemini']['num_cores'], sample['working_vcf'],
-                        sample['gemini_db']))
+    command = ("{}".format(config['gemini']),
+               "load",
+               "--cores",
+               "{}".format(multiprocessing.cpu_count()),
+               "-v",
+               "{}".format(input_vcf),
+               "-t",
+               "snpEff",
+               "{}".format(db))
 
-            sys.stdout.write("Running GEMINI for sample %s\n" % sample['name'])
-            code = pipe.run_and_log_command(command, logfile)
-            pipe.check_return_code(code)
-    elif project_config['mode'] == "per_cohort":
-        project_config['gemini_db'] = "%s.snpEff.%s.db" % (project_config['project_name'],
-                                                           tool_config['snpeff_parameters']['reference'])
-        logfile = "%s.gemini.log" % project_config['project_name']
+    job.fileStore.logToMaster("GEMINI Command: {}\n".format(command))
+    # pipeline.run_and_log_command(" ".join(gemini_command), logfile)
+    time.sleep(2)
 
-        command = ("%s load --cores %s -v %s -t snpEff %s" %
-                   (tool_config['gemini']['bin'], tool_config['gemini']['num_cores'], project_config['working_vcf'],
-                    project_config['gemini_db']))
-
-        sys.stdout.write("Running GEMINI\n")
-        code = pipe.run_and_log_command(command, logfile)
-        pipe.check_return_code(code)
-    else:
-        sys.stderr.write("ERROR: Mode: %s not supported\n" % project_config['mode'])
-        sys.exit()
-
-    sys.stdout.write("Finished GEMINI for all samples\n")
+    return db
 
 
 def annotate_structural_variants(project_config, sample_config, tool_config, resource_config):

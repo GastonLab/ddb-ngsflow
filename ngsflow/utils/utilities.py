@@ -109,8 +109,8 @@ def vt_normalization(job, config, sample, input_vcf):
                      ">",
                      "{}".format(output_vcf))
 
-    job.fileStore.logToMaster("VT Command: {}\n".format(scalpel_command))
-    # pipeline.run_and_log_command(" ".join(normalization_command), logfile)
+    job.fileStore.logToMaster("VT Command: {}\n".format(normalization))
+    # pipeline.run_and_log_command(" ".join(normalization), logfile)
     time.sleep(2)
 
     return output_vcf
