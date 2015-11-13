@@ -58,74 +58,86 @@ def run_qualifymissing(project_config, sample_config, tool_config, resource_conf
     sys.stdout.write("Running DiagnoseTargets\n")
 
 
-def run_annotations_and_filters(project_config, sample_config, tool_config, resource_config):
+def annotate_vcf(job, config, sample, input_vcf, input_bam):
     """GATK Annotate and Variant Filters"""
 
-    instructions1 = list()
-    instructions2 = list()
+    output_vcf = "{}.annotated.vcf".format(sample)
+    annotation_log = "{}.variantannotation.log".format(sample)
 
-    # Double use of parallelism
-    annotation_core = ("java -Xmx%sg -jar %s -T VariantAnnotator -R %s --group StandardAnnotation --dbsnp %s" %
-                       (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'],
-                        resource_config['reference_genome'], resource_config['dbsnp'],))
-    filter_core = ("java -Xmx%sg -jar %s -T VariantFiltration -R %s --filterExpression 'MQ0 > 50' "
-                   "--filterName 'HighMQ0' --filterExpression 'DP < 10' --filterName 'LowDepth' "
-                   "--filterExpression 'QUAL < 10' --filterName 'LowQual' --filterExpression 'MQ < 10' "
-                   "--filterName 'LowMappingQual'" %
-                   (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'],
-                    resource_config['reference_genome']))
+    annotation_command = ("java",
+                          "-Xmx{}g".format(config['max_mem']),
+                          "-jar",
+                          "{}".format(config['gatk']),
+                          "-T",
+                          "VariantAnnotator",
+                          "-R",
+                          "{}".format(config['reference']),
+                          "-nt",
+                          "{}".format(multiprocessing.cpu_count()),
+                          "--group",
+                          "StandardAnnotation",
+                          "--dbsnp"
+                          "{}".format(config['dbsnp']),
+                          "-I",
+                          "{}".format(input_bam),
+                          "--variant",
+                          "{}".format(input_vcf),
+                          "-L",
+                          "{}".format(input_vcf),
+                          "-o",
+                          "{}".format(output_vcf))
 
-    if project_config['mode'] == "per_sample":
-        for sample in sample_config:
-            sample['annotated_vcf'] = "%s.annotated.vcf" % sample['name']
-            sample['filtered_vcf'] = "%s.filtered.vcf" % sample['name']
+    job.fileStore.logToMaster("GATK VariantAnnotator Command: {}\n".format(annotation_command))
+    # pipeline.run_and_log_command(" ".join(annotation_command), annotation_logfile)
 
-            logfile1 = "%s.variantannotation.log" % sample['name']
-            logfile2 = "%s.variantfiltration.log" % sample['name']
+    time.sleep(2)
+    utilities.touch("{}".format(output_vcf))
 
-            command1 = ("%s %s -o %s --variant %s -L %s" % (annotation_core, sample['working_bam'],
-                                                            sample['annotated_vcf'], sample['working_vcf'],
-                                                            sample['working_vcf']))
-            command2 = ("%s -o %s --variant %s" % (filter_core, sample['filtered_vcf'], sample['annotated_vcf']))
+    return output_vcf
 
-            instructions1.append((command1, logfile1))
-            instructions2.append((command2, logfile2))
-            sample['working_vcf'] = sample['filtered_vcf']
-    elif project_config['mode'] == "per_cohort":
-        sample_inputs = list()
-        for sample in sample_config:
-            sample_bam = "-I %s" % sample['working_bam']
-            sample_inputs.append(sample_bam)
 
-        sample_bam_string = " ".join(sample_inputs)
-        project_config['annotated_vcf'] = "%s.annotated.vcf" % project_config['project_name']
-        project_config['filtered_vcf'] = "%s.filtered.vcf" % project_config['project_name']
+def filter_variants(job, config, sample, input_vcf):
+    """Run GATK Variant Filtration"""
 
-        logfile1 = "%s.variantannotation.log" % project_config['project_name']
-        logfile2 = "%s.variantfiltration.log" % project_config['project_name']
+    output_vcf = "{}.filtered.vcf".format(sample)
+    filter_log = "{}.variantfiltration.log".format(sample)
 
-        command1 = ("%s %s -o %s --variant %s -L %s -nt %s" % (annotation_core, sample_bam_string,
-                                                               project_config['annotated_vcf'],
-                                                               project_config['working_vcf'],
-                                                               project_config['working_vcf'],
-                                                               tool_config['gatk']['num_cores']))
+    filter_command = ("java",
+                      "-Xmx{}g".format(config['max_mem']),
+                      "-jar",
+                      "{}".format(config['gatk']),
+                      "-T",
+                      "VariantAnnotator",
+                      "-R",
+                      "{}".format(config['reference']),
+                      "--filterExpression",
+                      "'MQ0 > 50'",
+                      "--filterName",
+                      "'HighMQ0'",
+                      "--filterExpression",
+                      "'DP < {}'".format(config['depth_threshold']),
+                      "--filterName",
+                      "'LowDepth'",
+                      "--filterExpression",
+                      "'QUAL < 10'",
+                      "--filterName",
+                      "'LowQual'",
+                      "--filterExpression",
+                      "'MQ < 10'",
+                      "--filterName",
+                      "'LowMappingQual'",
+                      "--variant",
+                      "{}".format(input_vcf),
+                      "-o",
+                      "{}".format(output_vcf))
 
-        command2 = ("%s -o %s --variant %s" % (filter_core, project_config['filtered_vcf'],
-                                               project_config['annotated_vcf']))
+    job.fileStore.logToMaster("GATK VariantFiltration Command: {}\n".format(filter_command))
+    # pipeline.run_and_log_command(" ".join(filter_command), filter_log)
 
-        instructions1.append((command1, logfile1))
-        instructions2.append((command2, logfile2))
-        project_config['working_vcf'] = project_config['filtered_vcf']
-    else:
-        sys.stderr.write("ERROR: Mode: %s not supported\n" % project_config['mode'])
-        sys.exit()
+    time.sleep(2)
+    utilities.touch("{}".format(output_vcf))
 
-    sys.stdout.write("Annotating variants\n")
-    pipe.execute_multiprocess(instructions1, int(tool_config['gatk']['num_cores']))
-
-    sys.stdout.write("Applying variant filters\n")
-    pipe.execute_multiprocess(instructions2, int(tool_config['gatk']['num_cores']))
-    sys.stdout.write("Finished annotating and filtering variants using the GATK\n")
+    return output_vcf
 
 
 def run_mark_duplicates(project_config, sample_config, tool_config, resource_config):

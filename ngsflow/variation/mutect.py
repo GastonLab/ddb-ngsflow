@@ -1,6 +1,7 @@
 __author__ = 'dgaston'
 
 import time
+import multiprocessing
 
 from ngsflow import pipeline
 
@@ -46,6 +47,8 @@ def mutect_single(job, config, sample, input_bam):
                       "{}".format(input_bam),
                       "--coverage_file",
                       "{}".format(sample_coverage),
+                      "-nt",
+                      "{}".format(multiprocessing.cpu_count()),
                       "-o",
                       "{}".format(output_stats),
                       "-vcf",

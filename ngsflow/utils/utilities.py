@@ -84,39 +84,36 @@ def generate_fastqc_summary_report(project_config, sample_config, tool_config, r
                         summary_file.write(line)
 
 
-def run_vt_normalization(project_config, sample_config, tool_config, resource_config):
+def vt_normalization(job, config, sample, input_vcf):
     """Decompose and left normalize variants"""
 
-    instructions = list()
+    output_vcf = "{}.normalized.vcf".format(sample)
+    logfile = "{}.vt_normalization.log".format(sample)
 
-    if project_config['mode'] == "per_sample":
-        for sample in sample_config:
-            sample['normalized_vcf'] = "%s.normalized.vcf" % sample['name']
-            logfile = "%s.vt_norm.log" % sample['name']
+    normalization = ("zless",
+                     "{}".format(input_vcf),
+                     "|",
+                     "sed",
+                     "'s/ID=AD.Number=./ID=AD,Number=R/'",
+                     "|",
+                     "vt",
+                     "decompose"
+                     "-s",
+                     "-",
+                     "|",
+                     "vt",
+                     "normalize",
+                     "-r",
+                     "{}".format(config['reference']),
+                     "-",
+                     ">",
+                     "{}".format(output_vcf))
 
-            command = ("zless %s | sed 's/ID=AD.Number=./ID=AD,Number=R/' | vt decompose -s - | "
-                       "vt normalize -r %s - > %s" %
-                       (sample['working_vcf'], resource_config['reference_genome'], sample['normalized_vcf']))
+    job.fileStore.logToMaster("VT Command: {}\n".format(scalpel_command))
+    # pipeline.run_and_log_command(" ".join(normalization_command), logfile)
+    time.sleep(2)
 
-            instructions.append((command, logfile))
-            sample['working_vcf'] = sample['normalized_vcf']
-    elif project_config['mode'] == "per_cohort":
-        project_config['normalized_vcf'] = "%s.normalized.vcf" % project_config['project_name']
-        logfile = "%s.vt_norm.log" % project_config['project_name']
-
-        sys.stdout.write("Performing normalization\n")
-        command = ("zless %s | sed 's/ID=AD.Number=./ID=AD,Number=R/' | vt decompose -s - | vt normalize -r %s - > %s" %
-                   (project_config['working_vcf'], resource_config['reference_genome'],
-                    project_config['normalized_vcf']))
-        instructions.append((command, logfile))
-        project_config['working_vcf'] = project_config['normalized_vcf']
-    else:
-        sys.stderr.write("ERROR: Mode: %s not supported\n" % project_config['mode'])
-        sys.exit()
-
-    sys.stdout.write("Running normalization\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['num_cores']))
-    sys.stdout.write("Finished normalization\n")
+    return output_vcf
 
 
 def generate_coverage_report(project_config, sample_config, tool_config, resource_config):

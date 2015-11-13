@@ -9,7 +9,7 @@ from ngsflow.utils import utilities
 from .. import pipeline as pipe
 
 
-def merge_variant_calls(config, sample, vcf_files):
+def merge_variant_calls(job, config, sample, vcf_files):
     """Use vcf-isec to merge vcfs together and create an ensemble call set report"""
 
     for vcf in vcf_files:
@@ -18,6 +18,7 @@ def merge_variant_calls(config, sample, vcf_files):
     vcf_files_string = " ".join(vcf_files)
 
     merged_vcf = "{}.merged.vcf".format(sample)
+    logfile = "{}.merged.log".format(sample)
 
     isec_command = ("{}".format(config['vcftools']),
                     "isec",
@@ -26,7 +27,11 @@ def merge_variant_calls(config, sample, vcf_files):
                     "{}".format(vcf_files_string),
                     "{}".format(merged_vcf))
 
+    job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
+    # pipeline.run_and_log_command(" ".join(isec_command), logfile)
+    time.sleep(2)
 
+    return merged_vcf
 
 
 def evaluate_double_strand_calls(project_config, sample_config, tool_config, resource_config):
