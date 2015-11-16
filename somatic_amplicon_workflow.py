@@ -13,6 +13,7 @@ from ngsflow import gatk
 from ngsflow import annotation
 from ngsflow import read_sample_sheet
 from ngsflow.align import bwa
+from ngsflow.utils import configuration
 from ngsflow.utils import utilities
 from ngsflow.variation import variation
 from ngsflow.variation import freebayes
@@ -26,67 +27,66 @@ from ngsflow.variation import indelminer
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--samples_file', help="Input configuration file for samples")
+    parser.add_argument('-c', '--configuration', help="Configuration file for various settings")
     Job.Runner.addToilOptions(parser)
     args = parser.parse_args()
     # args.logLevel = "INFO"
 
-    config = {"bwa": "bwa", "samtools": "samtools", "fastqc": "fastqc", "picard": "picard", "max_mem": "4",
-              "gatk": "/usr/local/bin/GenomeAnalysisTK.jar", "indel1": "indel1,vcf", "indel2": "indel2.vcf",
-              "reference": "/data/Resources/Genomes/Human/GATK-Bundle/2.8/b37/human_g1k_v37.fasta",
-              "dbsnp": "/data/Resources/Genomes/Human/GATK-Bundle/2.8/b37/dbsnp_138.b37.vcf"}
+    sys.stdout.write("Parsing configuration data\n")
+    config = configuration.configure_runtime(args.configuration)
 
     sys.stdout.write("Parsing sample data\n")
     samples = read_sample_sheet.read(args.samples_file)
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
-    # root_job.addChildJobFn(utilities.run_fastqc, config, samples)
+    root_job.addChildJobFn(utilities.run_fastqc, configuration, samples)
 
     num_cores = multiprocessing.cpu_count()
 
     # Per sample jobs
     for sample in samples:
         # Alignment and Refinement Stages
-        align_job = Job.wrapJobFn(bwa.run_bwa_mem, config, sample, samples[sample]['fastq1'], samples[sample]['fastq2'],
+        align_job = Job.wrapJobFn(bwa.run_bwa_mem, configuration, sample, samples[sample]['fastq1'], samples[sample]['fastq2'],
                                   cores=num_cores, memory="4G")
-        add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, config, sample, align_job.rv(),
+        add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, configuration, sample, align_job.rv(),
                                 cores=1, memory="4G")
-        creator_job = Job.wrapJobFn(gatk.realign_target_creator, config, sample, add_job.rv(),
+        creator_job = Job.wrapJobFn(gatk.realign_target_creator, configuration, sample, add_job.rv(),
                                     cores=num_cores, memory="4G")
-        realign_job = Job.wrapJobFn(gatk.realign_indels, config, sample, add_job.rv(), creator_job.rv(),
+        realign_job = Job.wrapJobFn(gatk.realign_indels, configuration, sample, add_job.rv(), creator_job.rv(),
                                     cores=1, memory="4G")
-        recal_job = Job.wrapJobFn(gatk.recalibrator, config, sample, realign_job.rv(),
+        recal_job = Job.wrapJobFn(gatk.recalibrator, configuration, sample, realign_job.rv(),
                                   cores=num_cores, memory="4G")
 
         # Variant calling
         spawn_variant_job = Job.wrapJobFn(utilities.spawn_variant_jobs)
 
-        freebayes_job = Job.wrapJobFn(freebayes.freebayes_single, config, sample, recal_job.rv(),
+        freebayes_job = Job.wrapJobFn(freebayes.freebayes_single, configuration, sample, recal_job.rv(),
                                       cores=1, memory="4G")
-        mutect_job = Job.wrapJobFn(mutect.mutect_single, config, sample, recal_job.rv(),
+        mutect_job = Job.wrapJobFn(mutect.mutect_single, configuration, sample, recal_job.rv(),
                                    cores=num_cores, memory="4G")
-        vardict_job = Job.wrapJobFn(vardict.vardict_single, config, sample, recal_job.rv(),
+        vardict_job = Job.wrapJobFn(vardict.vardict_single, configuration, sample, recal_job.rv(),
                                     cores=num_cores, memory="5G")
-        scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, recal_job.rv(),
+        scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, configuration, sample, recal_job.rv(),
                                     cores=num_cores, memory="4G")
-        indelminer_job = Job.wrapJobFn(indelminer.indelminer_single, config, sample, recal_job.rv(),
+        indelminer_job = Job.wrapJobFn(indelminer.indelminer_single, configuration, sample, recal_job.rv(),
                                        cores=1, memory="5G")
-        platypus_job = Job.wrapJobFn(platypus.platypus_single, config, sample, recal_job.rv(),
+        platypus_job = Job.wrapJobFn(platypus.platypus_single, configuration, sample, recal_job.rv(),
                                      cores=num_cores, memory="4G")
 
         # Merge results and annotate
-        merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
+        merge_job = Job.wrapJobFn(variation.merge_variant_calls, configuration, sample, (freebayes_job.rv(), mutect_job.rv(),
                                   vardict_job.rv(), scalpel_job.rv(), indelminer_job.rv(), platypus_job.rv()),
                                   cores=1)
-        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), recal_job.rv(),
+        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, configuration, sample, merge_job.rv(), recal_job.rv(),
                                           cores=num_cores, memory="4G")
-        gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
+        gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, configuration, sample, gatk_annotate_job.rv(),
                                         cores=1, memory="2G")
-        normalization_job = Job.wrapJobFn(utilities.vt_normalization, config, sample, gatk_filter_job.rv(),
+        normalization_job = Job.wrapJobFn(utilities.vt_normalization, configuration, sample, gatk_filter_job.rv(),
                                           cores=1, memory="2G")
-        snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
+        snpeff_job = Job.wrapJobFn(annotation.snpeff, configuration, sample, normalization_job.rv(),
                                    cores=num_cores, memory="4G")
-        gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(),
+        gemini_job = Job.wrapJobFn(annotation.gemini, configuration, sample, snpeff_job.rv(),
                                    cores=num_cores, memory="4G")
 
         # Create workflow from created jobs
