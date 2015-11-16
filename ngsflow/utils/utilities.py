@@ -7,7 +7,7 @@ import pyexcel
 import multiprocessing
 import subprocess as sub
 
-from .. import pipeline as pipe
+from ngsflow import pipeline
 
 
 def touch(path):
@@ -246,13 +246,13 @@ def bgzip_and_tabix_vcf_instructions(infile):
     return bgzip_instructions, tabix_instructions
 
 
-def bgzip_and_tabix_vcf(infile):
+def bgzip_and_tabix_vcf(job, infile):
     """Call bgzip and tabix on vcf files"""
 
     bgzip_instructions, tabix_instructions = bgzip_and_tabix_vcf_instructions(infile)
 
-    code = pipe.run_and_log_command(bgzip_instructions[0], bgzip_instructions[1])
-    pipe.check_return_codes(code)
+    job.fileStore.logToMaster("BGzip Command: {}\n".format(bgzip_instructions[0]))
+    # pipeline.run_and_log_command(bgzip_instructions[0], bgzip_instructions[1])
 
-    code2 = pipe.run_and_log_command(tabix_instructions[0], tabix_instructions[1])
-    pipe.check_return_codes(code2)
+    job.fileStore.logToMaster("Tabix Command: {}\n".format(tabix_instructions[0]))
+    # pipeline.run_and_log_command(tabix_instructions[0], tabix_instructions[1])

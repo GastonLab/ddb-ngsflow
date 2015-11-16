@@ -12,10 +12,11 @@ from .. import pipeline as pipe
 def merge_variant_calls(job, config, sample, vcf_files):
     """Use vcf-isec to merge vcfs together and create an ensemble call set report"""
 
+    files = list()
     for vcf in vcf_files:
-        utilities.bgzip_and_tabix_vcf(vcf)
-        vcf_files.append("{}.gz".format(vcf))
-    vcf_files_string = " ".join(vcf_files)
+        utilities.bgzip_and_tabix_vcf(job, vcf)
+        files.append("{}.gz".format(vcf))
+    vcf_files_string = " ".join(files)
 
     merged_vcf = "{}.merged.vcf".format(sample)
     logfile = "{}.merged.log".format(sample)

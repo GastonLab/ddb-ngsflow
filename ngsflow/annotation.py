@@ -7,20 +7,20 @@ from ngsflow import pipeline
 from ngsflow.utils import utilities
 
 
-def snpeff(job, config, sample, input_vcf):
+def snpeff(job, config, sample, input_vcf, max_mem):
     """Run snpEff Annotations"""
 
     output_vcf = "{}.snpEff.{}.vcf".format(sample, config['snpeff']['reference'])
     logfile = "{}.snpeff.log".format(sample)
 
     snpeff_command = ("java",
-                      "-Xmx{}g".format(config['max_mem']),
+                      "-Xmx{}g".format(max_mem),
                       "-jar",
                       "{}".format(config['snpeff']['bin']),
                       "-classic",
                       "-formatEff",
                       "-v",
-                      "{}".format(config['snpeff_reference']),
+                      "{}".format(config['snpeff']['reference']),
                       "{}".format(input_vcf),
                       "{}".format(output_vcf))
 

@@ -19,7 +19,7 @@ def mutect_matched():
     raise NotImplementedError()
 
 
-def mutect_single(job, config, sample, input_bam):
+def mutect_single(job, config, sample, input_bam, max_mem):
     """Run MuTect without paired normal samples. Use vcf-subset to remove none column"""
 
     mutect_vcf = "{}.mutect.vcf".format(sample)
@@ -32,7 +32,7 @@ def mutect_single(job, config, sample, input_bam):
     subset_log = "{}.mutect_subset.log".format(sample)
 
     mutect_command = ("java",
-                      "-Xmx{}g".format(config['max_mem']),
+                      "-Xmx{}g".format(max_mem),
                       "-jar",
                       "{}".format(config['mutect']['bin']),
                       "-T",

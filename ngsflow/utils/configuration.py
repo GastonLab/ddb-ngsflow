@@ -12,7 +12,7 @@ import ConfigParser
 def configure_runtime(infile):
     """Parse the configuration settings from a file"""
 
-    configuration = defaultdict
+    configuration = defaultdict()
     config = ConfigParser.SafeConfigParser()
     config.read(infile)
 
@@ -29,8 +29,8 @@ def configure_runtime(infile):
         sys.exit()
 
     # Set all options specified in file
-    for option in config.options('tools'):
-            configuration[option] = config.get('tools', option)
+    for option in config.options('settings'):
+            configuration[option] = config.get('settings', option)
 
     for resource in config.options('resources'):
             configuration[resource] = config.get('resources', resource)
@@ -45,13 +45,6 @@ def configure_runtime(infile):
             # Set all specified options
             for option in options:
                 tool_dict[option] = config.get(tool, option)
-
-            # Check for specific options and if not specified set to defaults
-            if 'num_cores' not in tool_dict.keys():
-                tool_dict['num_cores'] = config['num_cores']
-
-            if 'max_mem' not in tool_dict.keys():
-                tool_dict['max_mem'] = config['max_mem']
 
             configuration[tool] = tool_dict
 
