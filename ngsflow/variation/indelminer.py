@@ -13,7 +13,7 @@ def indelminer_single(job, config, sample, input_bam):
     indelminer_vcf = "{}.indelminer.vcf".format(sample)
     logfile = "{}.indelminer.log".format(sample)
 
-    command = ("{}".format(config['indelminer']),
+    command = ("{}".format(config['indelminer']['bin']),
                "{}".format(config['reference']),
                "{}".format(input_bam),
                ">",

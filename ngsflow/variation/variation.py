@@ -20,7 +20,7 @@ def merge_variant_calls(job, config, sample, vcf_files):
     merged_vcf = "{}.merged.vcf".format(sample)
     logfile = "{}.merged.log".format(sample)
 
-    isec_command = ("vcf-isec",
+    isec_command = ("{}".format(config['vcftools_isec']['bin']),
                     "-n",
                     "+1",
                     "{}".format(vcf_files_string),

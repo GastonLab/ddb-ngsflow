@@ -52,7 +52,7 @@ def run_fastqc(job, config, samples):
     else:
         num_cores = len(samples)
     fastq_files_string = " ".join(fastq_files_list)
-    command = ("{}".format(config['fastqc']),
+    command = ("{}".format(config['fastqc']['bin']),
                "{}".format(fastq_files_string),
                "--extract",
                "-t",

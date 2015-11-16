@@ -15,7 +15,7 @@ def scalpel_single(job, config, sample, input_bam):
     scalpel_vcf = os.path.join(output_dir, "variants.indel.vcf")
     logfile = "{}.scalpel.log".format(sample)
 
-    scalpel_command = ("{}".format(config['scalpel-discovery']),
+    scalpel_command = ("{}".format(config['scalpel-discovery']['bin']),
                        "--single",
                        "--intarget",
                        "--covthr",

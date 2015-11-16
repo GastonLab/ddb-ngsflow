@@ -12,7 +12,7 @@ def freebayes_single(job, config, sample, input_bam):
     freebayes_vcf = "{}.freebayes.vcf".format(sample)
     logfile = "{}.freebayes.log".format(sample)
 
-    command = ("{}".format(config['freebayes']),
+    command = ("{}".format(config['freebayes']['bin']),
                "--fasta-reference",
                "{}".format(config['reference']),
                "-t",

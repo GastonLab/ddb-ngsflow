@@ -18,7 +18,7 @@ def run_bwa_mem(job, config, sample, fastq1, fastq2):
     temp = "{}.bwa.sort.temp".format(sample)
     logfile = "{}.bwa-align.log".format(sample)
 
-    bwa_cmd = ["{}".format(config['bwa']),
+    bwa_cmd = ["{}".format(config['bwa']['bin']),
                "mem",
                "-t",
                "{}".format(multiprocessing.cpu_count()),
@@ -29,12 +29,12 @@ def run_bwa_mem(job, config, sample, fastq1, fastq2):
                "{}".format(fastq1),
                "{}".format(fastq2)]
 
-    view_cmd = ["{}".format(config['samtools']),
+    view_cmd = ["{}".format(config['samtools']['bin']),
                 "view",
                 "-u",
                 "-"]
 
-    sort_cmd = ["{}".format(config['samtools']),
+    sort_cmd = ["{}".format(config['samtools']['bin']),
                 "sort",
                 "-@",
                 "{}".format(multiprocessing.cpu_count()),

@@ -19,7 +19,7 @@ def vardict_single(job, config, sample, input_bam):
     vardict_vcf = "{}.vardict.vcf".format(sample)
     logfile = "{}.vardict.log".format(sample)
 
-    vardict = ("{}".format(config['vardict']),
+    vardict = ("{}".format(config['vardict']['bin']),
                "-G",
                "{}".format(config['reference']),
                "-z",
@@ -49,8 +49,9 @@ def vardict_single(job, config, sample, input_bam):
                    "{}".format(sample))
 
     command = ("{vardict} | {strandbias} | {vardict2vcf} > {vcf}".format(vardict=vardict,
-                                                                         strandbias=config['vardict_strandbias'],
-                                                                         vardict2vcf=vardict2vcf, vcf=vardict_vcf))
+                                                                         strandbias=config['vardict_strandbias']['bin'],
+                                                                         vardict2vcf=config['vardict2vcf']['bin'],
+                                                                         vcf=vardict_vcf))
 
     job.fileStore.logToMaster("VarDict Command: {}\n".format(command))
     # pipeline.run_and_log_command(command, logfile)

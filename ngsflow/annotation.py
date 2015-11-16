@@ -10,13 +10,13 @@ from ngsflow.utils import utilities
 def snpeff(job, config, sample, input_vcf):
     """Run snpEff Annotations"""
 
-    output_vcf = "{}.snpEff.{}.vcf".format(sample, config['snpeff_reference'])
+    output_vcf = "{}.snpEff.{}.vcf".format(sample, config['snpeff']['reference'])
     logfile = "{}.snpeff.log".format(sample)
 
     snpeff_command = ("java",
                       "-Xmx{}g".format(config['max_mem']),
                       "-jar",
-                      "{}".format(config['snpeff']),
+                      "{}".format(config['snpeff']['bin']),
                       "-classic",
                       "-formatEff",
                       "-v",
@@ -35,7 +35,7 @@ def snpeff(job, config, sample, input_vcf):
 def gemini(job, config, sample, input_vcf):
     """Run GEMINI on a per sample basis"""
 
-    db = "{}.db".format(sample)
+    db = "{}.snpEff.{}.db".format(sample, config['snpeff']['reference'])
     logfile = "{}.gemini.log".format(sample)
 
     command = ("{}".format(config['gemini']),

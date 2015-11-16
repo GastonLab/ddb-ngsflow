@@ -14,10 +14,10 @@ def platypus_single(job, config, sample, input_bam):
     platypus_log = "{}.platypus.log".format(sample)
     internal_log = "{}.platypus_internal.log".format(sample)
 
-    platypus_command = ("{}".format(config['platypus']),
+    platypus_command = ("{}".format(config['platypus']['bin']),
                         "callVariants",
                         "--refFile={}".format(config['reference']),
-                        "--regions={}".format(config['platypus_regions']),
+                        "--regions={}".format(config['platypus']['regions']),
                         "--assemble=1",
                         "--assembleBrokenPairs=1",
                         "--filterDuplicates=0",
