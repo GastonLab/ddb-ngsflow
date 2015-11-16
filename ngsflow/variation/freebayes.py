@@ -3,6 +3,7 @@ __author__ = 'dgaston'
 import time
 
 from ngsflow import pipeline
+from ngsflow.utils import utilities
 
 
 def freebayes_single(job, config, sample, input_bam):
@@ -31,6 +32,7 @@ def freebayes_single(job, config, sample, input_bam):
 
     job.fileStore.logToMaster("FreeBayes Command: {}\n".format(command))
     # pipeline.run_and_log_command(" ".join(command), logfile)
+    utilities.touch(freebayes_vcf)
     time.sleep(2)
     return freebayes_vcf
 

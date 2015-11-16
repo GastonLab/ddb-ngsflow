@@ -5,6 +5,7 @@ import time
 import multiprocessing
 
 from ngsflow import pipeline
+from ngsflow.utils import utilities
 
 
 def scalpel_single(job, config, sample, input_bam):
@@ -36,6 +37,7 @@ def scalpel_single(job, config, sample, input_bam):
 
     job.fileStore.logToMaster("Scalpel Command: {}\n".format(scalpel_command))
     # pipeline.run_and_log_command(" ".join(scalpel_command), logfile)
+    utilities.touch(scalpel_vcf)
     time.sleep(2)
 
     return scalpel_vcf

@@ -4,6 +4,7 @@ import time
 import multiprocessing
 
 from ngsflow import pipeline
+from ngsflow.utils import utilities
 
 
 def platypus_single(job, config, sample, input_bam):
@@ -27,6 +28,7 @@ def platypus_single(job, config, sample, input_bam):
 
     job.fileStore.logToMaster("Platypus Command: {}\n".format(platypus_command))
     # pipeline.run_and_log_command(" ".join(platypus_command), platypus_log)
+    utilities.touch(platypus_vcf)
     time.sleep(2)
 
     return platypus_vcf

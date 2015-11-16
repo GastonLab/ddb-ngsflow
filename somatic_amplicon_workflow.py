@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
-    root_job.addChildJobFn(utilities.run_fastqc, config, samples)
+    # root_job.addChildJobFn(utilities.run_fastqc, config, samples)
 
     num_cores = multiprocessing.cpu_count()
 
@@ -96,6 +96,7 @@ if __name__ == "__main__":
         realign_job.addChild(recal_job)
 
         recal_job.addChild(spawn_variant_job)
+
         spawn_variant_job.addChild(freebayes_job)
         spawn_variant_job.addChild(mutect_job)
         spawn_variant_job.addChild(vardict_job)
@@ -103,7 +104,6 @@ if __name__ == "__main__":
         spawn_variant_job.addChild(indelminer_job)
         spawn_variant_job.addChild(platypus_job)
 
-        spawn_variant_job = spawn_variant_job.encapsulate()
         spawn_variant_job.addChild(merge_job)
         merge_job.addChild(gatk_annotate_job)
         gatk_annotate_job.addChild(gatk_filter_job)
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         snpeff_job.addChild(gemini_job)
 
     # Jobs to be executed for a cohort if necessary
-    root_job = root_job.encapsulate()
+    # root_job = root_job.encapsulate()
 
     # Start workflow execution
     Job.Runner.startToil(root_job, args)

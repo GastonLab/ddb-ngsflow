@@ -4,6 +4,7 @@ import time
 import multiprocessing
 
 from ngsflow import pipeline
+from ngsflow.utils import utilities
 
 
 def snpeff(job, config, sample, input_vcf):
@@ -25,6 +26,7 @@ def snpeff(job, config, sample, input_vcf):
 
     job.fileStore.logToMaster("snpEff Command: {}\n".format(snpeff_command))
     # pipeline.run_and_log_command(" ".join(snpeff_command), logfile)
+    utilities.touch(output_vcf)
     time.sleep(2)
 
     return output_vcf
@@ -48,6 +50,7 @@ def gemini(job, config, sample, input_vcf):
 
     job.fileStore.logToMaster("GEMINI Command: {}\n".format(command))
     # pipeline.run_and_log_command(" ".join(gemini_command), logfile)
+    utilities.touch(db)
     time.sleep(2)
 
     return db

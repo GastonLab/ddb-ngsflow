@@ -29,6 +29,7 @@ def merge_variant_calls(job, config, sample, vcf_files):
 
     job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
     # pipeline.run_and_log_command(" ".join(isec_command), logfile)
+    utilities.touch(merged_vcf)
     time.sleep(2)
 
     return merged_vcf

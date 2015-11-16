@@ -4,6 +4,7 @@ import time
 import multiprocessing
 
 from ngsflow import pipeline
+from ngsflow.utils import utilities
 
 
 def mutect_pon():
@@ -66,9 +67,11 @@ def mutect_single(job, config, sample, input_bam):
 
     job.fileStore.logToMaster("MuTect Command: {}\n".format(mutect_command))
     # pipeline.run_and_log_command(" ".join(mutect_command), mutect_logfile)
+    utilities.touch(temp_mutect)
 
     job.fileStore.logToMaster("Subset Command: {}\n".format(subset_command))
     # pipeline.run_and_log_command(" ".join(subset_command), subset_logfile)
+    utilities.touch(mutect_vcf)
     time.sleep(2)
 
     return mutect_vcf

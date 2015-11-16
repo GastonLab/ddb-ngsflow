@@ -4,6 +4,7 @@ import time
 import multiprocessing
 
 from ngsflow import pipeline
+from ngsflow.utils import utilities
 
 
 def vardict_matched():
@@ -53,6 +54,7 @@ def vardict_single(job, config, sample, input_bam):
 
     job.fileStore.logToMaster("VarDict Command: {}\n".format(command))
     # pipeline.run_and_log_command(command, logfile)
+    utilities.touch(vardict_vcf)
     time.sleep(2)
 
     return vardict_vcf
