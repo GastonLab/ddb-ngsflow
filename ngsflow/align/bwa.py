@@ -10,8 +10,6 @@ from ngsflow import pipeline
 def run_bwa_mem(job, config, sample, fastq1, fastq2):
     """Run BWA MEM  and pipe to samtoools to sort and convert to BAM format"""
 
-    # task_desc = "BWA-MEM: %s" % sample_config[sample_id]['name']
-
     job.fileStore.logToMaster("Running BWA for sample {}\n".format(sample))
 
     output_bam = "{}.bwa.sorted.bam".format(sample)
@@ -48,8 +46,6 @@ def run_bwa_mem(job, config, sample, fastq1, fastq2):
     command = "{} | {} | {}".format(" ".join(bwa_cmd), " ".join(view_cmd), " ".join(sort_cmd))
 
     job.fileStore.logToMaster("BWA Command: {}\n".format(command))
-    utilities.touch("{}".format(output_bam))
-    time.sleep(2)
-    # pipeline.run_and_log_command(command, logfile)
+    pipeline.run_and_log_command(command, logfile)
 
     return output_bam

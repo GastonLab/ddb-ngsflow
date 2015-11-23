@@ -5,6 +5,7 @@ import time
 from gemini import GeminiQuery
 
 from ngsflow.utils import utilities
+from ngsflow import pipeline
 
 
 # Can simplify this later with max_aaf_all after updated to 0.18
@@ -128,8 +129,6 @@ def merge_variant_calls(job, config, sample, vcf_files):
                     "{}".format(merged_vcf))
 
     job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
-    # pipeline.run_and_log_command(" ".join(isec_command), logfile)
-    utilities.touch(merged_vcf)
-    time.sleep(2)
+    pipeline.run_and_log_command(" ".join(isec_command), logfile)
 
     return merged_vcf

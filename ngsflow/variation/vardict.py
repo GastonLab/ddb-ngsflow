@@ -1,10 +1,8 @@
 __author__ = 'dgaston'
 
-import time
 import multiprocessing
 
 from ngsflow import pipeline
-from ngsflow.utils import utilities
 
 
 def vardict_matched():
@@ -41,7 +39,7 @@ def vardict_single(job, config, sample, input_bam):
                "{}".format(input_bam),
                "{}".format(config['regions']))
 
-    vardict2vcf = ("{}".format(config['vardict2vcf']),
+    vardict2vcf = ("{}".format(config['vardict2vcf']['bin']),
                    "-E",
                    "-f",
                    "{}".format(config['min_alt_af']),
@@ -50,12 +48,10 @@ def vardict_single(job, config, sample, input_bam):
 
     command = ("{vardict} | {strandbias} | {vardict2vcf} > {vcf}".format(vardict=vardict,
                                                                          strandbias=config['vardict_strandbias']['bin'],
-                                                                         vardict2vcf=config['vardict2vcf']['bin'],
+                                                                         vardict2vcf=vardict2vcf,
                                                                          vcf=vardict_vcf))
 
     job.fileStore.logToMaster("VarDict Command: {}\n".format(command))
-    # pipeline.run_and_log_command(command, logfile)
-    utilities.touch(vardict_vcf)
-    time.sleep(2)
+    pipeline.run_and_log_command(command, logfile)
 
     return vardict_vcf

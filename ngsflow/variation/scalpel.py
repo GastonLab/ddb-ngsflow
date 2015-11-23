@@ -1,11 +1,9 @@
 __author__ = 'dgaston'
 
 import os
-import time
 import multiprocessing
 
 from ngsflow import pipeline
-from ngsflow.utils import utilities
 
 
 def scalpel_single(job, config, sample, input_bam):
@@ -36,8 +34,6 @@ def scalpel_single(job, config, sample, input_bam):
                        "{}".format(output_dir))
 
     job.fileStore.logToMaster("Scalpel Command: {}\n".format(scalpel_command))
-    # pipeline.run_and_log_command(" ".join(scalpel_command), logfile)
-    utilities.touch("{}.scalpel.vcf".format(sample))
-    time.sleep(2)
+    pipeline.run_and_log_command(" ".join(scalpel_command), logfile)
 
     return scalpel_vcf

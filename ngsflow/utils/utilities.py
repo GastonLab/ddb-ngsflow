@@ -10,19 +10,12 @@ import subprocess as sub
 from ngsflow import pipeline
 
 
-def touch(path):
-    with open(path, 'a'):
-        os.utime(path, None)
-
-
 def spawn_batch_jobs(job):
     """
     This is simply a placeholder root job for the workflow
     """
 
     job.fileStore.logToMaster("Initializing workflow\n")
-    touch("Initialization.bam")
-    time.sleep(2)
 
 
 def spawn_variant_jobs(job):
@@ -32,8 +25,6 @@ def spawn_variant_jobs(job):
     """
 
     job.fileStore.logToMaster("Spawning all variant calling methods\n")
-    touch("Variant_Calling.bam")
-    time.sleep(2)
 
 
 def run_fastqc(job, config, samples):
@@ -59,11 +50,7 @@ def run_fastqc(job, config, samples):
                "{}".format(num_cores))
 
     job.fileStore.logToMaster("FastQC Command: {}\n".format(command))
-    touch("FastQC.bam")
-    time.sleep(2)
-
-    # code = pipe.run_and_log_command(" ".join(command), logfile)
-    # pipe.check_return_code(code)
+    pipeline.run_and_log_command(" ".join(command), logfile)
 
 
 def generate_fastqc_summary_report(project_config, sample_config, tool_config, resource_config):
@@ -110,8 +97,7 @@ def vt_normalization(job, config, sample, input_vcf):
                      "{}".format(output_vcf))
 
     job.fileStore.logToMaster("VT Command: {}\n".format(normalization))
-    # pipeline.run_and_log_command(" ".join(normalization), logfile)
-    time.sleep(2)
+    pipeline.run_and_log_command(" ".join(normalization), logfile)
 
     return output_vcf
 
@@ -252,7 +238,7 @@ def bgzip_and_tabix_vcf(job, infile):
     bgzip_instructions, tabix_instructions = bgzip_and_tabix_vcf_instructions(infile)
 
     job.fileStore.logToMaster("BGzip Command: {}\n".format(bgzip_instructions[0]))
-    # pipeline.run_and_log_command(bgzip_instructions[0], bgzip_instructions[1])
+    pipeline.run_and_log_command(bgzip_instructions[0], bgzip_instructions[1])
 
     job.fileStore.logToMaster("Tabix Command: {}\n".format(tabix_instructions[0]))
-    # pipeline.run_and_log_command(tabix_instructions[0], tabix_instructions[1])
+    pipeline.run_and_log_command(tabix_instructions[0], tabix_instructions[1])

@@ -1,6 +1,5 @@
 __author__ = 'dgaston'
 
-import time
 import multiprocessing
 
 from ngsflow import pipeline
@@ -66,12 +65,9 @@ def mutect_single(job, config, sample, input_bam, max_mem):
                       "{}".format(mutect_vcf))
 
     job.fileStore.logToMaster("MuTect Command: {}\n".format(mutect_command))
-    # pipeline.run_and_log_command(" ".join(mutect_command), mutect_logfile)
-    utilities.touch(temp_mutect)
+    pipeline.run_and_log_command(" ".join(mutect_command), mutect_logfile)
 
     job.fileStore.logToMaster("Subset Command: {}\n".format(subset_command))
-    # pipeline.run_and_log_command(" ".join(subset_command), subset_logfile)
-    utilities.touch(mutect_vcf)
-    time.sleep(2)
+    pipeline.run_and_log_command(" ".join(subset_command), subset_logfile)
 
     return mutect_vcf

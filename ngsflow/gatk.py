@@ -88,10 +88,7 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam, max_mem):
                           "{}".format(output_vcf))
 
     job.fileStore.logToMaster("GATK VariantAnnotator Command: {}\n".format(annotation_command))
-    # pipeline.run_and_log_command(" ".join(annotation_command), annotation_logfile)
-
-    time.sleep(2)
-    utilities.touch("{}".format(output_vcf))
+    pipeline.run_and_log_command(" ".join(annotation_command), annotation_logfile)
 
     return output_vcf
 
@@ -132,10 +129,7 @@ def filter_variants(job, config, sample, input_vcf, max_mem):
                       "{}".format(output_vcf))
 
     job.fileStore.logToMaster("GATK VariantFiltration Command: {}\n".format(filter_command))
-    # pipeline.run_and_log_command(" ".join(filter_command), filter_log)
-
-    time.sleep(2)
-    utilities.touch("{}".format(output_vcf))
+    pipeline.run_and_log_command(" ".join(filter_command), filter_log)
 
     return output_vcf
 
@@ -194,13 +188,11 @@ def add_or_replace_readgroups(job, config, sample, input_bam, max_mem):
                 "INPUT={}".format(output_bam))
 
     job.fileStore.logToMaster("GATK AddOrReplaceReadGroupsCommand Command: {}\n".format(command))
-    utilities.touch("{}".format(output_bam))
-    # pipeline.run_and_log_command(" ".join(command), logfile)
+    pipeline.run_and_log_command(" ".join(command), logfile)
 
     job.fileStore.logToMaster("GATK BuildBamIndex Command: {}\n".format(command2))
-    # pipeline.run_and_log_command(" ".join(command2), index_log)
+    pipeline.run_and_log_command(" ".join(command2), index_log)
 
-    time.sleep(2)
     return output_bam
 
 
@@ -232,8 +224,7 @@ def realign_target_creator(job, config, sample, input_bam, max_mem):
                "NotPrimaryAlignment")
 
     job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
-    # pipeline.run_and_log_command(" ".join(command), targets_log)
-    time.sleep(1)
+    pipeline.run_and_log_command(" ".join(command), targets_log)
 
     return targets
 
@@ -265,8 +256,7 @@ def realign_indels(job, config, sample, input_bam, targets, max_mem):
 
     job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command))
     utilities.touch("{}".format(output_bam))
-    # pipeline.run_and_log_command(" ".join(command2), realign_log)
-    time.sleep(2)
+    pipeline.run_and_log_command(" ".join(command), realign_log)
 
     return output_bam
 
@@ -322,14 +312,12 @@ def recalibrator(job, config, sample, input_bam, max_mem):
                   "{}.recalibrated.sorted.bam.bai".format(sample))
 
     job.fileStore.logToMaster("GATK BaseRecalibrator Command: {}\n".format(recal_commands))
-    # pipeline.run_and_log_command(" ".join(recal_commands), recal_log)
+    pipeline.run_and_log_command(" ".join(recal_commands), recal_log)
 
     job.fileStore.logToMaster("GATK PrintReads Command: {}\n".format(print_reads_command))
-    utilities.touch("{}".format(output_bam))
-    # pipeline.run_and_log_command(" ".join(print_reads_command), print_log)
+    pipeline.run_and_log_command(" ".join(print_reads_command), print_log)
 
     job.fileStore.logToMaster("GATK Copy Command: {}\n".format(cp_command))
-    # pipeline.run_and_log_command(" ".join(cp_command), cp_log)
+    pipeline.run_and_log_command(" ".join(cp_command), cp_log)
 
-    time.sleep(2)
     return output_bam
