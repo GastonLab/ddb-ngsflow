@@ -94,7 +94,7 @@ def vt_normalization(job, config, sample, input_vcf):
                      "{}".format(input_vcf),
                      "|",
                      "sed",
-                     "'s/ID=AD.Number=./ID=AD,Number=R/'",
+                     "'s/ID=AD,Number=./ID=AD,Number=R/'",
                      "|",
                      "vt",
                      "decompose"
