@@ -1,12 +1,111 @@
 __author__ = 'dgaston'
 
-import sys
 import time
-import multiprocessing
-import subprocess as sub
+
+from gemini import GeminiQuery
 
 from ngsflow.utils import utilities
-from .. import pipeline as pipe
+
+
+# Can simplify this later with max_aaf_all after updated to 0.18
+def var_is_rare(variant_data):
+    """Determine if the MAF of the variant is < 1% in all populations"""
+
+    if variant_data['in_esp'] != 0 or variant_data['in_1kg'] != 0 or variant_data['in_exac'] != 0:
+        if variant_data['aaf_esp_ea'] > 0.01:
+            return False
+        elif variant_data['aaf_esp_aa'] > 0.01:
+            return False
+        elif variant_data['aaf_1kg_amr'] > 0.01:
+            return False
+        elif variant_data['aaf_1kg_eas'] > 0.01:
+            return False
+        elif variant_data['aaf_1kg_sas'] > 0.01:
+            return False
+        elif variant_data['aaf_1kg_afr'] > 0.01:
+            return False
+        elif variant_data['aaf_1kg_eur'] > 0.01:
+            return False
+        elif variant_data['aaf_adj_exac_afr'] > 0.01:
+            return False
+        elif variant_data['aaf_adj_exac_amr'] > 0.01:
+            return False
+        elif variant_data['aaf_adj_exac_eas'] > 0.01:
+            return False
+        elif variant_data['aaf_adj_exac_fin'] > 0.01:
+            return False
+        elif variant_data['aaf_adj_exac_nfe'] > 0.01:
+            return False
+        elif variant_data['aaf_adj_exac_oth'] > 0.01:
+            return False
+        elif variant_data['aaf_adj_exac_sas'] > 0.01:
+            return False
+        else:
+            return True
+    else:
+        return True
+
+
+def var_is_in_cosmic(variant_data):
+    """Determine if the variant has a COSMIC identifier"""
+
+    if variant_data['cosmic_ids'] is not None:
+        return True
+    else:
+        return False
+
+
+def var_is_in_clinvar(variant_data):
+    """Determine if there is ClinVar data for the variant"""
+
+    if variant_data['clinvar_sig'] is not None:
+        return True
+    else:
+        return False
+
+
+def var_is_protein_effecting(variant_data):
+    if variant_data['impact_severity'] != "LOW":
+        return True
+    else:
+        return False
+
+
+# Need to add max_aaf_all later when gemini updated to 0.18
+def run_gemini_query_and_filter(db):
+    """Fetch all variants from a specified GEMINI database and filter"""
+
+    query = "SELECT chrom, start, end, ref, alt, vcf_id, rs_ids, cosmic_ids, filter, qual, qual_depth, depth, " \
+            "(gts).(*), (gt_depths).(*), (gt_ref_depths).(*), (gt_alt_depths).(*), " \
+            "gene, transcript, exon, codon_change, aa_change, biotype, impact, impact_so, impact_severity, aa_length, " \
+            "is_lof, is_conserved, pfam_domain, " \
+            "in_omim, clinvar_sig, clinvar_disease_name, clinvar_origin, clinvar_causal_allele, clinvar_dbsource, " \
+            "clinvar_dbsource_id, clinvar_on_diag_assay, " \
+            "rmsk, in_segdup, strand_bias, rms_map_qual, in_hom_run, num_mapq_zero, num_reads_w_dels, grc, " \
+            "gms_illumina, in_cse, " \
+            "num_alleles, allele_count, haplotype_score, is_somatic, somatic_score, " \
+            "aaf_esp_ea, aaf_esp_aa, aaf_esp_aa, aaf_esp_all, aaf_1kg_amr, aaf_1kg_eas, aaf_1kg_sas, aaf_1kg_afr, " \
+            "aaf_1kg_eur, aaf_1kg_all, aaf_exac_all, aaf_adj_exac_all, aaf_adj_exac_afr, aaf_adj_exac_amr, " \
+            "aaf_adj_exac_eas, aaf_adj_exac_fin, aaf_adj_exac_nfe, aaf_adj_exac_oth, aaf_adj_exac_sas, " \
+            "in_esp, in_1kg, in_exac, " \
+            "info FROM variants"
+    gq = GeminiQuery(db)
+    gq.run(query)
+    header = gq.header
+    passing_rows = []
+    print header
+
+    # Filter out variants with minor allele frequencies above the threshold but
+    # retain any that are above the threshold but in COSMIC
+    for variant_data in gq:
+        if var_is_in_cosmic(variant_data) or var_is_in_clinvar(variant_data):
+            passing_rows.append(variant_data)
+            continue
+        if var_is_rare(variant_data):
+            if var_is_protein_effecting(variant_data):
+                passing_rows.append(variant_data)
+
+    return header, passing_rows
 
 
 def merge_variant_calls(job, config, sample, vcf_files):
@@ -34,94 +133,3 @@ def merge_variant_calls(job, config, sample, vcf_files):
     time.sleep(2)
 
     return merged_vcf
-
-
-def evaluate_double_strand_calls(project_config, sample_config, tool_config, resource_config):
-    """Use pool A and pool B data from an Illumina strand-specific sequencing experiment to call high confidences
-    and likely false-positive variants"""
-
-    new_samples_config = list()
-    instructions = list()
-    bgzip_instructions = list()
-    tabix_instructions = list()
-
-    isec_command_core = ("%s -n +1 -f" % (tool_config['vcftools_isec']['bin']))
-
-    if project_config['mode'] == "per_sample":
-        for sample in project_config['stranded_sample_data']:
-            new_sample_dict = dict()
-            pool_dicts = list()
-            vcf_files = list()
-
-            logfile = "%s.mergepools.log" % sample['name']
-            pool1_name = sample['pools'][0]
-            pool2_name = sample['pools'][1]
-
-            for sample_dict in sample_config:
-                if sample_dict['name'] == pool1_name or sample_dict['name'] == pool2_name:
-                    pool_dicts.append(sample_dict)
-                    bgzip, tabix = bgzip_and_tabix_vcf_instructions(sample_dict['working_vcf'])
-                    bgzip_instructions.append((bgzip[0], bgzip[1]))
-                    tabix_instructions.append((tabix[0], tabix[1]))
-                    vcf_files.append("%s.gz" % sample_dict['working_vcf'])
-
-            new_sample_dict['name'] = sample['name']
-            new_sample_dict['double_strand_merged_vcf'] = "%s.ds.merged.vcf" % sample['name']
-            new_sample_dict['raw_vcf'] = new_sample_dict['double_strand_merged_vcf']
-            new_sample_dict['working_vcf'] = new_sample_dict['double_strand_merged_vcf']
-            new_samples_config.append(new_sample_dict)
-
-            vcf_files_string = " ".join(vcf_files)
-            isec_command = ("%s %s > %s" % (isec_command_core, vcf_files_string,
-                                            new_sample_dict['double_strand_merged_vcf']))
-
-            instructions.append((isec_command, logfile))
-
-            if 'sv_callers' in tool_config.keys():
-                new_sample_dict = dict()
-                pool_dicts = list()
-                vcf_files = list()
-
-                logfile = "%s.mergesvpools.log" % sample['name']
-                pool1_name = sample['pools'][0]
-                pool2_name = sample['pools'][1]
-
-                for sample_dict in sample_config:
-                    if sample_dict['name'] == pool1_name or sample_dict['name'] == pool2_name:
-                        pool_dicts.append(sample_dict)
-                        bgzip, tabix = bgzip_and_tabix_vcf_instructions(sample_dict['working_sv_vcf'])
-                        bgzip_instructions.append((bgzip[0], bgzip[1]))
-                        tabix_instructions.append((tabix[0], tabix[1]))
-                        vcf_files.append("%s.gz" % sample_dict['working_sv_vcf'])
-
-                new_sample_dict['name'] = sample['name']
-                new_sample_dict['double_strand_merged_sv_vcf'] = "%s.ds.merged.sv.vcf" % sample['name']
-                new_sample_dict['raw_sv_vcf'] = new_sample_dict['double_strand_merged_sv_vcf']
-                new_sample_dict['working_sv_vcf'] = new_sample_dict['double_strand_merged_sv_vcf']
-                new_samples_config.append(new_sample_dict)
-
-                vcf_files_string = " ".join(vcf_files)
-                isec_command = ("%s %s > %s" % (isec_command_core, vcf_files_string,
-                                                new_sample_dict['double_strand_merged_sv_vcf']))
-
-                instructions.append((isec_command, logfile))
-
-    elif project_config['mode'] == "per_cohort":
-        sys.stdout.write("ERROR: Double-Stranded variant call merging not supported for per cohort variants\n")
-        sys.exit()
-    else:
-        sys.stderr.write("ERROR: Mode: %s not supported\n" % project_config['mode'])
-        sys.exit()
-
-    sys.stdout.write("Running BGZip and Tabix on all input VCF files prior to merging\n")
-    pipe.execute_multiprocess(bgzip_instructions, int(tool_config['vcftools_isec']['num_cores']))
-    pipe.execute_multiprocess(tabix_instructions, int(tool_config['vcftools_isec']['num_cores']))
-
-    sys.stdout.write("Running vcftools isec for double stranded pools\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['vcftools_isec']['num_cores']))
-    sys.stdout.write("Finished vcftools isec\n")
-
-    # Set new configuration parameters for new merged samples
-    del sample_config[:]
-    for sample in new_samples_config:
-        sample_config.append(sample)
