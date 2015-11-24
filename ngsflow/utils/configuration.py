@@ -60,3 +60,21 @@ def configure_runtime(infile):
             configuration[tool] = tool_dict
 
     return configuration
+
+
+def configure_samples(infile):
+    """Parse the Sample configuration file"""
+
+    samples = dict()
+
+    config = ConfigParser.SafeConfigParser()
+    config.read(infile)
+
+    for sample in config.sections():
+        sample_dict = dict()
+        for option in config.options(sample):
+            sample_dict[option] = config.get(sample, option)
+
+    samples[sample] = sample_dict
+
+    return samples

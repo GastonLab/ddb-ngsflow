@@ -3,6 +3,7 @@ __author__ = 'dgaston'
 import os
 import sys
 import pyexcel
+import pybedtools
 import multiprocessing
 
 from ngsflow import pipeline
@@ -51,11 +52,12 @@ def run_fastqc(job, config, samples):
     pipeline.run_and_log_command(" ".join(command), logfile)
 
 
-def generate_fastqc_summary_report(project_config, sample_config, tool_config, resource_config):
+def generate_fastqc_summary_report(job, config, samples):
     """Parse FastQC summary reports and generate a run-level summary"""
 
-    with open("%s_fastqc_summary.txt" % project_config['project_name'], 'w') as summary_file:
-        for sample in sample_config:
+    job.fileStore.logToMaster("Parsing FastQC results to run-level summary file\n")
+    with open("{}_fastqc_summary.txt".format(config['run_name']), 'w') as summary_file:
+        for sample in samples:
             sample_fastq_dirs = list()
             if sample['fastq1']:
                 temp = sample['fastq1'].split(".")
@@ -170,52 +172,27 @@ def generate_coverage_report(project_config, sample_config, tool_config, resourc
     sheet.save_as("%s_coverage_results.xlsx" % project_config['project_name'])
 
 
-def create_output_dirs(project_config, sample_config, tool_config, resource_config):
-    """Create appropriate directories for variant calling outputs and intermediate files"""
-
-    os.mkdir("output")
-    os.chdir("output")
-    for variant_caller in project_config['variant_callers']:
-        os.mkdir(variant_caller)
-
-    os.mkdir("alignment")
-
-
-def bcftools_filter_variants_regions(project_config, sample_config, tool_config, resource_config):
+def bcftools_filter_variants_regions(job, config, sample, input_vcf):
     """Use bcftools to filter vcf file to only variants found within the specified regions file"""
 
-    instructions = list()
+    filtered_vcf = "{}.on_target.vcf".format(sample)
+    bgzipped_vcf = "{}.gz".format(input_vcf)
+    logfile = "{}.on_target_filter.log".format(sample)
 
-    if project_config['mode'] is "per_sample":
-        for sample in sample_config:
-            sample['on_target_vcf'] = "%s.on_target.vcf" % sample['name']
-            logfile = "%s.bcftools.filter.log" % sample['name']
+    bgzip_and_tabix_vcf(job, input_vcf)
 
-            bgzip_and_tabix_vcf(sample['working_vcf'])
-            bgzipped_vcf = "%s.gz" % sample['working_vcf']
+    filter_command = ("{}".format(config['bcftools']['bin']),
+                      "isec",
+                      "-T",
+                      "{}".format(config['regions']),
+                      "{}".format(bgzipped_vcf),
+                      ">",
+                      "{}".format(filtered_vcf))
 
-            command = ("%s isec -T %s %s > %s" % (tool_config['bcftools']['bin'], resource_config['regions'],
-                                                  bgzipped_vcf, sample['on_target_vcf']))
-            instructions.append((command, logfile))
-            sample['working_vcf'] = sample['on_target_vcf']
-    elif project_config['mode'] is "per_cohort":
-        project_config['on_target_vcf'] = "%s.on_target.vcf" % project_config['project_name']
-        logfile = "%s.bcftools.filter.log" % project_config['project_name']
+    job.fileStore.logToMaster("BCFTools isec command for filtering to only target regions: {}\n".format(filter_command))
+    pipeline.run_and_log_command(" ".join(filter_command), logfile)
 
-        bgzip_and_tabix_vcf(project_config['working_vcf'])
-        bgzipped_vcf = "%s.gz" % project_config['working_vcf']
-
-        command = ("%s isec -T %s %s > %s" % (tool_config['bcftools']['bin'], resource_config['regions'],
-                                              bgzipped_vcf, project_config['on_target_vcf']))
-        instructions.append((command, logfile))
-        project_config['working_vcf'] = project_config['on_target_vcf']
-    else:
-        sys.stderr.write("ERROR: Mode: %s not supported\n" % project_config['mode'])
-        sys.exit()
-
-    sys.stdout.write("Running bcftools isec to filter to only variants in targets\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['bcftools']['num_cores']))
-    sys.stdout.write("Finished filtering\n")
+    return filtered_vcf
 
 
 def bgzip_and_tabix_vcf_instructions(infile):
