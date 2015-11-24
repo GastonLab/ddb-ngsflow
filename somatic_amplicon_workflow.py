@@ -49,13 +49,13 @@ if __name__ == "__main__":
         # Alignment and Refinement Stages
         align_job = Job.wrapJobFn(bwa.run_bwa_mem, config, sample, samples[sample]['fastq1'], samples[sample]['fastq2'],
                                   cores=num_cores, memory="4G")
-        add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, config, sample, align_job.rv(), 4,
+        add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, config, sample, align_job.rv(),
                                 cores=1, memory="4G")
-        creator_job = Job.wrapJobFn(gatk.realign_target_creator, config, sample, add_job.rv(), 4,
+        creator_job = Job.wrapJobFn(gatk.realign_target_creator, config, sample, add_job.rv(),
                                     cores=num_cores, memory="4G")
-        realign_job = Job.wrapJobFn(gatk.realign_indels, config, sample, add_job.rv(), creator_job.rv(), 4,
+        realign_job = Job.wrapJobFn(gatk.realign_indels, config, sample, add_job.rv(), creator_job.rv(),
                                     cores=1, memory="4G")
-        recal_job = Job.wrapJobFn(gatk.recalibrator, config, sample, realign_job.rv(), 4,
+        recal_job = Job.wrapJobFn(gatk.recalibrator, config, sample, realign_job.rv(),
                                   cores=num_cores, memory="4G")
 
         # Variant calling
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
         freebayes_job = Job.wrapJobFn(freebayes.freebayes_single, config, sample, recal_job.rv(),
                                       cores=1, memory="4G")
-        mutect_job = Job.wrapJobFn(mutect.mutect_single, config, sample, recal_job.rv(), 4,
+        mutect_job = Job.wrapJobFn(mutect.mutect_single, config, sample, recal_job.rv(),
                                    cores=num_cores, memory="4G")
         vardict_job = Job.wrapJobFn(vardict.vardict_single, config, sample, recal_job.rv(),
                                     cores=num_cores, memory="5G")
@@ -78,13 +78,13 @@ if __name__ == "__main__":
         merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
                                   vardict_job.rv(), scalpel_job.rv(), indelminer_job.rv(), platypus_job.rv()),
                                   cores=1)
-        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), recal_job.rv(), 4,
+        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), recal_job.rv(),
                                           cores=num_cores, memory="4G")
-        gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(), 4,
+        gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
                                         cores=1, memory="2G")
         normalization_job = Job.wrapJobFn(utilities.vt_normalization, config, sample, gatk_filter_job.rv(),
                                           cores=1, memory="2G")
-        snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(), 4,
+        snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
                                    cores=num_cores, memory="4G")
         gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(),
                                    cores=num_cores, memory="4G")

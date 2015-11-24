@@ -11,19 +11,11 @@ import multiprocessing
 from toil.job import Job
 
 # Package methods
-from ngsflow import gatk
 from ngsflow import annotation
 from ngsflow import read_sample_sheet
-from ngsflow.align import bwa
 from ngsflow.utils import configuration
 from ngsflow.utils import utilities
 from ngsflow.variation import variation
-from ngsflow.variation import freebayes
-from ngsflow.variation import mutect
-from ngsflow.variation import platypus
-from ngsflow.variation import vardict
-from ngsflow.variation import scalpel
-from ngsflow.variation import indelminer
 
 
 if __name__ == "__main__":
@@ -38,4 +30,12 @@ if __name__ == "__main__":
     config = configuration.configure_runtime(args.configuration)
 
     sys.stdout.write("Parsing sample data\n")
-    samples = read_sample_sheet.read(args.samples_file)
+    samples = configuration.configure_samples(args.samples_file)
+
+    num_cores = multiprocessing.cpu_count()
+
+    root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
+
+    for sample in samples:
+        on_target_job = Job.wrapJobFn(utilities.bcftools_filter_variants_regions, config, sample,
+                                      samples[sample]['vcf'], cores=num_cores, memory="1G")
