@@ -3,10 +3,21 @@ __author__ = 'dgaston'
 # -*- coding: utf-8 -*-
 
 import sys
+import requests
 
 from collections import defaultdict
 
 import ConfigParser
+
+
+def configure_from_pipeline_service(url, port, pipe_name):
+    """Query the DDBio-PipelineService for configuration parameters"""
+
+    payload = {'name': pipe_name}
+    r = requests.get("{url}:{port}/pipelines".format(url=url, port=port), params=payload)
+    run_parameters = r.json()
+
+    return run_parameters
 
 
 def configure_runtime(infile):

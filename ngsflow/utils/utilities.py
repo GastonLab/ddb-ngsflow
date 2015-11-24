@@ -122,6 +122,12 @@ def bedtools_coverage_per_site(job, config, sample, input_bam):
     return output
 
 
+def bedtools_coverage_to_summary(job, config, sample, input_file):
+    """Summarize outputs from BedTools coverage results"""
+
+    raise NotImplementedError
+
+
 def generate_coverage_report(project_config, sample_config, tool_config, resource_config):
     """Take DiagnoseTargets data and generate a coverage report"""
 
@@ -173,26 +179,6 @@ def create_output_dirs(project_config, sample_config, tool_config, resource_conf
         os.mkdir(variant_caller)
 
     os.mkdir("alignment")
-
-
-def bedtools_coverage(project_config, sample_config, tool_config, resource_config):
-    """Use bedtools to evaluate on and off target alignments from bam files"""
-
-    instructions = list()
-
-    for sample in sample_config:
-        sample['bedtools_coverage'] = "%s.bedtools_coverage.bed" % sample['name']
-
-        logfile = "%s.bedtools_coverage.log" % sample['name']
-
-        command = ("%s coverage -a %s -b %s -hist" % (tool_config['bedtools']['bin'], sample['working_bam'],
-                                                      resource_config['regions']))
-
-        instructions.append((command, logfile))
-
-    sys.stdout.write("Running bedtools to evaluate coverage statistics\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['bedtools']['num_cores']))
-    sys.stdout.write("Finished bedtools\n")
 
 
 def bcftools_filter_variants_regions(project_config, sample_config, tool_config, resource_config):

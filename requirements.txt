@@ -8,3 +8,5 @@ pyexcel
 pyexcel-xlsx
 celery
 toil
+requests
+
