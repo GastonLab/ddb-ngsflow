@@ -2,10 +2,8 @@ __author__ = 'dgaston'
 
 import os
 import sys
-import time
 import pyexcel
 import multiprocessing
-import subprocess as sub
 
 from ngsflow import pipeline
 
@@ -100,6 +98,28 @@ def vt_normalization(job, config, sample, input_vcf):
     pipeline.run_and_log_command(" ".join(normalization), logfile)
 
     return output_vcf
+
+
+def bedtools_coverage_per_site(job, config, sample, input_bam):
+    """Run BedTools to calculate the per-site coverage of targeted regions"""
+
+    output = "{}.coverage.bed".format(sample)
+    logfile = "{}.bedtools_coverage.log".format(sample)
+
+    coverage = ("{}".format(config['bedtools']['bin']),
+                "coverage",
+                "-d",
+                "-a",
+                "{}".format(config['regions']),
+                "-b",
+                "{}".format(input_bam),
+                ">",
+                "{}".format(output))
+
+    job.fileStore.logToMaster("BedTools Coverage Command: {}\n".format(coverage))
+    pipeline.run_and_log_command(" ".join(coverage), logfile)
+
+    return output
 
 
 def generate_coverage_report(project_config, sample_config, tool_config, resource_config):
