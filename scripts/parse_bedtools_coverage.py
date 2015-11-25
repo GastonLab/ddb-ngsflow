@@ -25,7 +25,7 @@ if __name__ == "__main__":
             reader = csv.reader(infh, dialect='excel-tab')
             for row in reader:
                 num_bases += 1
-                if int(row[5]) < args.threshold:
+                if int(row[-1]) < args.threshold:
                     num_low += 1
             percent = (float(num_low) / float(num_bases)) * 100
             sys.stdout.write("Sample {sample}\t"

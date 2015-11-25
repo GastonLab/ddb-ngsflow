@@ -11,33 +11,40 @@ from ngsflow.utils import utilities
 from ngsflow import pipeline
 
 
-def run_diagnosetargets(project_config, sample_config, tool_config, resource_config):
+def run_diagnosetargets(job, config, sample, input_bam):
     """Run GATK's DiagnoseTargets against the supplied regions"""
 
-    instructions = list()
-    command_core = ("java -Xmx%sg -jar %s -T DiagnoseTargets -R %s -L %s --minimum_coverage %s "
-                    "--coverage_status_threshold 0.001" %
-                    (tool_config['gatk']['max_mem'], tool_config['gatk']['bin'],
-                     resource_config['reference_genome'], resource_config['regions'],
-                     resource_config['coverage_threshold']))
+    diagnose_targets_vcf = "{}.diagnosetargets.vcf".format(sample)
+    missing_intervals = "{}.missing.intervals".format(sample)
+    logfile = "{}.diagnose_targets.log".format(sample)
 
-    for sample in sample_config:
-        sample['diagnose_targets_vcf'] = "%s.diagnosetargets.vcf" % sample['name']
-        sample['diagnose_targets_missing_intervals'] = "%s.missing.intervals" % sample['name']
-        logfile = "%s.diagnosetargets.log" % sample['name']
+    command = ("java",
+               "-Xmx{}g".format(config['gatk']['max_mem']),
+               "-jar",
+               "{}".format(config['gatk']['bin']),
+               "-T",
+               "DiagnoseTargets",
+               "-R",
+               "{}".format(config['reference']),
+               "-L",
+               "{}".format(config['regions']),
+               "--minimum_coverage",
+               "{}".format(config['coverage_threshold']),
+               "-I",
+               "{}".format(input_bam),
+               "-o",
+               "{}".format(diagnose_targets_vcf),
+               "--missing_intervals",
+               "{}".format(missing_intervals))
 
-        command = ("%s -I %s -o %s --missing_intervals %s" % (command_core, sample['working_bam'],
-                                                              sample['diagnose_targets_vcf'],
-                                                              sample['diagnose_targets_missing_intervals']))
-        instructions.append((command, logfile))
+    job.fileStore.logToMaster("GATK DiagnoseTargets Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
 
-    sys.stdout.write("Running DiagnoseTargets\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['gatk']['num_cores']))
-    sys.stdout.write("Running DiagnoseTargets\n")
+    return diagnose_targets_vcf, missing_intervals
 
 
 def run_qualifymissing(project_config, sample_config, tool_config, resource_config):
-    """Run GATK's QualifyMissingIntervals against the supplied regions and datae from DiagnoseTargets"""
+    """Run GATK's QualifyMissingIntervals against the supplied regions and data from DiagnoseTargets"""
 
     instructions = list()
     command_core = ("java -Xmx%sg -jar %s -T QualifyMissingIntervals -R %s" % (tool_config['gatk']['max_mem'],
@@ -62,7 +69,7 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     """GATK Annotate and Variant Filters"""
 
     output_vcf = "{}.annotated.vcf".format(sample)
-    annotation_log = "{}.variantannotation.log".format(sample)
+    annotation_logfile = "{}.variantannotation.log".format(sample)
 
     annotation_command = ("java",
                           "-Xmx{}g".format(config['gatk']['max_mem']),
