@@ -1,8 +1,8 @@
 __author__ = 'dgaston'
 
-import os
 import sys
 import pyexcel
+import pyexcel.ext.xlsx
 import pybedtools
 import multiprocessing
 
@@ -130,26 +130,30 @@ def bedtools_coverage_to_summary(job, config, sample, input_file):
     raise NotImplementedError
 
 
-def generate_coverage_report(project_config, sample_config, tool_config, resource_config):
+def generate_coverage_report(job, config, vcfs):
     """Take DiagnoseTargets data and generate a coverage report"""
 
-    project_config['coverage_problems'] = "%s.coverage_issues_report.txt" % project_config['project_name']
     samples_coverage = {"Chr": [], "Start": [], "Stop": [], "Target": []}
     first_pass = True
 
-    for sample in sample_config:
-        filter_field = "%s_filter" % sample['name']
-        depth_field = "%s_depth" % sample['name']
-        low_field = "%s_bp_low" % sample['name']
-        zero_field = "%s_bp_zero" % sample['name']
+    job.fileStore.logToMaster("Processing DiagnoseTargets outputs and writing to spreadsheet\n")
+    sys.stdout.write("Processing VCFs:\n")
+    for vcf in vcfs:
+        sys.stdout.write("{}\n".format(vcf))
 
-        samples_coverage[filter_field] = []
-        samples_coverage[depth_field] = []
-        samples_coverage[low_field] = []
-        samples_coverage[zero_field] = []
+    for vcf in vcfs:
+        filter_field = "{}_filter".format(vcf)
+        depth_field = "{}_depth".format(vcf)
+        low_field = "{}_bp_low".format(vcf)
+        zero_field = "{}_bp_zero".format(vcf)
 
-        targeted_regions = pybedtools.BedTool(resource_config['regions'])
-        coverage_data = pybedtools.BedTool(sample['diagnose_targets_vcf'])
+        samples_coverage[filter_field] = list()
+        samples_coverage[depth_field] = list()
+        samples_coverage[low_field] = list()
+        samples_coverage[zero_field] = list()
+
+        targeted_regions = pybedtools.BedTool(config['regions'])
+        coverage_data = pybedtools.BedTool(vcf)
         intersections = coverage_data.intersect(targeted_regions, loj=True)
 
         for region in intersections:
@@ -169,7 +173,7 @@ def generate_coverage_report(project_config, sample_config, tool_config, resourc
 
     content = pyexcel.utils.dict_to_array(samples_coverage)
     sheet = pyexcel.Sheet(content)
-    sheet.save_as("%s_coverage_results.xlsx" % project_config['project_name'])
+    sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
 
 
 def bcftools_filter_variants_regions(job, config, sample, input_vcf):

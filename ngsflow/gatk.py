@@ -11,7 +11,7 @@ from ngsflow.utils import utilities
 from ngsflow import pipeline
 
 
-def run_diagnosetargets(job, config, sample, input_bam):
+def diagnosetargets(job, config, sample, input_bam):
     """Run GATK's DiagnoseTargets against the supplied regions"""
 
     diagnose_targets_vcf = "{}.diagnosetargets.vcf".format(sample)
@@ -19,7 +19,7 @@ def run_diagnosetargets(job, config, sample, input_bam):
     logfile = "{}.diagnose_targets.log".format(sample)
 
     command = ("java",
-               "-Xmx{}g".format(config['gatk']['max_mem']),
+               "-Xmx{}g".format(2),
                "-jar",
                "{}".format(config['gatk']['bin']),
                "-T",
@@ -28,8 +28,14 @@ def run_diagnosetargets(job, config, sample, input_bam):
                "{}".format(config['reference']),
                "-L",
                "{}".format(config['regions']),
+               "--coverage_status_threshold",
+               "{}".format(config['coverage_loci_threshold']),
+               "--bad_mate_status_threshold",
+               "{}".format(config['bad_mate_threshold']),
                "--minimum_coverage",
                "{}".format(config['coverage_threshold']),
+               "--quality_status_threshold",
+               "{}".format(config['quality_loci_threshold']),
                "-I",
                "{}".format(input_bam),
                "-o",
@@ -40,29 +46,7 @@ def run_diagnosetargets(job, config, sample, input_bam):
     job.fileStore.logToMaster("GATK DiagnoseTargets Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
-    return diagnose_targets_vcf, missing_intervals
-
-
-def run_qualifymissing(project_config, sample_config, tool_config, resource_config):
-    """Run GATK's QualifyMissingIntervals against the supplied regions and data from DiagnoseTargets"""
-
-    instructions = list()
-    command_core = ("java -Xmx%sg -jar %s -T QualifyMissingIntervals -R %s" % (tool_config['gatk']['max_mem'],
-                                                                               tool_config['gatk']['bin'],
-                                                                               resource_config['reference_genome']))
-
-    for sample in sample_config:
-        sample['diagnose_targets_vcf'] = "%s.diagnosetargets.vcf" % sample['name']
-        logfile = "%s.diagnosetargets.log" % sample['name']
-
-        command = ("%s -I %s -L %s -o %s" % (command_core, sample['working_bam'],
-                                             sample['diagnose_targets_missing_intervals'],
-                                             sample['diagnose_targets_vcf']))
-        instructions.append((command, logfile))
-
-    sys.stdout.write("Running DiagnoseTargets\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['gatk']['num_cores']))
-    sys.stdout.write("Running DiagnoseTargets\n")
+    return diagnose_targets_vcf
 
 
 def annotate_vcf(job, config, sample, input_vcf, input_bam):

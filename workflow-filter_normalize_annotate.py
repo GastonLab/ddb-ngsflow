@@ -1,7 +1,5 @@
 __author__ = 'dgaston'
 
-__author__ = 'dgaston'
-
 # Standard packages
 import sys
 import argparse

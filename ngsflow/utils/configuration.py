@@ -74,7 +74,6 @@ def configure_samples(infile):
         sample_dict = dict()
         for option in config.options(sample):
             sample_dict[option] = config.get(sample, option)
-
-    samples[sample] = sample_dict
+        samples[sample] = sample_dict
 
     return samples
