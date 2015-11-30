@@ -1,3 +1,13 @@
+"""
+.. module:: variation
+   :platform: Unix, OSX
+   :synopsis: A module for various methods and utilities for dealing with variation and VCF files.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
+
 __author__ = 'dgaston'
 
 import time

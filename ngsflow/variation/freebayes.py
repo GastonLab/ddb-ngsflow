@@ -1,3 +1,13 @@
+"""
+.. module:: freebayes
+   :platform: Unix, OSX
+   :synopsis: A wrapper module for calling FreeBayes.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
+
 __author__ = 'dgaston'
 
 from ngsflow import pipeline

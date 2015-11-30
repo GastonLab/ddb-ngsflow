@@ -1,4 +1,12 @@
-__author__ = 'dgaston'
+"""
+.. module:: GATK-Variation
+   :platform: Unix, OSX
+   :synopsis: A wrapper module for calling GATK UnifiedGenotyper and HaplotypeCaller.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
 
 __author__ = 'dgaston'
 

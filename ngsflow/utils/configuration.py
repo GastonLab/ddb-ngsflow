@@ -1,3 +1,13 @@
+"""
+.. module:: configuration
+   :platform: Unix, OSX
+   :synopsis: A module of wrapper methods for configuring pipeline runs.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
+
 __author__ = 'dgaston'
 
 # -*- coding: utf-8 -*-

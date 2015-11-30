@@ -1,3 +1,14 @@
+"""
+.. module:: utilities
+   :platform: Unix, OSX
+   :synopsis: A module of methods for various utility functions. This is a general catch all module for methoods
+   not better implemented elsewhere.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
+
 __author__ = 'dgaston'
 
 import sys

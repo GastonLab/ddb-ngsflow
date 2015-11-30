@@ -1,3 +1,14 @@
+"""
+.. module:: annotation
+   :platform: Unix, OSX
+   :synopsis: A module of methods and utilities for annotating files, post-processing annotated VCFs, and transforming
+   into additional formats.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
+
 __author__ = 'dgaston'
 
 import multiprocessing

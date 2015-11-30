@@ -1,3 +1,13 @@
+"""
+.. module:: gatk
+   :platform: Unix, OSX
+   :synopsis: A wrapper module for calling GATK utilities.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
+
 __author__ = 'dgaston'
 
 # This file contains methods for setting up and calling GATK and Picard tool executables in both per_sample and

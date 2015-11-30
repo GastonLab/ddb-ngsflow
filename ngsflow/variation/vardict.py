@@ -1,4 +1,15 @@
+"""
+.. module:: vardict
+   :platform: Unix, OSX
+   :synopsis: A wrapper module for calling VarDictJava.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
+
 __author__ = 'dgaston'
+
 
 import multiprocessing
 

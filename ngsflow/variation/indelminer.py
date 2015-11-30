@@ -1,3 +1,13 @@
+"""
+.. module:: indelminer
+   :platform: Unix, OSX
+   :synopsis: A wrapper module for calling indelminer.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+
+
+"""
+
 __author__ = 'dgaston'
 
 from ngsflow import pipeline
