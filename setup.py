@@ -20,7 +20,7 @@ def read(*filenames, **kwargs):
     return sep.join(buf)
 
 
-long_description = read('README.md', 'CHANGES.txt')
+long_description = read('README.md')
 
 with open("requirements.txt", "r") as f:
     install_requires = [x.strip() for x in f.readlines() if not x.startswith(("ddbio-", "#"))]
