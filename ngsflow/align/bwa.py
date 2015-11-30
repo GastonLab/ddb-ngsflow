@@ -1,14 +1,17 @@
 __author__ = 'dgaston'
 
-import time
 import multiprocessing
 
-from ngsflow.utils import utilities
 from ngsflow import pipeline
 
 
 def run_bwa_mem(job, config, sample, fastq1, fastq2):
-    """Run BWA MEM  and pipe to samtoools to sort and convert to BAM format"""
+    """
+    Run BWA MEM  and pipe to samtoools to sort and convert to BAM format
+
+    Return ``bam_file`` upon successful completion of BWA
+
+    """
 
     job.fileStore.logToMaster("Running BWA for sample {}\n".format(sample))
 

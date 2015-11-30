@@ -1,49 +1,37 @@
 __author__ = 'dgaston'
 
 """Setup file and install script"""
-import sys
 import os
+import io
 from setuptools import setup, find_packages
 
 from ngsflow.version import __version__ as version
 
+here = os.path.abspath(os.path.dirname(__file__))
 
-def write_version_py():
-    version_py = os.path.join(os.path.dirname(__file__), 'bcbio', 'pipeline',
-                              'version.py')
-    try:
-        import subprocess
-        p = subprocess.Popen(["git", "rev-parse", "--short", "HEAD"],
-                             stdout=subprocess.PIPE)
-        githash = p.stdout.read().strip()
-    except:
-        githash = ""
-    with open(version_py, "w") as out_handle:
-        out_handle.write("\n".join(['__version__ = "%s"' % version,
-                                    '__git_revision__ = "%s"' % githash]))
+
+def read(*filenames, **kwargs):
+    encoding = kwargs.get('encoding', 'utf-8')
+    sep = kwargs.get('sep', '\n')
+    buf = []
+    for filename in filenames:
+        with io.open(filename, encoding=encoding) as f:
+            buf.append(f.read())
+    return sep.join(buf)
+
+
+long_description = read('README.md', 'CHANGES.txt')
 
 with open("requirements.txt", "r") as f:
-    install_requires = [x.strip() for x in f.readlines() if not x.startswith(("bcbio-nextgen", "#"))]
+    install_requires = [x.strip() for x in f.readlines() if not x.startswith(("ddbio-", "#"))]
 
-# library-only install: enable skipping of scripts and requirements for conda builds
-if "--record=/dev/null" in sys.argv:
-    scripts = []
-    install_requires = []
-    zip_safe = True
-else:
-    zip_safe = False
-    scripts = ['scripts/bcbio_nextgen.py', 'scripts/bcbio_setup_genome.py', 'scripts/bcbio_prepare_samples.py']
-
-write_version_py()
-setup(name="helenus",
+setup(name="ddbio-ngsflow",
       version=version,
       author="Dan Gaston",
-      author_email="daniel.gaston@dal.ca",
+      author_email="daniel.gaston@gmail.com",
       description="Pipeline infrastructure and services for processing next-generation sequencing data",
-      long_description=(open('README.rst').read()),
+      long_description=long_description,
       license="MIT",
-      url="https://github.com/dgaston/nsha-mdx",
+      url="https://github.com/dgaston/ddbio-ngsflow",
       packages=find_packages(),
-      zip_safe=zip_safe,
-      scripts=scripts,
       install_requires=install_requires)
