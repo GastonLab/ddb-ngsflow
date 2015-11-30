@@ -164,9 +164,9 @@ def generate_coverage_report(job, config, vcfs):
                 samples_coverage['Target'].append(region[13])
             reads_data = region[9].split(":")
             samples_coverage[filter_field].append(region[6])
-            samples_coverage[depth_field].append(reads_data[0])
-            samples_coverage[low_field].append(reads_data[1])
-            samples_coverage[zero_field].append(reads_data[2])
+            samples_coverage[depth_field].append(reads_data[-3])
+            samples_coverage[low_field].append(reads_data[-2])
+            samples_coverage[zero_field].append(reads_data[-1])
 
         if first_pass:
             first_pass = False

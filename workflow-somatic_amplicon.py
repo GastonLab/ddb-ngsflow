@@ -11,7 +11,6 @@ from toil.job import Job
 # Package methods
 from ngsflow import gatk
 from ngsflow import annotation
-from ngsflow import read_sample_sheet
 from ngsflow.align import bwa
 from ngsflow.utils import configuration
 from ngsflow.utils import utilities
@@ -36,7 +35,7 @@ if __name__ == "__main__":
     config = configuration.configure_runtime(args.configuration)
 
     sys.stdout.write("Parsing sample data\n")
-    samples = read_sample_sheet.read(args.samples_file)
+    samples = configuration.configure_samples(args.samples_file)
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
