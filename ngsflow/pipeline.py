@@ -17,7 +17,17 @@ import subprocess as sub
 
 
 def run_and_log_command(command, logfile):
-    """Run a command and log StdErr to file"""
+    """This function uses the python subprocess method to run the specified command and writes all error to the
+    specified logfile
+
+    :param command: The command-line command to execute.
+    :type name: str.
+    :param logfile: The logfile to output error messages to.
+    :type logfile: str.
+    :returns:  Nothing
+    :raises: RuntimeError
+
+    """
 
     with open(logfile, "wb") as err:
         sys.stdout.write("Executing %s and writing to logfile %s\n" % (command, logfile))

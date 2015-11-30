@@ -15,7 +15,17 @@ from ngsflow import pipeline
 
 # indeliminer can be quite slow, doesn't appear to have inbuilt multi-threading, and can use a lot of RAM (>4GB)
 def indelminer_single(job, config, sample, input_bam):
-    """Run indelminer for calling indels in sample data"""
+    """Run IndelMiner on an an unmatched tumour sample and call somatic variants
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output vcf file name.
+
+    """
 
     indelminer_vcf = "{}.indelminer.vcf".format(sample)
     logfile = "{}.indelminer.log".format(sample)

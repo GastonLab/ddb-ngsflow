@@ -10,11 +10,7 @@
 
 __author__ = 'dgaston'
 
-# This file contains methods for setting up and calling GATK and Picard tool executables in both per_sample and
-# per_cohort modes. Haplotype caller, UnifiedGenotyper and MuTect are located in the variation.py file
-
 import sys
-import time
 import multiprocessing
 
 from ngsflow.utils import utilities
@@ -22,7 +18,17 @@ from ngsflow import pipeline
 
 
 def diagnosetargets(job, config, sample, input_bam):
-    """Run GATK's DiagnoseTargets against the supplied regions"""
+    """Run GATK's DiagnoseTargets against the supplied region
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The DiagnoseTargets output vcf file name.
+
+    """
 
     diagnose_targets_vcf = "{}.diagnosetargets.vcf".format(sample)
     missing_intervals = "{}.missing.intervals".format(sample)
@@ -60,7 +66,19 @@ def diagnosetargets(job, config, sample, input_bam):
 
 
 def annotate_vcf(job, config, sample, input_vcf, input_bam):
-    """GATK Annotate and Variant Filters"""
+    """Run GATK's VariantAnnotation on the specified VCF
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_vcf: The input_vcf file name to process.
+    :type input_vcf: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output vcf file name.
+
+    """
 
     output_vcf = "{}.annotated.vcf".format(sample)
     annotation_logfile = "{}.variantannotation.log".format(sample)
@@ -95,7 +113,17 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
 
 
 def filter_variants(job, config, sample, input_vcf):
-    """Run GATK Variant Filtration"""
+    """Run GATK's VariantFilter on the specified VCF
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_vcf: The input_vcf file name to process.
+    :type input_vcf: str.
+    :returns:  str -- The output vcf file name.
+
+    """
 
     output_vcf = "{}.filtered.vcf".format(sample)
     filter_log = "{}.variantfiltration.log".format(sample)
@@ -160,7 +188,17 @@ def run_mark_duplicates(project_config, sample_config, tool_config, resource_con
 
 
 def add_or_replace_readgroups(job, config, sample, input_bam):
-    """Run AddOrReplaceReadGroups"""
+    """Run Picard's AddOrReplaceReadGroups on the specified BAM
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output bam file name.
+
+    """
 
     job.fileStore.logToMaster("Running AddOrReplaceReadGroups in sample: {}".format(sample))
 
@@ -198,7 +236,17 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
 
 
 def realign_target_creator(job, config, sample, input_bam):
-    """Identify targets for realignment"""
+    """Run GATK TargetCreator on the specified BAM to identify targets for realignment
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The file name of the targets file.
+
+    """
 
     targets = "{}.targets.intervals".format(sample)
     targets_log = "{}.targetcreation.log".format(sample)
@@ -231,7 +279,19 @@ def realign_target_creator(job, config, sample, input_bam):
 
 
 def realign_indels(job, config, sample, input_bam, targets):
-    """Create Indel realignment targets and run realignment step"""
+    """Run GATK Indel Realignment on the specified BAM
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :param targets: The file name of targets to realign.
+    :type targets: str.
+    :returns:  str -- The output bam file name.
+
+    """
 
     output_bam = "{}.realigned.sorted.bam".format(sample)
     realign_log = "{}.realignindels.log".format(sample)
@@ -263,7 +323,17 @@ def realign_indels(job, config, sample, input_bam, targets):
 
 
 def recalibrator(job, config, sample, input_bam):
-    """Recalibrate and print bases"""
+    """Run GATK Recalibrator on the specified BAM
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output bam file name.
+
+    """
 
     output_bam = "{}.recalibrated.sorted.bam".format(sample)
     recal_config = "{}.recal".format(sample)

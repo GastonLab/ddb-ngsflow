@@ -17,7 +17,18 @@ from ngsflow import pipeline
 
 
 def scalpel_single(job, config, sample, input_bam):
-    """Run scalpel for variant calling"""
+    """Run Scalpel on an an unmatched tumour sample and call somatic variants
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output vcf file name.
+
+    """
+
     cwd = os.getcwd()
     output_dir = os.path.join(cwd, "{}-scalpel-output".format(sample))
     scalpel_vcf = os.path.join(output_dir, "variants.indel.vcf")

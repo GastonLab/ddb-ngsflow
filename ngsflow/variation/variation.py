@@ -10,8 +10,6 @@
 
 __author__ = 'dgaston'
 
-import time
-
 from gemini import GeminiQuery
 
 from ngsflow.utils import utilities
@@ -19,7 +17,7 @@ from ngsflow import pipeline
 
 
 # Can simplify this later with max_aaf_all after updated to 0.18
-def var_is_rare(variant_data):
+def _var_is_rare(variant_data):
     """Determine if the MAF of the variant is < 1% in all populations"""
 
     if variant_data['in_esp'] != 0 or variant_data['in_1kg'] != 0 or variant_data['in_exac'] != 0:
@@ -57,7 +55,7 @@ def var_is_rare(variant_data):
         return True
 
 
-def var_is_in_cosmic(variant_data):
+def _var_is_in_cosmic(variant_data):
     """Determine if the variant has a COSMIC identifier"""
 
     if variant_data['cosmic_ids'] is not None:
@@ -66,7 +64,7 @@ def var_is_in_cosmic(variant_data):
         return False
 
 
-def var_is_in_clinvar(variant_data):
+def _var_is_in_clinvar(variant_data):
     """Determine if there is ClinVar data for the variant"""
 
     if variant_data['clinvar_sig'] is not None:
@@ -75,7 +73,7 @@ def var_is_in_clinvar(variant_data):
         return False
 
 
-def var_is_protein_effecting(variant_data):
+def _var_is_protein_effecting(variant_data):
     if variant_data['impact_severity'] != "LOW":
         return True
     else:
@@ -84,7 +82,13 @@ def var_is_protein_effecting(variant_data):
 
 # Need to add max_aaf_all later when gemini updated to 0.18
 def run_gemini_query_and_filter(db):
-    """Fetch all variants from a specified GEMINI database and filter"""
+    """Use the GeminiQuery API to filter results based on severity and specific annotations
+
+    :param db: GEMINI database.
+    :type db: filename.
+    :returns:  tuple -- The header line for the requested columns and all rows that pass filters.
+
+    """
 
     query = "SELECT chrom, start, end, ref, alt, vcf_id, rs_ids, cosmic_ids, filter, qual, qual_depth, depth, " \
             "(gts).(*), (gt_depths).(*), (gt_ref_depths).(*), (gt_alt_depths).(*), " \
@@ -109,18 +113,28 @@ def run_gemini_query_and_filter(db):
     # Filter out variants with minor allele frequencies above the threshold but
     # retain any that are above the threshold but in COSMIC
     for variant_data in gq:
-        if var_is_in_cosmic(variant_data) or var_is_in_clinvar(variant_data):
+        if _var_is_in_cosmic(variant_data) or _var_is_in_clinvar(variant_data):
             passing_rows.append(variant_data)
             continue
-        if var_is_rare(variant_data):
-            if var_is_protein_effecting(variant_data):
+        if _var_is_rare(variant_data):
+            if _var_is_protein_effecting(variant_data):
                 passing_rows.append(variant_data)
 
     return header, passing_rows
 
 
 def merge_variant_calls(job, config, sample, vcf_files):
-    """Use vcf-isec to merge vcfs together and create an ensemble call set report"""
+    """Run vcf-isec to merge variant calls from multiple variant callers
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param vcf_files: List of input vcf files for merging.
+    :type vcf_files: list.
+    :returns:  str -- The output vcf file name.
+
+    """
 
     files = list()
     for vcf in vcf_files:

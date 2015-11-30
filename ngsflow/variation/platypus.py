@@ -16,7 +16,17 @@ from ngsflow import pipeline
 
 
 def platypus_single(job, config, sample, input_bam):
-    """Run platypus on a single sample"""
+    """Run Platypus on an an unmatched tumour sample and call somatic variants
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output vcf file name.
+
+    """
 
     platypus_vcf = "{}.platypus.vcf".format(sample)
     platypus_log = "{}.platypus.log".format(sample)
