@@ -1,7 +1,4 @@
-cassandra-driver
-flask
 cython
-gemini
 pybedtools
 psutil
 pyexcel
