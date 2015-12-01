@@ -1,14 +1,11 @@
 __author__ = 'dgaston'
 
-# Standard packages
 import sys
 import argparse
 import multiprocessing
 
-# Third-party packages
 from toil.job import Job
 
-# Package methods
 from ngsflow import gatk
 from ngsflow import annotation
 from ngsflow.utils import configuration
