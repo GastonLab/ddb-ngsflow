@@ -37,15 +37,15 @@ if __name__ == "__main__":
         on_target_job = Job.wrapJobFn(utilities.bcftools_filter_variants_regions, config, sample,
                                       samples[sample]['vcf'], cores=num_cores, memory="1G")
         gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, on_target_job.rv(), samples[sample]['bam'],
-                                          cores=num_cores, memory="4G")
+                                          cores=num_cores, memory="2G")
         gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
                                         cores=1, memory="2G")
         normalization_job = Job.wrapJobFn(utilities.vt_normalization, config, sample, gatk_filter_job.rv(),
                                           cores=1, memory="2G")
         snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
-                                   cores=num_cores, memory="4G")
+                                   cores=num_cores, memory="2G")
         gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(),
-                                   cores=num_cores, memory="4G")
+                                   cores=num_cores, memory="2G")
 
         root_job.addChild(on_target_job)
         on_target_job.addChild(gatk_annotate_job)
