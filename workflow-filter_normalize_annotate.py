@@ -39,7 +39,7 @@ if __name__ == "__main__":
         normalization_job = Job.wrapJobFn(utilities.vt_normalization, config, sample, gatk_filter_job.rv(),
                                           cores=1, memory="2G")
         snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
-                                   cores=1, memory="2G")
+                                   cores=1, memory="4G")
         gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(), args.maxCores,
                                    cores=int(args.maxCores), memory="2G")
 
