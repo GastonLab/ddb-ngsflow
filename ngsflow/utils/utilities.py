@@ -95,7 +95,7 @@ def vt_normalization(job, config, sample, input_vcf):
                      "'s/ID=AD,Number=./ID=AD,Number=R/'",
                      "|",
                      "vt",
-                     "decompose"
+                     "decompose",
                      "-s",
                      "-",
                      "|",
@@ -191,8 +191,10 @@ def bcftools_filter_variants_regions(job, config, sample, input_vcf):
     """Use bcftools to filter vcf file to only variants found within the specified regions file"""
 
     filtered_vcf = "{}.on_target.vcf".format(sample)
+    sorted_vcf = "{}.on_target_sorted.vcf".format(sample)
     bgzipped_vcf = "{}.gz".format(input_vcf)
     logfile = "{}.on_target_filter.log".format(sample)
+    sort_logfile = "{}.on_target_sorted.log".format(sample)
 
     bgzip_and_tabix_vcf(job, input_vcf)
 
@@ -204,10 +206,22 @@ def bcftools_filter_variants_regions(job, config, sample, input_vcf):
                       ">",
                       "{}".format(filtered_vcf))
 
+    sort_command = ("cat",
+                    "{}".format(filtered_vcf),
+                    "|",
+                    "{}".format(config['vcftools_sort']['bin']),
+                    "-c",
+                    ">",
+                    "{}".format(sorted_vcf)
+                    )
+
     job.fileStore.logToMaster("BCFTools isec command for filtering to only target regions: {}\n".format(filter_command))
     pipeline.run_and_log_command(" ".join(filter_command), logfile)
 
-    return filtered_vcf
+    job.fileStore.logToMaster("VCFTools-sort command for filtering to only target regions: {}\n".format(sort_command))
+    pipeline.run_and_log_command(" ".join(sort_command), sort_logfile)
+
+    return sorted_vcf
 
 
 def bgzip_and_tabix_vcf_instructions(infile):

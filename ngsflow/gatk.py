@@ -65,7 +65,7 @@ def diagnosetargets(job, config, sample, input_bam):
     return diagnose_targets_vcf
 
 
-def annotate_vcf(job, config, sample, input_vcf, input_bam):
+def annotate_vcf(job, config, sample, input_vcf, input_bam, num_threads):
     """Run GATK's VariantAnnotation on the specified VCF
 
     :param config: The configuration dictionary.
@@ -76,6 +76,8 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     :type input_vcf: str.
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
+    :param num_threads: Number of threads for local processing.
+    :type num_threads: int.
     :returns:  str -- The output vcf file name.
 
     """
@@ -86,16 +88,16 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     annotation_command = ("java",
                           "-Xmx{}g".format(config['gatk']['max_mem']),
                           "-jar",
-                          "{}".format(config['gatk']),
+                          "{}".format(config['gatk']['bin']),
                           "-T",
                           "VariantAnnotator",
                           "-R",
                           "{}".format(config['reference']),
                           "-nt",
-                          "{}".format(multiprocessing.cpu_count()),
+                          "{}".format(num_threads),
                           "--group",
                           "StandardAnnotation",
-                          "--dbsnp"
+                          "--dbsnp",
                           "{}".format(config['dbsnp']),
                           "-I",
                           "{}".format(input_bam),
@@ -131,9 +133,9 @@ def filter_variants(job, config, sample, input_vcf):
     filter_command = ("java",
                       "-Xmx{}g".format(config['gatk']['max_mem']),
                       "-jar",
-                      "{}".format(config['gatk']),
+                      "{}".format(config['gatk']['bin']),
                       "-T",
-                      "VariantAnnotator",
+                      "VariantFiltration",
                       "-R",
                       "{}".format(config['reference']),
                       "--filterExpression",

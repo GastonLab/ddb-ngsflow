@@ -36,11 +36,10 @@ def snpeff(job, config, sample, input_vcf):
                       "-Xmx{}g".format(config['snpeff']['max_mem']),
                       "-jar",
                       "{}".format(config['snpeff']['bin']),
-                      "-classic",
-                      "-formatEff",
                       "-v",
                       "{}".format(config['snpeff']['reference']),
                       "{}".format(input_vcf),
+                      ">"
                       "{}".format(output_vcf))
 
     job.fileStore.logToMaster("snpEff Command: {}\n".format(snpeff_command))
@@ -49,7 +48,7 @@ def snpeff(job, config, sample, input_vcf):
     return output_vcf
 
 
-def gemini(job, config, sample, input_vcf):
+def gemini(job, config, sample, input_vcf, num_threads):
     """Take the specified VCF and use GEMINI to add additional annotations and convert to database format
 
     :param config: The configuration dictionary.
@@ -65,10 +64,10 @@ def gemini(job, config, sample, input_vcf):
     db = "{}.snpEff.{}.db".format(sample, config['snpeff']['reference'])
     logfile = "{}.gemini.log".format(sample)
 
-    command = ("{}".format(config['gemini']),
+    command = ("{}".format(config['gemini']['bin']),
                "load",
                "--cores",
-               "{}".format(multiprocessing.cpu_count()),
+               "{}".format(num_threads),
                "-v",
                "{}".format(input_vcf),
                "-t",
