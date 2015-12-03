@@ -7,7 +7,6 @@
 
 """
 
-import sys
 from ngsflow.utils import utilities
 from ngsflow import pipeline
 
@@ -68,8 +67,6 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     :type input_vcf: str.
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
-    :param num_threads: Number of threads for local processing.
-    :type num_threads: int.
     :returns:  str -- The output vcf file name.
     """
 
@@ -128,7 +125,7 @@ def filter_variants(job, config, sample, input_vcf):
                       "-R",
                       "{}".format(config['reference']),
                       "--filterExpression",
-                      "'MQ0 > 50'",
+                      "'MQ0 > {}'".format(config['mq0_threshold']),
                       "--filterName",
                       "'HighMQ0'",
                       "--filterExpression",
@@ -136,11 +133,11 @@ def filter_variants(job, config, sample, input_vcf):
                       "--filterName",
                       "'LowDepth'",
                       "--filterExpression",
-                      "'QUAL < 10'",
+                      "'QUAL < {}'".format(config['var_qual_threshold']),
                       "--filterName",
                       "'LowQual'",
                       "--filterExpression",
-                      "'MQ < 10'",
+                      "'MQ < {}'".format(config['map_qual_threshold']),
                       "--filterName",
                       "'LowMappingQual'",
                       "--variant",
