@@ -44,10 +44,12 @@ if __name__ == "__main__":
     for sample in samples:
         # Alignment and Refinement Stages
         align_job = Job.wrapJobFn(bwa.run_bwa_mem, config, sample, samples[sample]['fastq1'], samples[sample]['fastq2'],
-                                  cores=int(config['bwa']['num_cores']), memory="4G")
+                                  cores=int(config['bwa']['num_cores']),
+                                  memory="{}G".format(config['bwa']['max_mem']))
 
         add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, config, sample, align_job.rv(),
-                                cores=1, memory="{}G".format(config['gatk']['max_mem']))
+                                cores=1,
+                                memory="{}G".format(config['gatk']['max_mem']))
 
         creator_job = Job.wrapJobFn(gatk.realign_target_creator, config, sample, add_job.rv(),
                                     cores=int(config['gatk']['num_cores']),
@@ -65,22 +67,28 @@ if __name__ == "__main__":
         spawn_variant_job = Job.wrapJobFn(utilities.spawn_variant_jobs)
 
         freebayes_job = Job.wrapJobFn(freebayes.freebayes_single, config, sample, recal_job.rv(),
-                                      cores=1, memory="4G")
+                                      cores=1,
+                                      memory="{}G".format(config['']['max_mem']))
 
         mutect_job = Job.wrapJobFn(mutect.mutect_single, config, sample, recal_job.rv(),
-                                   cores=int(config['mutect']['num_cores']), memory="4G")
+                                   cores=int(config['mutect']['num_cores']),
+                                   memory="{}G".format(config['mutect']['max_mem']))
 
         vardict_job = Job.wrapJobFn(vardict.vardict_single, config, sample, recal_job.rv(),
-                                    cores=int(config['vardict']['num_cores']), memory="5G")
+                                    cores=int(config['vardict']['num_cores']),
+                                    memory="{}G".format(config['vardict']['max_mem']))
 
         scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, recal_job.rv(),
-                                    cores=int(config['scalpel']['num_cores']), memory="4G")
+                                    cores=int(config['scalpel']['num_cores']),
+                                    memory="{}G".format(config['scalpel']['max_mem']))
 
         indelminer_job = Job.wrapJobFn(indelminer.indelminer_single, config, sample, recal_job.rv(),
-                                       cores=1, memory="5G")
+                                       cores=1,
+                                       memory="{}G".format(config['indelminer']['max_mem']))
 
         platypus_job = Job.wrapJobFn(platypus.platypus_single, config, sample, recal_job.rv(),
-                                     cores=int(config['platypus']['num_cores']), memory="4G")
+                                     cores=int(config['platypus']['num_cores']),
+                                     memory="{}G".format(config['platypus']['max_mem']))
 
         # Merge results and annotate
         merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
@@ -88,19 +96,24 @@ if __name__ == "__main__":
                                   cores=1)
 
         gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), recal_job.rv(),
-                                          cores=int(config['gatk']['num_cores']), memory="4G")
+                                          cores=int(config['gatk']['num_cores']),
+                                          memory="{}G".format(config['gatk']['max_mem']))
 
         gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
-                                        cores=1, memory="2G")
+                                        cores=1,
+                                        memory="{}G".format(config['gatk']['max_mem']))
 
         normalization_job = Job.wrapJobFn(utilities.vt_normalization, config, sample, gatk_filter_job.rv(),
-                                          cores=1, memory="2G")
+                                          cores=1,
+                                          memory="{}G".format(config['gatk']['max_mem']))
 
         snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
-                                   cores=int(config['snpeff']['num_cores']), memory="4G")
+                                   cores=int(config['snpeff']['num_cores']),
+                                   memory="{}G".format(config['snpeff']['max_mem']))
 
         gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(),
-                                   cores=int(config['gatk']['num_cores']), memory="4G")
+                                   cores=int(config['gatk']['num_cores']),
+                                   memory="{}G".format(config['gemini']['max_mem']))
 
         # Create workflow from created jobs
         root_job.addChild(align_job)
