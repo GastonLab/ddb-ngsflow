@@ -154,33 +154,8 @@ def filter_variants(job, config, sample, input_vcf):
     return output_vcf
 
 
-def run_mark_duplicates(project_config, sample_config, tool_config, resource_config):
-    """Run Picard MarkDuplicates"""
-
-    sys.stdout.write("Running MarkDuplicates\n")
-    instructions = list()
-    for sample in sample_config:
-        logfile = "%s.markduplicates.log" % sample['name']
-
-        try:
-            sample['sorted_bam'] = sample['bam']
-        except KeyError:
-            pass
-
-        sample['dedup_bam'] = "%s.dedup.sorted.bam" % sample['name']
-        metrics = "%s.dedup.metrics" % sample['name']
-
-        command = ("java -Xmx%sg -jar %s MarkDuplicates CREATE_INDEX=true INPUT=%s OUTPUT=%s METRICS_FILE=%s "
-                   "VALIDATION_STRINGENCY=LENIENT" %
-                   (tool_config['gatk']['max_mem'], tool_config['picard']['bin'], sample['working_bam'],
-                    sample['dedup_bam'], metrics))
-        instructions.append((command, logfile))
-        sample['working_bam'] = sample['dedup_bam']
-
-
-def add_or_replace_readgroups(job, config, sample, input_bam):
-    """Run Picard's AddOrReplaceReadGroups on the specified BAM
-
+def run_mark_duplicates(job, config, sample, input_bam):
+    """Run Picard MarkDuplicates
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -188,7 +163,39 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The output bam file name.
+    """
 
+    job.fileStore.logToMaster("Running MarkDuplicates for sample: {}".format(sample))
+
+    metrics_file = "{}.dedup.metrics".format(sample)
+    output_bam = "{}.dedup.sorted.bam".format(sample)
+    logfile = "{}.markduplicates.log".format(sample)
+
+    command = ("java",
+               "-Xmx{}g".format(config['gatk']['max_mem']),
+               "-jar",
+               "{}".format(config['picard']['bin']),
+               "MarkDuplicates",
+               "CREATE_INDEX=true",
+               "METRICS_FILE={}".format(metrics_file),
+               "INPUT={}".format(input_bam),
+               "OUTPUT={}".format(output_bam))
+
+    job.fileStore.logToMaster("GATK BuildBamIndex Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_bam
+
+
+def add_or_replace_readgroups(job, config, sample, input_bam):
+    """Run Picard's AddOrReplaceReadGroups on the specified BAM
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output bam file name.
     """
 
     job.fileStore.logToMaster("Running AddOrReplaceReadGroups in sample: {}".format(sample))
@@ -228,7 +235,6 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
 
 def realign_target_creator(job, config, sample, input_bam):
     """Run GATK TargetCreator on the specified BAM to identify targets for realignment
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -236,7 +242,6 @@ def realign_target_creator(job, config, sample, input_bam):
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The file name of the targets file.
-
     """
 
     targets = "{}.targets.intervals".format(sample)
@@ -273,7 +278,6 @@ def realign_target_creator(job, config, sample, input_bam):
 
 def realign_indels(job, config, sample, input_bam, targets):
     """Run GATK Indel Realignment on the specified BAM
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -283,7 +287,6 @@ def realign_indels(job, config, sample, input_bam, targets):
     :param targets: The file name of targets to realign.
     :type targets: str.
     :returns:  str -- The output bam file name.
-
     """
 
     output_bam = "{}.realigned.sorted.bam".format(sample)
