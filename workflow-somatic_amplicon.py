@@ -1,9 +1,6 @@
-__author__ = 'dgaston'
-
 # Standard packages
 import sys
 import argparse
-import multiprocessing
 
 # Third-party packages
 from toil.job import Job
@@ -89,7 +86,7 @@ if __name__ == "__main__":
                                   cores=1)
 
         gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), recal_job.rv(),
-                                          cores=num_cores, memory="4G")
+                                          cores=int(config['gatk']['num_cores']), memory="4G")
 
         gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
                                         cores=1, memory="2G")
@@ -98,10 +95,10 @@ if __name__ == "__main__":
                                           cores=1, memory="2G")
 
         snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
-                                   cores=num_cores, memory="4G")
+                                   cores=int(config['snpeff']['num_cores']), memory="4G")
 
         gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(),
-                                   cores=num_cores, memory="4G")
+                                   cores=int(config['gatk']['num_cores']), memory="4G")
 
         # Create workflow from created jobs
         root_job.addChild(align_job)
