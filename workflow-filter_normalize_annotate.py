@@ -1,8 +1,7 @@
-__author__ = 'dgaston'
+#!/usr/bin/env python
 
 import sys
 import argparse
-import multiprocessing
 
 from toil.job import Job
 
