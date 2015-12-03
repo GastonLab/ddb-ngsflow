@@ -5,19 +5,13 @@
 
 .. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
 
-
 """
-
-__author__ = 'dgaston'
-
-import multiprocessing
 
 from ngsflow import pipeline
 
 
 def platypus_single(job, config, sample, input_bam):
     """Run Platypus on an an unmatched tumour sample and call somatic variants
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -25,7 +19,6 @@ def platypus_single(job, config, sample, input_bam):
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The output vcf file name.
-
     """
 
     platypus_vcf = "{}.platypus.vcf".format(sample)
@@ -39,7 +32,7 @@ def platypus_single(job, config, sample, input_bam):
                         "--assemble=1",
                         "--assembleBrokenPairs=1",
                         "--filterDuplicates=0",
-                        "--nCPU={}".format(multiprocessing.cpu_count()),
+                        "--nCPU={}".format(config['platypus']['num_cores']),
                         "--logFileName={}".format(internal_log),
                         "--bamFiles={}".format(input_bam),
                         "--output={}".format(platypus_vcf))

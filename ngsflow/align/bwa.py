@@ -13,10 +13,17 @@ __author__ = 'dgaston'
 
 
 def run_bwa_mem(job, config, sample, fastq1, fastq2):
-    """
-    Run BWA MEM  and pipe to samtoools to sort and convert to BAM format
+    """Run GATK's DiagnoseTargets against the supplied region
 
-    Return ``bam_file`` upon successful completion of BWA
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param fastq1: Input FastQ File.
+    :type fastq1: str.
+    :param fastq2: Input FastQ File.
+    :type fastq2: str.
+    :returns:  str -- Aligned and sorted BAM file name.
 
     """
 

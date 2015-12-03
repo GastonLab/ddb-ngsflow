@@ -9,16 +9,11 @@
 
 """
 
-__author__ = 'dgaston'
-
-import multiprocessing
-
 from ngsflow import pipeline
 
 
 def snpeff(job, config, sample, input_vcf):
     """Annotate the specified VCF using snpEff
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -26,7 +21,6 @@ def snpeff(job, config, sample, input_vcf):
     :param input_vcf: The input_vcf file name to process.
     :type input_vcf: str.
     :returns:  str -- The output vcf file name.
-
     """
 
     output_vcf = "{}.snpEff.{}.vcf".format(sample, config['snpeff']['reference'])
@@ -48,9 +42,8 @@ def snpeff(job, config, sample, input_vcf):
     return output_vcf
 
 
-def gemini(job, config, sample, input_vcf, num_threads):
+def gemini(job, config, sample, input_vcf):
     """Take the specified VCF and use GEMINI to add additional annotations and convert to database format
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -58,7 +51,6 @@ def gemini(job, config, sample, input_vcf, num_threads):
     :param input_vcf: The input_vcf file name to process.
     :type input_vcf: str.
     :returns:  str -- The output GEMINI database name.
-
     """
 
     db = "{}.snpEff.{}.db".format(sample, config['snpeff']['reference'])
@@ -67,7 +59,7 @@ def gemini(job, config, sample, input_vcf, num_threads):
     command = ("{}".format(config['gemini']['bin']),
                "load",
                "--cores",
-               "{}".format(num_threads),
+               "{}".format(config['gemini']['num_cores']),
                "-v",
                "{}".format(input_vcf),
                "-t",

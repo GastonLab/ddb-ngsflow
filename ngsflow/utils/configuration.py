@@ -21,7 +21,15 @@ import ConfigParser
 
 
 def configure_from_pipeline_service(url, port, pipe_name):
-    """Query the DDBio-PipelineService for configuration parameters"""
+    """Query the DDBio-PipelineService for configuration parameters
+    :param url: The database URL
+    :type url: string.
+    :param port: Port number
+    :type port: str.
+    :param pipe_name: The name of the pipeline to get configuration paramaters for.
+    :type pipe_name: str.
+    :returns:  dict -- A configuration dictionary.
+    """
 
     payload = {'name': pipe_name}
     r = requests.get("{url}:{port}/pipelines".format(url=url, port=port), params=payload)
@@ -31,7 +39,11 @@ def configure_from_pipeline_service(url, port, pipe_name):
 
 
 def configure_runtime(infile):
-    """Parse the configuration settings from a file"""
+    """Parse the configuration settings from a file
+    :param infile: input filename
+    :type infile: string.
+    :returns:  dict -- A configuration dictionary.
+    """
 
     configuration = defaultdict()
     config = ConfigParser.SafeConfigParser()
@@ -73,7 +85,11 @@ def configure_runtime(infile):
 
 
 def configure_samples(infile):
-    """Parse the Sample configuration file"""
+    """Parse the sample-level configuration settings from a file
+    :param infile: input filename
+    :type infile: string.
+    :returns:  dict -- A configuration dictionary.
+    """
 
     samples = dict()
 

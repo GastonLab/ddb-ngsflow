@@ -8,8 +8,6 @@
 
 """
 
-__author__ = 'dgaston'
-
 from gemini import GeminiQuery
 
 from ngsflow.utils import utilities
@@ -83,11 +81,9 @@ def _var_is_protein_effecting(variant_data):
 # Need to add max_aaf_all later when gemini updated to 0.18
 def run_gemini_query_and_filter(db):
     """Use the GeminiQuery API to filter results based on severity and specific annotations
-
     :param db: GEMINI database.
     :type db: filename.
     :returns:  tuple -- The header line for the requested columns and all rows that pass filters.
-
     """
 
     query = "SELECT chrom, start, end, ref, alt, vcf_id, rs_ids, cosmic_ids, filter, qual, qual_depth, depth, " \
@@ -125,7 +121,6 @@ def run_gemini_query_and_filter(db):
 
 def merge_variant_calls(job, config, sample, vcf_files):
     """Run vcf-isec to merge variant calls from multiple variant callers
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -133,7 +128,6 @@ def merge_variant_calls(job, config, sample, vcf_files):
     :param vcf_files: List of input vcf files for merging.
     :type vcf_files: list.
     :returns:  str -- The output vcf file name.
-
     """
 
     files = list()

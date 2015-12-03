@@ -38,7 +38,12 @@ def spawn_variant_jobs(job):
 
 
 def run_fastqc(job, config, samples):
-    """Run FastQC on provided FastQ files"""
+    """Run FastQC on provided FastQ files
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param samples: Samples dictionary
+    :type samples: str.
+    """
 
     job.fileStore.logToMaster("Running FastQC for all samples\n")
     logfile = "fastqc.log"
@@ -64,7 +69,12 @@ def run_fastqc(job, config, samples):
 
 
 def generate_fastqc_summary_report(job, config, samples):
-    """Parse FastQC summary reports and generate a run-level summary"""
+    """Parse FastQC summary reports and generate a run-level summary
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param samples: Samples dictionary
+    :type samples: str.
+    """
 
     job.fileStore.logToMaster("Parsing FastQC results to run-level summary file\n")
     with open("{}_fastqc_summary.txt".format(config['run_name']), 'w') as summary_file:
@@ -83,7 +93,15 @@ def generate_fastqc_summary_report(job, config, samples):
 
 
 def vt_normalization(job, config, sample, input_vcf):
-    """Decompose and left normalize variants"""
+    """Decompose and left normalize variants
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_vcf: The input_vcf file name to process.
+    :type input_vcf: str.
+    :returns:  str -- The output vcf file name.
+    """
 
     output_vcf = "{}.normalized.vcf".format(sample)
     logfile = "{}.vt_normalization.log".format(sample)
@@ -114,7 +132,15 @@ def vt_normalization(job, config, sample, input_vcf):
 
 
 def bedtools_coverage_per_site(job, config, sample, input_bam):
-    """Run BedTools to calculate the per-site coverage of targeted regions"""
+    """Run BedTools to calculate the per-site coverage of targeted regions
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_vcf file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output BED file name.
+    """
 
     output = "{}.coverage.bed".format(sample)
     logfile = "{}.bedtools_coverage.log".format(sample)
@@ -142,7 +168,14 @@ def bedtools_coverage_to_summary(job, config, sample, input_file):
 
 
 def generate_coverage_report(job, config, vcfs):
-    """Take DiagnoseTargets data and generate a coverage report"""
+    """Take DiagnoseTargets data and generate a coverage report
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param vcfs: The list of input DiagnoseTargets generated vcf file names to process.
+    :type vcfs: str.
+    """
 
     samples_coverage = {"Chr": [], "Start": [], "Stop": [], "Target": []}
     first_pass = True
@@ -188,7 +221,15 @@ def generate_coverage_report(job, config, vcfs):
 
 
 def bcftools_filter_variants_regions(job, config, sample, input_vcf):
-    """Use bcftools to filter vcf file to only variants found within the specified regions file"""
+    """Use bcftools to filter vcf file to only variants found within the specified regions file
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_vcf: The input_vcf file name to process.
+    :type input_vcf: str.
+    :returns:  str -- The output vcf file name.
+    """
 
     filtered_vcf = "{}.on_target.vcf".format(sample)
     sorted_vcf = "{}.on_target_sorted.vcf".format(sample)
@@ -224,7 +265,7 @@ def bcftools_filter_variants_regions(job, config, sample, input_vcf):
     return sorted_vcf
 
 
-def bgzip_and_tabix_vcf_instructions(infile):
+def _bgzip_and_tabix_vcf_instructions(infile):
     """Generate instructions and logfile for bgzip and tabix"""
 
     bgzip_command = "bgzip -c %s > %s.gz" % (infile, infile)
@@ -245,9 +286,17 @@ def bgzip_and_tabix_vcf_instructions(infile):
 
 
 def bgzip_and_tabix_vcf(job, infile):
-    """Call bgzip and tabix on vcf files"""
+    """Run GATK's VariantFilter on the specified VCF
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param infile: The input_vcf file name to process.
+    :type infile: str.
+    :returns:  str -- The output vcf file name.
+    """
 
-    bgzip_instructions, tabix_instructions = bgzip_and_tabix_vcf_instructions(infile)
+    bgzip_instructions, tabix_instructions = _bgzip_and_tabix_vcf_instructions(infile)
 
     job.fileStore.logToMaster("BGzip Command: {}\n".format(bgzip_instructions[0]))
     pipeline.run_and_log_command(bgzip_instructions[0], bgzip_instructions[1])

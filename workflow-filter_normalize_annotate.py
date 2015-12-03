@@ -40,7 +40,7 @@ if __name__ == "__main__":
                                           cores=1, memory="2G")
         snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
                                    cores=1, memory="{}G".format(config['snpeff']['max_mem']))
-        gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(), args.maxCores,
+        gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(),
                                    cores=int(args.maxCores), memory="2G")
 
         root_job.addChild(on_target_job)

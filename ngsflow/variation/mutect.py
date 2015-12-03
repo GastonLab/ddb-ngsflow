@@ -5,7 +5,6 @@
 
 .. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
 
-
 """
 
 from ngsflow import pipeline
@@ -25,7 +24,6 @@ def mutect_matched():
 
 def mutect_single(job, config, sample, input_bam):
     """Run MuTect on an an unmatched tumour sample and call somatic variants
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -33,7 +31,6 @@ def mutect_single(job, config, sample, input_bam):
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The output vcf file name.
-
     """
 
     mutect_vcf = "{}.mutect.vcf".format(sample)

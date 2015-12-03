@@ -4,17 +4,21 @@
    :synopsis: A wrapper module for calling FreeBayes.
 
 .. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
-
-
 """
-
-__author__ = 'dgaston'
 
 from ngsflow import pipeline
 
 
 def freebayes_single(job, config, sample, input_bam):
-    """Run FreeBayes without a matched normal sample"""
+    """Run FreeBayes without a matched normal sample
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output vcf file name.
+    """
 
     freebayes_vcf = "{}.freebayes.vcf".format(sample)
     logfile = "{}.freebayes.log".format(sample)

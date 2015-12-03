@@ -5,7 +5,6 @@
 
 .. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
 
-
 """
 
 import sys
@@ -15,7 +14,6 @@ from ngsflow import pipeline
 
 def diagnosetargets(job, config, sample, input_bam):
     """Run GATK's DiagnoseTargets against the supplied region
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -23,7 +21,6 @@ def diagnosetargets(job, config, sample, input_bam):
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The DiagnoseTargets output vcf file name.
-
     """
 
     diagnose_targets_vcf = "{}.diagnosetargets.vcf".format(sample)
@@ -63,7 +60,6 @@ def diagnosetargets(job, config, sample, input_bam):
 
 def annotate_vcf(job, config, sample, input_vcf, input_bam):
     """Run GATK's VariantAnnotation on the specified VCF
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -75,7 +71,6 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     :param num_threads: Number of threads for local processing.
     :type num_threads: int.
     :returns:  str -- The output vcf file name.
-
     """
 
     output_vcf = "{}.annotated.vcf".format(sample)
@@ -112,7 +107,6 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
 
 def filter_variants(job, config, sample, input_vcf):
     """Run GATK's VariantFilter on the specified VCF
-
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -120,7 +114,6 @@ def filter_variants(job, config, sample, input_vcf):
     :param input_vcf: The input_vcf file name to process.
     :type input_vcf: str.
     :returns:  str -- The output vcf file name.
-
     """
 
     output_vcf = "{}.filtered.vcf".format(sample)
