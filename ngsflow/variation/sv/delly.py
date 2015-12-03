@@ -1,61 +1,45 @@
-__author__ = 'dgaston'
-
 import sys
 
-from helenus.workflow import pipeline as pipe
-from helenus.workflow.elements.utilities import bgzip_and_tabix_vcf_instructions, bgzip_and_tabix_vcf
+from ngsflow import pipeline
 
 
-def run_delly2_single(project_config, sample_config, tool_config, resource_config):
+def run_delly2_single(job, config, sample, input_bam):
     """Run delly2 for structural variant detection. As delly2 is parallelized on the level of samples,
-    we use a single-threaded version"""
+    we use a single-threaded version
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The merged Delly output vcf file name.
+    """
 
-    instructions = list()
-    bgzip_instructions = list()
-    tabix_instructions = list()
+    delly_vcfs = list()
+    delly_command_core = ("{}".format(config['delly']['bin']),
+                          "-x",
+                          "{}".format(config['delly']['exclude']),
+                          "-g",
+                          "{}".format(config['reference']))
 
-    delly_command_core = ("%s -x %s -g %s" % (tool_config['delly']['bin'], resource_config['delly']['exclude'],
-                                              resource_config['reference_genome']))
+    for mut_type in ["DEL", "DUP", "TRA", "INV"]:
+        output_vcf = "{sample}.{type}.vcf".format(sample=sample, type=mut_type)
+        logfile = "{sample}.{type}.log".format(sample=sample, type=mut_type)
 
-    if project_config['mode'] is "per_sample":
-        for sample in sample_config:
-            sample['delly_vcfs'] = list()
-            for mut_type in ["DEL", "DUP", "TRA", "INV"]:
-                output_vcf = "%s.%s.vcf" % (sample['name'], mut_type)
-                logfile = "%s.%s.log" % (sample['name'], mut_type)
-                sample['delly_vcfs'].append(output_vcf)
-                command = ("%s -t %s -o %s %s" % (delly_command_core, mut_type, output_vcf, sample['working_bam']))
+        delly_vcfs.append(output_vcf)
 
-                bgzip, tabix = bgzip_and_tabix_vcf_instructions(output_vcf)
-                bgzip_instructions.append((bgzip[0], bgzip[1]))
-                tabix_instructions.append((tabix[0], tabix[1]))
-                instructions.append((command, logfile))
-    elif project_config['mode'] is "per_cohort":
-        sample_bams = list()
-        for sample in sample_config:
-            sample_bams.append(sample['working_bam'])
-        sample_bams_list = " ".join(sample_bams)
-        project_config['delly_vcfs'] = list()
-        for mut_type in ["DEL", "DUP", "TRA", "INV"]:
-            output_vcf = "%s.%s.vcf" % (project_config['project_name'], mut_type)
-            logfile = "%s.%s.log" % (project_config['project_name'], mut_type)
-            project_config['delly_vcfs'].append(output_vcf)
-            command = ("%s -t %s -o %s %s" % (delly_command_core, mut_type, output_vcf, sample_bams_list))
+        delly_command = list()
+        delly_command.append(delly_command_core)
+        delly_command.append("-t",
+                             "{}".format(mut_type),
+                             "-o",
+                             "{}".format(output_vcf),
+                             "{}".format(input_bam))
 
-            bgzip, tabix = bgzip_and_tabix_vcf_instructions(output_vcf)
-            bgzip_instructions.append((bgzip[0], bgzip[1]))
-            tabix_instructions.append((tabix[0], tabix[1]))
-            instructions.append((command, logfile))
-    else:
-        sys.stderr.write("ERROR: Mode: %s not supported\n" % project_config['mode'])
-        sys.exit()
+        job.fileStore.logToMaster("Running Delly: {}\n".format(delly_command))
+        pipeline.run_and_log_command(" ".join(delly_command), logfile)
 
-    sys.stdout.write("Running Delly\n")
-    pipe.execute_multiprocess(instructions, int(tool_config['delly']['num_cores']))
-    pipe.execute_multiprocess(bgzip_instructions, int(tool_config['delly']['num_cores']))
-    pipe.execute_multiprocess(tabix_instructions, int(tool_config['delly']['num_cores']))
-    sys.stdout.write("Finished Delly\n")
+    job.fileStore.logToMaster("Merging delly output with command: {}\n".format(merge_command))
+    pipeline.run_and_log_command(" ".join(merge_command), merge_log)
 
-    sys.stdout.write("Merging Delly output\n")
-
-    sys.stdout.write("Finished merging Delly output\n")
+    return merged_vcf
