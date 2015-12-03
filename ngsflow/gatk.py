@@ -200,7 +200,7 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     command = ("java",
                "-Xmx{}g".format(config['gatk']['max_mem']),
                "-jar",
-               "{}".format(config['picard']),
+               "{}".format(config['picard']['bin']),
                "AddOrReplaceReadGroups",
                "INPUT={}".format(input_bam),
                "OUTPUT={}".format(output_bam),
@@ -213,7 +213,7 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     command2 = ("java",
                 "-Xmx{}g".format(config['gatk']['max_mem']),
                 "-jar",
-                "{}".format(config['picard']),
+                "{}".format(config['picard']['bin']),
                 "BuildBamIndex",
                 "INPUT={}".format(output_bam))
 
