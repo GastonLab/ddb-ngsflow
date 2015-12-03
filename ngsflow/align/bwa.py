@@ -7,12 +7,9 @@
 
 
 """
+from ngsflow import pipeline
 
 __author__ = 'dgaston'
-
-import multiprocessing
-
-from ngsflow import pipeline
 
 
 def run_bwa_mem(job, config, sample, fastq1, fastq2):
@@ -32,7 +29,7 @@ def run_bwa_mem(job, config, sample, fastq1, fastq2):
     bwa_cmd = ["{}".format(config['bwa']['bin']),
                "mem",
                "-t",
-               "{}".format(multiprocessing.cpu_count()),
+               "{}".format(config['bwa']['num_cores']),
                "-M",
                "-v",
                "2",
@@ -48,7 +45,7 @@ def run_bwa_mem(job, config, sample, fastq1, fastq2):
     sort_cmd = ["{}".format(config['samtools']['bin']),
                 "sort",
                 "-@",
-                "{}".format(multiprocessing.cpu_count()),
+                "{}".format(config['bwa']['num_cores']),
                 "-O",
                 "bam",
                 "-o",

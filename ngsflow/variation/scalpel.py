@@ -34,7 +34,7 @@ def scalpel_single(job, config, sample, input_bam):
     scalpel_vcf = os.path.join(output_dir, "variants.indel.vcf")
     logfile = "{}.scalpel.log".format(sample)
 
-    scalpel_command = ("{}".format(config['scalpel-discovery']['bin']),
+    scalpel_command = ("{}".format(config['scalpel']['bin']),
                        "--single",
                        "--intarget",
                        "--covthr",
@@ -48,7 +48,7 @@ def scalpel_single(job, config, sample, input_bam):
                        "--format",
                        "vcf",
                        "--numprocs",
-                       "{}".format(multiprocessing.cpu_count()),
+                       "{}".format(config['scalpel']['num_cores']),
                        "--bam",
                        "{}".format(input_bam),
                        "--dir",

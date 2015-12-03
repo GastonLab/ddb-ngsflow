@@ -8,11 +8,7 @@
 
 """
 
-__author__ = 'dgaston'
-
 import sys
-import multiprocessing
-
 from ngsflow.utils import utilities
 from ngsflow import pipeline
 
@@ -65,7 +61,7 @@ def diagnosetargets(job, config, sample, input_bam):
     return diagnose_targets_vcf
 
 
-def annotate_vcf(job, config, sample, input_vcf, input_bam, num_threads):
+def annotate_vcf(job, config, sample, input_vcf, input_bam):
     """Run GATK's VariantAnnotation on the specified VCF
 
     :param config: The configuration dictionary.
@@ -94,7 +90,7 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam, num_threads):
                           "-R",
                           "{}".format(config['reference']),
                           "-nt",
-                          "{}".format(num_threads),
+                          "{}".format(config['gatk']['num_cores']),
                           "--group",
                           "StandardAnnotation",
                           "--dbsnp",
@@ -259,6 +255,8 @@ def realign_target_creator(job, config, sample, input_bam):
                "{}".format(config['gatk']),
                "-T",
                "IndelRealigner",
+               "-nt",
+               "{}".format(config['gatk']['num_cores']),
                "-R",
                "{}".format(config['reference']),
                "-I",
@@ -315,7 +313,7 @@ def realign_indels(job, config, sample, input_bam, targets):
                "-known",
                "{}".format(config['indel2']),
                "-nt",
-               "{}".format(multiprocessing.cpu_count()))
+               "{}".format(config['gatk']['num_cores']))
 
     job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command))
     utilities.touch("{}".format(output_bam))
@@ -359,7 +357,7 @@ def recalibrator(job, config, sample, input_bam):
                       "--knownSites",
                       "{}".format(config['dbsnp']),
                       "-nct",
-                      "{}".format(multiprocessing.cpu_count()))
+                      "{}".format(config['gatk']['num_cores']))
 
     # Print recalibrated BAM
     print_reads_command = ("java",
@@ -377,7 +375,7 @@ def recalibrator(job, config, sample, input_bam):
                            "-BQSR",
                            "{}".format(recal_config),
                            "-nct",
-                           "{}".format(multiprocessing.cpu_count()))
+                           "{}".format(config['gatk']['num_cores']))
 
     # Copy index to alternative name
     cp_command = ("cp",

@@ -8,11 +8,6 @@
 
 """
 
-__author__ = 'dgaston'
-
-
-import multiprocessing
-
 from ngsflow import pipeline
 
 
@@ -51,7 +46,7 @@ def vardict_single(job, config, sample, input_bam):
                "-g",
                "4",
                "-th",
-               "{}".format(multiprocessing.cpu_count()),
+               "{}".format(config['vardict']['num_cores']),
                "-f",
                "{}".format(config['min_alt_af']),
                "-N",

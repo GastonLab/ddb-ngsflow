@@ -8,12 +8,7 @@
 
 """
 
-__author__ = 'dgaston'
-
-import multiprocessing
-
 from ngsflow import pipeline
-from ngsflow.utils import utilities
 
 
 def mutect_pon():
@@ -68,7 +63,7 @@ def mutect_single(job, config, sample, input_bam):
                       "--coverage_file",
                       "{}".format(sample_coverage),
                       "-nt",
-                      "{}".format(multiprocessing.cpu_count()),
+                      "{}".format(config['mutect']['num_cores']),
                       "-o",
                       "{}".format(output_stats),
                       "-vcf",
@@ -88,6 +83,6 @@ def mutect_single(job, config, sample, input_bam):
     pipeline.run_and_log_command(" ".join(mutect_command), mutect_logfile)
 
     job.fileStore.logToMaster("Subset Command: {}\n".format(subset_command))
-    pipeline.run_and_log_command(" ".join(subset_command), subset_logfile)
+    pipeline.run_and_log_command(" ".join(subset_command), subset_log)
 
     return mutect_vcf

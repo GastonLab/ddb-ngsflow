@@ -33,13 +33,13 @@ if __name__ == "__main__":
                                       samples[sample]['vcf'], cores=1, memory="1G")
         gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, on_target_job.rv(), samples[sample]['bam'],
                                           args.maxCores,
-                                          cores=int(args.maxCores), memory="2G")
+                                          cores=int(args.maxCores), memory="{}G".format(config['gatk']['max_mem']))
         gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
-                                        cores=1, memory="2G")
+                                        cores=1, memory="{}G".format(config['gatk']['max_mem']))
         normalization_job = Job.wrapJobFn(utilities.vt_normalization, config, sample, gatk_filter_job.rv(),
                                           cores=1, memory="2G")
         snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
-                                   cores=1, memory="4G")
+                                   cores=1, memory="{}G".format(config['snpeff']['max_mem']))
         gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(), args.maxCores,
                                    cores=int(args.maxCores), memory="2G")
 
