@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--configuration', help="Configuration file for various settings")
     Job.Runner.addToilOptions(parser)
     args = parser.parse_args()
-    # args.logLevel = "INFO"
+    args.logLevel = "INFO"
 
     sys.stdout.write("Parsing configuration data\n")
     config = configuration.configure_runtime(args.configuration)
@@ -38,9 +38,9 @@ if __name__ == "__main__":
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
-    root_job.addChildJobFn(utilities.run_fastqc, config, samples,
-                           cores=1,
-                           memory="{}G".format(config['fastqc']['max_mem']))
+    # root_job.addChildJobFn(utilities.run_fastqc, config, samples,
+    #                        cores=1,
+    #                        memory="{}G".format(config['fastqc']['max_mem']))
 
     # Per sample jobs
     for sample in samples:
