@@ -38,7 +38,9 @@ if __name__ == "__main__":
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
-    root_job.addChildJobFn(utilities.run_fastqc, config, samples)
+    root_job.addChildJobFn(utilities.run_fastqc, config, samples,
+                           cores=1,
+                           memory="{}G".format(config['fastqc']['max_mem']))
 
     # Per sample jobs
     for sample in samples:
@@ -50,6 +52,8 @@ if __name__ == "__main__":
         add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, config, sample, align_job.rv(),
                                 cores=1,
                                 memory="{}G".format(config['gatk']['max_mem']))
+
+        # add_job_bam = add_job.rv()
 
         creator_job = Job.wrapJobFn(gatk.realign_target_creator, config, sample, add_job.rv(),
                                     cores=int(config['gatk']['num_cores']),
@@ -118,7 +122,8 @@ if __name__ == "__main__":
         # Create workflow from created jobs
         root_job.addChild(align_job)
         align_job.addChild(add_job)
-        add_job.addChild(realign_job)
+        add_job.addChild(creator_job)
+        creator_job.addChild(realign_job)
         realign_job.addChild(recal_job)
 
         recal_job.addChild(spawn_variant_job)
@@ -137,9 +142,6 @@ if __name__ == "__main__":
         gatk_filter_job.addChild(normalization_job)
         normalization_job.addChild(snpeff_job)
         snpeff_job.addChild(gemini_job)
-
-    # Jobs to be executed for a cohort if necessary
-    # root_job = root_job.encapsulate()
 
     # Start workflow execution
     Job.Runner.startToil(root_job, args)

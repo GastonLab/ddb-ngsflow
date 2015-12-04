@@ -6,14 +6,9 @@
 
 .. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
 
-
 """
 
-__author__ = 'dgaston'
-
 import sys
-import pyexcel
-import pyexcel.ext.xlsx
 import pybedtools
 import multiprocessing
 
@@ -215,9 +210,11 @@ def generate_coverage_report(job, config, vcfs):
         if first_pass:
             first_pass = False
 
-    content = pyexcel.utils.dict_to_array(samples_coverage)
-    sheet = pyexcel.Sheet(content)
-    sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
+    # Change to not use pyexcel but instead use openpyxl directly. pyexcel is convenient but requires a newer version
+    # of openpyxl that isn't supported by pandas and hence GEMINI.
+    # content = pyexcel.utils.dict_to_array(samples_coverage)
+    # sheet = pyexcel.Sheet(content)
+    # sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
 
 
 def bcftools_filter_variants_regions(job, config, sample, input_vcf):
