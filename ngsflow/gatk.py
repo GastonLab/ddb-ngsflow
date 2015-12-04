@@ -7,7 +7,6 @@
 
 """
 
-from ngsflow.utils import utilities
 from ngsflow import pipeline
 
 
@@ -249,9 +248,7 @@ def realign_target_creator(job, config, sample, input_bam):
                "-jar",
                "{}".format(config['gatk']['bin']),
                "-T",
-               "IndelRealigner",
-               "-nt",
-               "{}".format(config['gatk']['num_cores']),
+               "RealignerTargetCreator",
                "-R",
                "{}".format(config['reference']),
                "-I",
@@ -261,11 +258,7 @@ def realign_target_creator(job, config, sample, input_bam):
                "-known",
                "{}".format(config['indel1']),
                "-known",
-               "{}".format(config['indel2']),
-               "-targetIntervals",
-               "{}".format(targets),
-               "--read_filter",
-               "NotPrimaryAlignment")
+               "{}".format(config['indel2']))
 
     job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), targets_log)
@@ -294,7 +287,9 @@ def realign_indels(job, config, sample, input_bam, targets):
                "-jar",
                "{}".format(config['gatk']['bin']),
                "-T",
-               "RealignerTargetCreator",
+               "IndelRealigner",
+               "-nt",
+               "{}".format(config['gatk']['num_cores']),
                "-R",
                "{}".format(config['reference']),
                "-I",
@@ -304,10 +299,13 @@ def realign_indels(job, config, sample, input_bam, targets):
                "-known",
                "{}".format(config['indel1']),
                "-known",
-               "{}".format(config['indel2']))
+               "{}".format(config['indel2']),
+               "-targetIntervals",
+               "{}".format(targets),
+               "--read_filter",
+               "NotPrimaryAlignment")
 
     job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command))
-    utilities.touch("{}".format(output_bam))
     pipeline.run_and_log_command(" ".join(command), realign_log)
 
     return output_bam
