@@ -60,7 +60,7 @@ if __name__ == "__main__":
                                     memory="{}G".format(config['gatk']['max_mem']))
 
         realign_job = Job.wrapJobFn(gatk.realign_indels, config, sample, add_job.rv(), creator_job.rv(),
-                                    cores=int(config['gatk']['num_cores']),
+                                    cores=1,
                                     memory="{}G".format(config['gatk']['max_mem']))
 
         recal_job = Job.wrapJobFn(gatk.recalibrator, config, sample, realign_job.rv(), int(config['gatk']['num_cores']),

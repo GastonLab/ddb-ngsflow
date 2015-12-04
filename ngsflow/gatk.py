@@ -304,9 +304,7 @@ def realign_indels(job, config, sample, input_bam, targets):
                "-known",
                "{}".format(config['indel1']),
                "-known",
-               "{}".format(config['indel2']),
-               "-nt",
-               "{}".format(config['gatk']['num_cores']))
+               "{}".format(config['indel2']))
 
     job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command))
     utilities.touch("{}".format(output_bam))
