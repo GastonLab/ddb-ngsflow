@@ -37,7 +37,7 @@ if __name__ == "__main__":
     samples = configuration.configure_samples(args.samples_file)
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
-    root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
+    root_job = Job.wrapJobFn(utilities.spawn_batch_jobs, cores=1)
     # root_job.addChildJobFn(utilities.run_fastqc, config, samples,
     #                        cores=1,
     #                        memory="{}G".format(config['fastqc']['max_mem']))
