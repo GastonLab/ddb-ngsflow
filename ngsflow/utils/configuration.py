@@ -5,19 +5,12 @@
 
 .. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
 
-
 """
-
-__author__ = 'dgaston'
-
-# -*- coding: utf-8 -*-
 
 import sys
 import requests
-
-from collections import defaultdict
-
 import ConfigParser
+from collections import defaultdict
 
 
 def configure_from_pipeline_service(url, port, pipe_name):
