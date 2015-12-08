@@ -295,8 +295,6 @@ def realign_indels(job, config, sample, input_bam, targets):
                "{}".format(config['reference']),
                "-I",
                "{}".format(input_bam),
-               "-o",
-               "{}".format(targets),
                "-known",
                "{}".format(config['indel1']),
                "-known",
@@ -304,7 +302,9 @@ def realign_indels(job, config, sample, input_bam, targets):
                "-targetIntervals",
                "{}".format(targets),
                "--read_filter",
-               "NotPrimaryAlignment")
+               "NotPrimaryAlignment",
+               "-o",
+               "{}".format(output_bam))
 
     job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), realign_log)

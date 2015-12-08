@@ -86,9 +86,9 @@ if __name__ == "__main__":
                                     cores=int(config['scalpel']['num_cores']),
                                     memory="{}G".format(config['scalpel']['max_mem']))
 
-        indelminer_job = Job.wrapJobFn(indelminer.indelminer_single, config, sample, recal_job.rv(),
-                                       cores=1,
-                                       memory="{}G".format(config['indelminer']['max_mem']))
+        # indelminer_job = Job.wrapJobFn(indelminer.indelminer_single, config, sample, recal_job.rv(),
+        #                                cores=1,
+        #                                memory="{}G".format(config['indelminer']['max_mem']))
 
         platypus_job = Job.wrapJobFn(platypus.platypus_single, config, sample, recal_job.rv(),
                                      cores=int(config['platypus']['num_cores']),
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
         # Merge results and annotate
         merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
-                                  vardict_job.rv(), scalpel_job.rv(), indelminer_job.rv(), platypus_job.rv()),
+                                  vardict_job.rv(), scalpel_job.rv(), platypus_job.rv()),
                                   cores=1)
 
         gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), recal_job.rv(),
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         spawn_variant_job.addChild(mutect_job)
         spawn_variant_job.addChild(vardict_job)
         spawn_variant_job.addChild(scalpel_job)
-        spawn_variant_job.addChild(indelminer_job)
+        # spawn_variant_job.addChild(indelminer_job)
         spawn_variant_job.addChild(platypus_job)
 
         # Use Follow On for Merge so it will follow after all of the spawned variant calling jobs

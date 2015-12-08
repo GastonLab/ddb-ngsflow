@@ -27,7 +27,7 @@ def indelminer_single(job, config, sample, input_bam):
 
     command = ("{}".format(config['indelminer']['bin']),
                "{}".format(config['reference']),
-               "{}".format(input_bam),
+               "sample={}".format(input_bam),
                ">",
                "{}".format(indelminer_vcf))
 
