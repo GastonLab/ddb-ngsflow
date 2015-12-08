@@ -65,7 +65,7 @@ def mutect_single(job, config, sample, input_bam):
                       "{}".format(temp_mutect))
 
     subset_command = ("cat",
-                      "%s".format(temp_mutect),
+                      "{}".format(temp_mutect),
                       "|",
                       "{}".format(config['vcftools_subset']['bin']),
                       "-e",
