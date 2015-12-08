@@ -59,8 +59,6 @@ def mutect_single(job, config, sample, input_bam):
                       "{}".format(input_bam),
                       "--coverage_file",
                       "{}".format(sample_coverage),
-                      "-nt",
-                      "{}".format(config['mutect']['num_cores']),
                       "-o",
                       "{}".format(output_stats),
                       "-vcf",
