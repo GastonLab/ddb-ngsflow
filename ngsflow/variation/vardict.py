@@ -60,9 +60,9 @@ def vardict_single(job, config, sample, input_bam):
                    "-N",
                    "{}".format(sample))
 
-    command = ("{vardict} | {strandbias} | {vardict2vcf} > {vcf}".format(vardict=vardict,
+    command = ("{vardict} | {strandbias} | {vardict2vcf} > {vcf}".format(vardict=" ".join(vardict),
                                                                          strandbias=config['vardict_strandbias']['bin'],
-                                                                         vardict2vcf=vardict2vcf,
+                                                                         vardict2vcf=" ".join(vardict2vcf),
                                                                          vcf=vardict_vcf))
 
     job.fileStore.logToMaster("VarDict Command: {}\n".format(command))
