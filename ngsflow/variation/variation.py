@@ -141,6 +141,7 @@ def merge_variant_calls(job, config, sample, vcf_files):
 
     # Put this back in after run: .format(config['vcftools_isec']['bin'])
     isec_command = ("vcf-isec",
+                    "-f",
                     "-n",
                     "+1",
                     "{}".format(vcf_files_string),

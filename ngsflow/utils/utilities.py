@@ -32,6 +32,15 @@ def spawn_variant_jobs(job):
     job.fileStore.logToMaster("Spawning all variant calling methods\n")
 
 
+def spawn_stranded_jobs(job):
+    """
+    This is simply a placeholder job to create a node in the graph for spawning
+    off the multiple variant callers
+    """
+
+    job.fileStore.logToMaster("Spawning jobs for stranded libraries\n")
+
+
 def run_fastqc(job, config, samples):
     """Run FastQC on provided FastQ files
     :param config: The configuration dictionary.
@@ -260,6 +269,40 @@ def bcftools_filter_variants_regions(job, config, sample, input_vcf):
     pipeline.run_and_log_command(" ".join(sort_command), sort_logfile)
 
     return sorted_vcf
+
+
+def merge_samples(job, config, sample, input_vcf1, input_vcf2):
+    """Merge samples into a single VCF"""
+
+    output_vcf = "{}.ds.merged.vcf".format(sample)
+    logfile = "{}.ds_merging.log".format(sample)
+
+    bgzipped_vcf1 = "{}.gz".format(input_vcf1)
+    bgzipped_vcf2 = "{}.gz".format(input_vcf2)
+
+    bgzip_and_tabix_vcf(job, input_vcf1)
+    bgzip_and_tabix_vcf(job, input_vcf2)
+
+    # Prefer to use BCFTools but merge returns errors about LSEQ fields
+    # command = ("{}".format(config['bcftools']['bin']),
+    #            "merge",
+    #            "-O",
+    #            "v",
+    #            "-o",
+    #            "{}".format(output_vcf),
+    #            "{}".format(bgzipped_vcf1),
+    #            "{}".format(bgzipped_vcf2))
+
+    command = ("{}".format(config['vcftools_merge']['bin']),
+               "{}".format(bgzipped_vcf1),
+               "{}".format(bgzipped_vcf2),
+               ">",
+               "{}".format(output_vcf))
+
+    job.fileStore.logToMaster("Merging stranded libraries into multi-sample VCF with the command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_vcf
 
 
 def _bgzip_and_tabix_vcf_instructions(infile):

@@ -1,3 +1,11 @@
+"""
+.. module:: freebayes
+   :platform: Unix, OSX
+   :synopsis: A wrapper module for calling ScanIndel.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+"""
+
 from ngsflow import pipeline
 
 

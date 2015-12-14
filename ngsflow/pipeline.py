@@ -8,10 +8,6 @@
 
 """
 
-__author__ = 'dgaston'
-
-# -*- coding: utf-8 -*-
-
 import sys
 import subprocess as sub
 

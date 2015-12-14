@@ -56,7 +56,7 @@ def diagnosetargets(job, config, sample, input_bam):
     return diagnose_targets_vcf
 
 
-def annotate_vcf(job, config, sample, input_vcf, input_bam):
+def annotate_vcf(job, config, sample, input_vcf, input_bams):
     """Run GATK's VariantAnnotation on the specified VCF
     :param config: The configuration dictionary.
     :type config: dict.
@@ -64,13 +64,18 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     :type sample: str.
     :param input_vcf: The input_vcf file name to process.
     :type input_vcf: str.
-    :param input_bam: The input_bam file name to process.
-    :type input_bam: str.
+    :param input_bams: The input_bam file(S) name to process.
+    :type input_bams: list.
     :returns:  str -- The output vcf file name.
     """
 
     output_vcf = "{}.annotated.vcf".format(sample)
     annotation_logfile = "{}.variantannotation.log".format(sample)
+
+    list_elements = list()
+    for bam in input_bams:
+        list_elements.append("-I {}".format(bam))
+    bam_list = " ".join(list_elements)
 
     annotation_command = ("java",
                           "-Xmx{}g".format(config['gatk']['max_mem']),
@@ -86,8 +91,7 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
                           "StandardAnnotation",
                           "--dbsnp",
                           "{}".format(config['dbsnp']),
-                          "-I",
-                          "{}".format(input_bam),
+                          "{}".format(bam_list),
                           "--variant",
                           "{}".format(input_vcf),
                           "-L",

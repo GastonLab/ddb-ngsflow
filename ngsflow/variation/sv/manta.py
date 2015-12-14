@@ -1,3 +1,11 @@
+"""
+.. module:: freebayes
+   :platform: Unix, OSX
+   :synopsis: A wrapper module for calling Manta.
+
+.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+"""
+
 import os
 
 from ngsflow import pipeline

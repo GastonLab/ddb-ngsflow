@@ -30,8 +30,8 @@ if __name__ == "__main__":
     for sample in samples:
         on_target_job = Job.wrapJobFn(utilities.bcftools_filter_variants_regions, config, sample,
                                       samples[sample]['vcf'], cores=1, memory="1G")
-        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, on_target_job.rv(), samples[sample]['bam'],
-                                          args.maxCores,
+        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, on_target_job.rv(),
+                                          (samples[sample]['bam']),
                                           cores=int(args.maxCores), memory="{}G".format(config['gatk']['max_mem']))
         gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
                                         cores=1, memory="{}G".format(config['gatk']['max_mem']))
