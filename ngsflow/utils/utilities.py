@@ -9,8 +9,12 @@
 """
 
 import sys
+import pyexcel
+import pyexcel.ext.xlsx
 import pybedtools
 import multiprocessing
+
+from collections import defaultdict
 
 from ngsflow import pipeline
 
@@ -174,9 +178,7 @@ def bedtools_coverage_to_summary(job, config, sample, input_file):
 def generate_coverage_report(job, config, vcfs):
     """Take DiagnoseTargets data and generate a coverage report
     :param config: The configuration dictionary.
-    :type config: dict.
-    :param sample: sample name.
-    :type sample: str.
+    :type config: dict..
     :param vcfs: The list of input DiagnoseTargets generated vcf file names to process.
     :type vcfs: str.
     """
@@ -219,11 +221,52 @@ def generate_coverage_report(job, config, vcfs):
         if first_pass:
             first_pass = False
 
-    # Change to not use pyexcel but instead use openpyxl directly. pyexcel is convenient but requires a newer version
-    # of openpyxl that isn't supported by pandas and hence GEMINI.
-    # content = pyexcel.utils.dict_to_array(samples_coverage)
-    # sheet = pyexcel.Sheet(content)
-    # sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
+    content = pyexcel.utils.dict_to_array(samples_coverage)
+    sheet = pyexcel.Sheet(content)
+    sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
+
+
+def read_coverage(job, config, sample, vcf):
+    """Take DiagnoseTargets data return summarized results
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param vcf: The input DiagnoseTargets generated vcf file name to process.
+    :type vcf: str.
+    """
+
+    sample_coverage = defaultdict(dict)
+
+    targeted_regions = pybedtools.BedTool(config['regions'])
+    coverage_data = pybedtools.BedTool(vcf)
+    intersections = coverage_data.intersect(targeted_regions, loj=True)
+
+    for region in intersections:
+        sample_coverage[region[13]]['filter_field'] = region[6]
+        reads_data = region[9].split(":")
+        sample_coverage[region[13]]['filter_field'] = region[6]
+        sample_coverage[region[13]]['depth_field'] = reads_data[-3]
+        sample_coverage[region[13]]['low_field'] = reads_data[-2]
+        sample_coverage[region[13]]['zero_field'] = reads_data[-1]
+
+    return sample_coverage
+
+
+def generate_coverage_summary(job, config, samples):
+    """Take Summarized DiagnoseTargets data and generate a coverage summary
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param samples: summarized sample results.
+    :type samples: dict.
+    """
+    with open("sample_coverage_summary.txt", 'w') as outfile:
+        for sample in samples:
+            for target in samples[sample].keys():
+                targets_list = target.split("\t")
+                target_string = ",".join(targets_list)
+                if 'COVERAGE' in samples[sample][target]['filter_field'] or 'NO_READS' in samples[sample][target]['filter_field']:
+                    outfile.write("{sample}\t{region}\t{filter}\n".format(sample=sample, region=target_string, filter=samples[sample][target]['filter_field']))
 
 
 def bcftools_filter_variants_regions(job, config, sample, input_vcf):

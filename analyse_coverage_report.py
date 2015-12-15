@@ -1,4 +1,4 @@
-__author__ = 'dgaston'
+#!/usr/bin/env python
 
 import argparse
 import pyexcel

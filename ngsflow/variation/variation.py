@@ -7,45 +7,18 @@
 
 
 """
-
+import csv
 from gemini import GeminiQuery
 
 from ngsflow.utils import utilities
 from ngsflow import pipeline
 
 
-# Can simplify this later with max_aaf_all after updated to 0.18
 def _var_is_rare(variant_data):
     """Determine if the MAF of the variant is < 1% in all populations"""
 
     if variant_data['in_esp'] != 0 or variant_data['in_1kg'] != 0 or variant_data['in_exac'] != 0:
-        if variant_data['aaf_esp_ea'] > 0.01:
-            return False
-        elif variant_data['aaf_esp_aa'] > 0.01:
-            return False
-        elif variant_data['aaf_1kg_amr'] > 0.01:
-            return False
-        elif variant_data['aaf_1kg_eas'] > 0.01:
-            return False
-        elif variant_data['aaf_1kg_sas'] > 0.01:
-            return False
-        elif variant_data['aaf_1kg_afr'] > 0.01:
-            return False
-        elif variant_data['aaf_1kg_eur'] > 0.01:
-            return False
-        elif variant_data['aaf_adj_exac_afr'] > 0.01:
-            return False
-        elif variant_data['aaf_adj_exac_amr'] > 0.01:
-            return False
-        elif variant_data['aaf_adj_exac_eas'] > 0.01:
-            return False
-        elif variant_data['aaf_adj_exac_fin'] > 0.01:
-            return False
-        elif variant_data['aaf_adj_exac_nfe'] > 0.01:
-            return False
-        elif variant_data['aaf_adj_exac_oth'] > 0.01:
-            return False
-        elif variant_data['aaf_adj_exac_sas'] > 0.01:
+        if variant_data['max_aaf_all'] > 0.01:
             return False
         else:
             return True
@@ -71,6 +44,18 @@ def _var_is_in_clinvar(variant_data):
         return False
 
 
+def _var_not_benign(variant_data):
+    """Determine if a variant in clinvar is completely benign"""
+
+    if "benign" in variant_data['clinvar_sig']:
+        if "pathogenic" in variant_data['clinvar_sig']:
+            return True
+        else:
+            return False
+    else:
+        return True
+
+
 def _var_is_protein_effecting(variant_data):
     if variant_data['impact_severity'] != "LOW":
         return True
@@ -78,11 +63,10 @@ def _var_is_protein_effecting(variant_data):
         return False
 
 
-# Need to add max_aaf_all later when gemini updated to 0.18
-def run_gemini_query_and_filter(db):
+def _run_gemini_query_and_filter(db):
     """Use the GeminiQuery API to filter results based on severity and specific annotations
     :param db: GEMINI database.
-    :type db: filename.
+    :type db: str.
     :returns:  tuple -- The header line for the requested columns and all rows that pass filters.
     """
 
@@ -98,7 +82,7 @@ def run_gemini_query_and_filter(db):
             "aaf_esp_ea, aaf_esp_aa, aaf_esp_aa, aaf_esp_all, aaf_1kg_amr, aaf_1kg_eas, aaf_1kg_sas, aaf_1kg_afr, " \
             "aaf_1kg_eur, aaf_1kg_all, aaf_exac_all, aaf_adj_exac_all, aaf_adj_exac_afr, aaf_adj_exac_amr, " \
             "aaf_adj_exac_eas, aaf_adj_exac_fin, aaf_adj_exac_nfe, aaf_adj_exac_oth, aaf_adj_exac_sas, " \
-            "in_esp, in_1kg, in_exac, " \
+            "max_aaf_all, in_esp, in_1kg, in_exac, " \
             "info FROM variants"
     gq = GeminiQuery(db)
     gq.run(query)
@@ -107,16 +91,49 @@ def run_gemini_query_and_filter(db):
     print header
 
     # Filter out variants with minor allele frequencies above the threshold but
-    # retain any that are above the threshold but in COSMIC
+    # retain any that are above the threshold but in COSMIC or in ClinVar and not listed as benign.
     for variant_data in gq:
-        if _var_is_in_cosmic(variant_data) or _var_is_in_clinvar(variant_data):
+        if _var_is_in_cosmic(variant_data):
             passing_rows.append(variant_data)
             continue
+        if _var_is_in_clinvar(variant_data):
+            if _var_not_benign(variant_data):
+                passing_rows.append(variant_data)
+                continue
         if _var_is_rare(variant_data):
             if _var_is_protein_effecting(variant_data):
                 passing_rows.append(variant_data)
 
     return header, passing_rows
+
+
+def generate_variant_report(job, config, sample, database):
+    """Call the GEMINI Query API and generate a text variant report from the provided database
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param database: The GEMINI database to query.
+    :type database: str.
+    :returns:  str -- The output vcf file name.
+    """
+
+    filename = "{}.variant_report.txt".format(sample)
+    header, variants = _run_gemini_query_and_filter(database)
+    with open(filename, 'w') as outfile:
+        outfile.write("{}\n".format(header))
+        for variant in variants:
+            outfile.write("{}\n".format(variant))
+
+
+def compare_ds_library_variants(db1, db2):
+    """Use the GeminiQuery API to filter results based on severity and specific annotations
+    :param db1: GEMINI database from one stranded library for a sample.
+    :type db1: str.
+    :param db2: GEMINI database for other stranded library from a sample.
+    :type db2: str.
+    :returns:  tuple -- The header line for the requested columns and all rows that pass filters.
+    """
 
 
 def merge_variant_calls(job, config, sample, vcf_files):
