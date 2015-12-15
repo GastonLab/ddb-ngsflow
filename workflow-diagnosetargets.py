@@ -35,13 +35,14 @@ if __name__ == "__main__":
         sys.stdout.write("{}\n".format(sample))
 
     for sample in samples:
-        diagnose_targets_job = Job.wrapJobFn(gatk.diagnosetargets, config, sample, samples[sample]['vcf'],
-                                             cores=1, memory="2G")
+        diagnose_targets_job = Job.wrapJobFn(gatk.diagnosetargets, config, sample, samples[sample]['bam'],
+                                             cores=int(config['gatk']['num_cores']),
+                                             memory="{}G".format(config['gatk']['max_mem']))
         return_files.append(diagnose_targets_job.rv())
         root_job.addChild(diagnose_targets_job)
 
-    create_spreadsheet_job = Job.wrapJobFn(utilities.generate_coverage_report, config, return_files)
-    root_job.addFollowOn(create_spreadsheet_job)
+    # create_spreadsheet_job = Job.wrapJobFn(utilities.generate_coverage_report, config, return_files)
+    # root_job.addFollowOn(create_spreadsheet_job)
 
     # Start workflow execution
     Job.Runner.startToil(root_job, args)
