@@ -7,7 +7,7 @@
 
 
 """
-import csv
+
 from gemini import GeminiQuery
 
 from ngsflow.utils import utilities

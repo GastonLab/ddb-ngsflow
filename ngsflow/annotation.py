@@ -60,6 +60,7 @@ def gemini(job, config, sample, input_vcf):
                "load",
                "--cores",
                "{}".format(config['gemini']['num_cores']),
+               "--save-info-string",
                "-v",
                "{}".format(input_vcf),
                "-t",
