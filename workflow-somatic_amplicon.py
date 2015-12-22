@@ -20,6 +20,7 @@ from ngsflow.variation import platypus
 from ngsflow.variation import vardict
 from ngsflow.variation import scalpel
 from ngsflow.variation import indelminer
+from ngsflow.variation import pisces
 
 
 if __name__ == "__main__":

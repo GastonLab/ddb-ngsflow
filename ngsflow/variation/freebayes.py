@@ -26,8 +26,6 @@ def freebayes_single(job, config, sample, input_bam):
     command = ("{}".format(config['freebayes']['bin']),
                "--fasta-reference",
                "{}".format(config['reference']),
-               "-t",
-               "{}".format(config['regions']),
                "--min-alternate-fraction",
                "{}".format(config['min_alt_af']),
                "--pooled-discrete",

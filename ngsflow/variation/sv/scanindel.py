@@ -34,7 +34,9 @@ def scanindel(job, config, sample, input_bam):
                "{}".format(config['scanindel']['config_file']),
                "--bam",
                "-F",
-               "{}".format(config['min_alt_af']))
+               "{}".format(config['min_alt_af']),
+               "-t",
+               "{}".format(config['regions']))
 
     job.fileStore.logToMaster("Manta Configuration Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
