@@ -77,7 +77,7 @@ def configure_runtime(infile):
     return configuration
 
 
-def configure_samples(infile):
+def configure_samples(infile, configuration):
     """Parse the sample-level configuration settings from a file
     :param infile: input filename
     :type infile: string.
@@ -95,7 +95,7 @@ def configure_samples(infile):
             sample_dict[option] = config.get(sample, option)
 
         if 'regions' not in sample_dict.keys():
-            sample_dict['regions'] = config['regions']
+            sample_dict['regions'] = configuration['regions']
 
         samples[sample] = sample_dict
 
