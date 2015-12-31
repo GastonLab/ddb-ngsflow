@@ -93,6 +93,10 @@ def configure_samples(infile):
         sample_dict = dict()
         for option in config.options(sample):
             sample_dict[option] = config.get(sample, option)
+
+        if 'regions' not in sample_dict.keys():
+            sample_dict['regions'] = config['regions']
+
         samples[sample] = sample_dict
 
     return samples

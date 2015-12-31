@@ -35,13 +35,13 @@ if __name__ == "__main__":
     config = configuration.configure_runtime(args.configuration)
 
     sys.stdout.write("Parsing sample data\n")
-    samples = configuration.configure_samples(args.samples_file, config)
+    samples = configuration.configure_samples(args.samples_file)
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs, cores=1)
-    # root_job.addChildJobFn(utilities.run_fastqc, config, samples,
-    #                        cores=1,
-    #                        memory="{}G".format(config['fastqc']['max_mem']))
+    root_job.addChildJobFn(utilities.run_fastqc, config, samples,
+                           cores=1,
+                           memory="{}G".format(config['fastqc']['max_mem']))
 
     # Per sample jobs
     for sample in samples:
@@ -53,8 +53,6 @@ if __name__ == "__main__":
         add_job = Job.wrapJobFn(gatk.add_or_replace_readgroups, config, sample, align_job.rv(),
                                 cores=1,
                                 memory="{}G".format(config['gatk']['max_mem']))
-
-        # add_job_bam = add_job.rv()
 
         creator_job = Job.wrapJobFn(gatk.realign_target_creator, config, sample, add_job.rv(),
                                     cores=int(config['gatk']['num_cores']),
