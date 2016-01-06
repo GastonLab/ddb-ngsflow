@@ -13,7 +13,7 @@ import os
 from ngsflow import pipeline
 
 
-def scalpel_single(job, config, sample, input_bam):
+def scalpel_single(job, config, sample, samples, input_bam):
     """Run Scalpel on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
@@ -39,7 +39,7 @@ def scalpel_single(job, config, sample, input_bam):
                        "--ref",
                        "{}".format(config['reference']),
                        "--bed",
-                       "{}".format(config['regions']),
+                       "{}".format(samples[sample]['regions']),
                        "--format",
                        "vcf",
                        "--numprocs",

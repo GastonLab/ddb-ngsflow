@@ -10,7 +10,7 @@
 from ngsflow import pipeline
 
 
-def diagnosetargets(job, config, sample, input_bam):
+def diagnosetargets(job, config, sample, samples, input_bam):
     """Run GATK's DiagnoseTargets against the supplied region
     :param config: The configuration dictionary.
     :type config: dict.
@@ -34,7 +34,7 @@ def diagnosetargets(job, config, sample, input_bam):
                "-R",
                "{}".format(config['reference']),
                "-L",
-               "{}".format(config['regions']),
+               "{}".format(samples[sample]['regions']),
                "--coverage_status_threshold",
                "{}".format(config['coverage_loci_threshold']),
                "--bad_mate_status_threshold",

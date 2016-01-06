@@ -115,7 +115,7 @@ def generate_variant_report(job, config, sample, database):
     :type sample: str.
     :param database: The GEMINI database to query.
     :type database: str.
-    :returns:  str -- The output vcf file name.
+    :returns:  None
     """
 
     filename = "{}.variant_report.txt".format(sample)
@@ -124,16 +124,6 @@ def generate_variant_report(job, config, sample, database):
         outfile.write("{}\n".format(header))
         for variant in variants:
             outfile.write("{}\n".format(variant))
-
-
-def compare_ds_library_variants(db1, db2):
-    """Use the GeminiQuery API to filter results based on severity and specific annotations
-    :param db1: GEMINI database from one stranded library for a sample.
-    :type db1: str.
-    :param db2: GEMINI database for other stranded library from a sample.
-    :type db2: str.
-    :returns:  tuple -- The header line for the requested columns and all rows that pass filters.
-    """
 
 
 def merge_variant_calls(job, config, sample, vcf_files):

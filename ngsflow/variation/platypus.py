@@ -10,6 +10,7 @@
 from ngsflow import pipeline
 
 
+# This needs to be fixed, new regions need to be defined for all targeted panels to use this
 def platypus_single(job, config, sample, input_bam):
     """Run Platypus on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
