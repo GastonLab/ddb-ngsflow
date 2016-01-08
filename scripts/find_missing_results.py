@@ -9,7 +9,9 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--samples_file', help="Input list of sample/library names to search for")
     args = parser.parse_args()
 
-    samples = file.read().splitlines()
+    samples = list()
+    with open(args.samples_file, 'r') as samples_file:
+        samples = samples_file.read().splitlines()
     root_dir = os.getcwd()
 
     # Check FinalBams
@@ -41,5 +43,13 @@ if __name__ == "__main__":
     sys.stdout.write("Missing FreeBayes VCFs:\n")
     for sample in samples:
         if not os.path.isfile("{}.freebayes.vcf".format(sample)):
+            sys.stdout.write("{}\n".format(sample))
+    os.chdir(root_dir)
+
+    # Check GEMINI Databases
+    os.chdir("./databases")
+    sys.stdout.write("Missing GEMINI databases:\n")
+    for sample in samples:
+        if not os.path.isfile("{}.snpEff.GRCh37.75.db".format(sample)):
             sys.stdout.write("{}\n".format(sample))
     os.chdir(root_dir)
