@@ -38,6 +38,18 @@ if __name__ == "__main__":
             sys.stdout.write("{}\n".format(sample))
     os.chdir(root_dir)
 
+    # Check Scalpel
+    os.chdir("./Scalpel")
+    sys.stdout.write("Missing Scalpel VCFs:\n")
+    for sample in samples:
+        if not os.path.isdir("{}-scalpel-output".format(sample)):
+            sys.stdout.write("{}\n".format(sample))
+        else:
+            os.chdir("{}-scalpel-output".format(sample))
+            if not os.path.isfile("variants.indel.vcf"):
+                sys.stdout.write("{}\n".format(sample))
+    os.chdir(root_dir)
+
     # Check FreeBayes
     os.chdir("./FreeBayes")
     sys.stdout.write("Missing FreeBayes VCFs:\n")

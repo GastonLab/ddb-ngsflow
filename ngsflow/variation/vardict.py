@@ -59,11 +59,12 @@ def vardict_single(job, config, sample, samples, input_bam):
                    "{}".format(config['min_alt_af']),
                    "-N",
                    "{}".format(sample))
+    vcfsort = ("{}".format(config['vcftools_sort']),
+               "-c")
 
-    command = ("{vardict} | {strandbias} | {vardict2vcf} > {vcf}".format(vardict=" ".join(vardict),
-                                                                         strandbias=config['vardict_strandbias']['bin'],
-                                                                         vardict2vcf=" ".join(vardict2vcf),
-                                                                         vcf=vardict_vcf))
+    command = ("{vardict} | {strandbias} | {vardict2vcf} | "
+               "{sort} > {vcf}".format(vardict=" ".join(vardict), strandbias=config['vardict_strandbias']['bin'],
+                                       vardict2vcf=" ".join(vardict2vcf), sort=" ".join(vcfsort), vcf=vardict_vcf))
 
     job.fileStore.logToMaster("VarDict Command: {}\n".format(command))
     pipeline.run_and_log_command(command, logfile)

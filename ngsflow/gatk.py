@@ -16,6 +16,8 @@ def diagnosetargets(job, config, sample, samples, input_bam):
     :type config: dict.
     :param sample: sample name.
     :type sample: str.
+    :param samples: samples dictionary.
+    :type samples: str.
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The DiagnoseTargets output vcf file name.
