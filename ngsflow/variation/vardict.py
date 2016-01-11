@@ -59,7 +59,8 @@ def vardict_single(job, config, sample, samples, input_bam):
                    "{}".format(config['min_alt_af']),
                    "-N",
                    "{}".format(sample))
-    vcfsort = ("{}".format(config['vcftools_sort']),
+
+    vcfsort = ("{}".format(config['vcftools_sort']['bin']),
                "-c")
 
     command = ("{vardict} | {strandbias} | {vardict2vcf} | "

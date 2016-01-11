@@ -50,9 +50,9 @@ if __name__ == "__main__":
                                     cores=int(config['vardict']['num_cores']),
                                     memory="{}G".format(config['vardict']['max_mem']))
 
-        # scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, samples, samples[sample]['bam'],
-        #                             cores=int(config['scalpel']['num_cores']),
-        #                             memory="{}G".format(config['scalpel']['max_mem']))
+        scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, samples, samples[sample]['bam'],
+                                    cores=int(config['scalpel']['num_cores']),
+                                    memory="{}G".format(config['scalpel']['max_mem']))
 
         # indelminer_job = Job.wrapJobFn(indelminer.indelminer_single, config, sample, samples[sample]['bam'],
         #                                cores=1,
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         # root_job.addChild(freebayes_job)
         # root_job.addChild(mutect_job)
         root_job.addChild(vardict_job)
-        # root_job.addChild(scalpel_job)
+        root_job.addChild(scalpel_job)
         # root_job.addChild(indelminer_job)
         # root_job.addChild(platypus_job)
 

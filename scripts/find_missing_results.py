@@ -43,11 +43,12 @@ if __name__ == "__main__":
     sys.stdout.write("Missing Scalpel VCFs:\n")
     for sample in samples:
         if not os.path.isdir("{}-scalpel-output".format(sample)):
-            sys.stdout.write("{}\n".format(sample))
+            sys.stdout.write("No Folder: {}\n".format(sample))
         else:
-            os.chdir("{}-scalpel-output".format(sample))
+            os.chdir("{}-scalpel-output/".format(sample))
             if not os.path.isfile("variants.indel.vcf"):
-                sys.stdout.write("{}\n".format(sample))
+                sys.stdout.write("No Variants file: {}\n".format(sample))
+            os.chdir("..")
     os.chdir(root_dir)
 
     # Check FreeBayes
@@ -59,9 +60,9 @@ if __name__ == "__main__":
     os.chdir(root_dir)
 
     # Check GEMINI Databases
-    os.chdir("./databases")
-    sys.stdout.write("Missing GEMINI databases:\n")
-    for sample in samples:
-        if not os.path.isfile("{}.snpEff.GRCh37.75.db".format(sample)):
-            sys.stdout.write("{}\n".format(sample))
-    os.chdir(root_dir)
+    # os.chdir("./GEMINI")
+    # sys.stdout.write("Missing GEMINI databases:\n")
+    # for sample in samples:
+    #     if not os.path.isfile("{}.snpEff.GRCh37.75.db".format(sample)):
+    #         sys.stdout.write("{}\n".format(sample))
+    # os.chdir(root_dir)
