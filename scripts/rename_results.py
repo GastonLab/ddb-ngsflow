@@ -111,7 +111,7 @@ if __name__ == "__main__":
     #             sys.stdout.write("Executing\n")
     # os.chdir(root_dir)
     #
-    # Check Scalpel (Needs fixing)
+    # Check Scalpel
     os.chdir("./Scalpel")
     sys.stdout.write("Renaming Scalpel VCFs:\n")
     files = os.listdir(os.getcwd())
