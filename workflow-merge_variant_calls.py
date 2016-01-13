@@ -39,6 +39,7 @@ if __name__ == "__main__":
     # Per sample jobs
     for sample in samples:
         # Need to filter for on target only results somewhere as well
+        spawn_variant_job = Job.wrapJobFn(utilities.spawn_variant_jobs)
         normalization_job1 = Job.wrapJobFn(utilities.vt_normalization, config, sample, samples[sample]['mutect'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
@@ -58,7 +59,10 @@ if __name__ == "__main__":
         combine_job = Job.wrapJobFn(variation.combine_variants, config, sample, (normalization_job1.rv(),
                                                                                  normalization_job2.rv()))
 
-        merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, samples)
+        merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (normalization_job1.rv(),
+                                                                                  normalization_job2.rv(),
+                                                                                  normalization_job3.rv(),
+                                                                                  normalization_job4.rv()))
 
         on_target_job = Job.wrapJobFn(utilities.bcftools_filter_variants_regions, config, sample, merge_job.rv())
 
@@ -70,7 +74,7 @@ if __name__ == "__main__":
                                         cores=1,
                                         memory="{}G".format(config['gatk']['max_mem']))
 
-        snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
+        snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, gatk_filter_job.rv(),
                                    cores=int(config['snpeff']['num_cores']),
                                    memory="{}G".format(config['snpeff']['max_mem']))
 
@@ -79,11 +83,18 @@ if __name__ == "__main__":
                                    memory="{}G".format(config['gemini']['max_mem']))
 
         # Create workflow from created jobs
-        root_job.addChild()
+        root_job.addChild(spawn_variant_job)
+
+        spawn_variant_job.addChild(normalization_job1)
+        spawn_variant_job.addChild(normalization_job2)
+        spawn_variant_job.addChild(normalization_job3)
+        spawn_variant_job.addChild(normalization_job4)
+        spawn_variant_job.addFollowOn(combine_job)
+
+        combine_job.addChild(merge_job)
         merge_job.addChild(gatk_annotate_job)
         gatk_annotate_job.addChild(gatk_filter_job)
-        gatk_filter_job.addChild(normalization_job)
-        normalization_job.addChild(snpeff_job)
+        gatk_filter_job.addChild(snpeff_job)
         snpeff_job.addChild(gemini_job)
 
     # Start workflow execution
