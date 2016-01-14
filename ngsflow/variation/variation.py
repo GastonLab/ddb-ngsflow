@@ -126,8 +126,8 @@ def generate_variant_report(job, config, sample, database):
             outfile.write("{}\n".format(variant))
 
 
-def merge_variant_calls(job, config, sample, vcf_files):
-    """Run vcf-isec to merge variant calls from multiple variant callers
+def intersect_variant_calls(job, config, sample, vcf_files):
+    """Run vcf-isec to intersect variant calls from multiple variant callers
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -159,6 +159,18 @@ def merge_variant_calls(job, config, sample, vcf_files):
     pipeline.run_and_log_command(" ".join(isec_command), logfile)
 
     return merged_vcf
+
+
+def merge_variant_calls(job, config, sample, vcf_files):
+    """Merge variant calls from multiple variant callers
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param vcf_files: List of input vcf files for merging.
+    :type vcf_files: list.
+    :returns:  str -- The output vcf file name.
+    """
 
 
 def combine_variants(job, config, sample, vcf_files):

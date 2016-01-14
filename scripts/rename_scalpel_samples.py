@@ -3,6 +3,7 @@
 import os
 import sys
 import argparse
+import subprocess as sub
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -17,7 +18,10 @@ if __name__ == "__main__":
         os.chdir(directory)
         sections = directory.partition("-scalpel-")
         sample = sections[0]
-        fixed_vcf = "{}.scalpel.vcf".format(sample)
+
+        fixed_vcf = os.path.join(root_dir, "{}.scalpel.vcf".format(sample))
+        logfile = "{}.scalpel-rename.log".format(sample)
+
         sys.stdout.write("Fixing Scalpel VCF in directory {}:\n".format(directory))
         fix_sample_name_command = ("cat",
                                    "variants.indel.vcf",
@@ -26,4 +30,15 @@ if __name__ == "__main__":
                                    "'s/sample/{}/g'".format(sample),
                                    ">",
                                    "{}".format(fixed_vcf))
+        command = " ".join(fix_sample_name_command)
+
+        with open(logfile, "wb") as err:
+            sys.stdout.write("Executing %s and writing to logfile %s\n" % (command, logfile))
+            err.write("Command: %s\n" % command)
+            p = sub.Popen(command, stdout=sub.PIPE, stderr=err, shell=True)
+            output = p.communicate()
+            code = p.returncode
+            if code:
+                raise RuntimeError("An error occurred when executing the commandline: {}. "
+                                   "Please check the logfile {} for details\n".format(command, logfile))
         os.chdir(root_dir)

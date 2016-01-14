@@ -56,9 +56,6 @@ if __name__ == "__main__":
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
 
-        combine_job = Job.wrapJobFn(variation.combine_variants, config, sample, (normalization_job1.rv(),
-                                                                                 normalization_job2.rv()))
-
         merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (normalization_job1.rv(),
                                                                                   normalization_job2.rv(),
                                                                                   normalization_job3.rv(),
@@ -89,9 +86,8 @@ if __name__ == "__main__":
         spawn_variant_job.addChild(normalization_job2)
         spawn_variant_job.addChild(normalization_job3)
         spawn_variant_job.addChild(normalization_job4)
-        spawn_variant_job.addFollowOn(combine_job)
+        spawn_variant_job.addFollowOn(merge_job)
 
-        combine_job.addChild(merge_job)
         merge_job.addChild(gatk_annotate_job)
         gatk_annotate_job.addChild(gatk_filter_job)
         gatk_filter_job.addChild(snpeff_job)
