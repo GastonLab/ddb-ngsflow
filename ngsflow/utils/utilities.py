@@ -111,8 +111,9 @@ def vt_normalization(job, config, sample, input_vcf):
     :returns:  str -- The output vcf file name.
     """
 
-    output_vcf = "{}.normalized.vcf".format(sample)
-    logfile = "{}.vt_normalization.log".format(sample)
+    file_name_sections = input_vcf.split(".")
+    output_vcf = "{}.{}.normalized.vcf".format(sample, file_name_sections[1])
+    logfile = "{}.{}.vt_normalization.log".format(sample, file_name_sections[1])
 
     normalization = ("zless",
                      "{}".format(input_vcf),
