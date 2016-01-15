@@ -1,10 +1,11 @@
+numpy
 cython
 cyvcf2
 pybedtools
 openpyxl<2.0.0,>=1.6.1
 gemini
 psutil
-# pyexcel
-# pyexcel-xlsx
+pyexcel
+pyexcel-xlsx
 toil
 requests
