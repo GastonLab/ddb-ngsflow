@@ -59,6 +59,14 @@ if __name__ == "__main__":
             sys.stdout.write("{}\n".format(sample))
     os.chdir(root_dir)
 
+    # Check Coverage
+    os.chdir("./Coverage")
+    sys.stdout.write("Missing DiagnoseTargets VCFs:\n")
+    for sample in samples:
+        if not os.path.isfile("{}.diagnosetargets.vcf".format(sample)):
+            sys.stdout.write("{}\n".format(sample))
+    os.chdir(root_dir)
+
     # Check GEMINI Databases
     # os.chdir("./GEMINI")
     # sys.stdout.write("Missing GEMINI databases:\n")
