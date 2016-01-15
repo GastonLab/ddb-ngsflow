@@ -176,11 +176,13 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
 
     merged_vcf = "{}.merged.vcf.gz".format(sample)
     uncompressed_vcf = "{}.merged.vcf".format(sample)
+    sorted_vcf = "{}.merged.sorted.vcf".format(sample)
 
     logfile1 = "{}.merging.log".format(sample)
     logfile2 = "{}.uncompress-merging.log".format(sample)
+    logfile3 = "{}.merged_sort.log".format(sample)
 
-    vcf_files_string = ",".join(vcf_files)
+    vcf_files_string = " ".join(vcf_files)
 
     command = ("{}".format(config['ensemble']['bin']),
                "ensemble",
@@ -200,13 +202,24 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
                 ">",
                 "{}".format(uncompressed_vcf))
 
+    command3 = ("cat",
+                "{}".format(uncompressed_vcf),
+                "|",
+                "{}".format(config['vcftools_sort']['bin']),
+                "-c",
+                ">",
+                "{}".format(sorted_vcf))
+
     job.fileStore.logToMaster("bcbio-variation-recall Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile1)
 
     job.fileStore.logToMaster("Uncompression Command: {}\n".format(command2))
     pipeline.run_and_log_command(" ".join(command2), logfile2)
 
-    return uncompressed_vcf
+    job.fileStore.logToMaster("Sort Command: {}\n".format(command3))
+    pipeline.run_and_log_command(" ".join(command3), logfile3)
+
+    return sorted_vcf
 
 # def combine_variants(job, config, sample, vcf_files):
 #     """Run GATK CatVariants to combine non-overlapping variant calls (ie MuTect + Scalpel)
