@@ -10,12 +10,14 @@
 from ngsflow import pipeline
 
 
-def diagnosetargets(job, config, sample, input_bam):
+def diagnosetargets(job, config, sample, samples, input_bam):
     """Run GATK's DiagnoseTargets against the supplied region
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
     :type sample: str.
+    :param samples: samples dictionary.
+    :type samples: str.
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The DiagnoseTargets output vcf file name.
@@ -34,7 +36,7 @@ def diagnosetargets(job, config, sample, input_bam):
                "-R",
                "{}".format(config['reference']),
                "-L",
-               "{}".format(config['regions']),
+               "{}".format(samples[sample]['regions']),
                "--coverage_status_threshold",
                "{}".format(config['coverage_loci_threshold']),
                "--bad_mate_status_threshold",

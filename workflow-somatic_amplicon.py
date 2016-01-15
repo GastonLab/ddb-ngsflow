@@ -35,7 +35,7 @@ if __name__ == "__main__":
     config = configuration.configure_runtime(args.configuration)
 
     sys.stdout.write("Parsing sample data\n")
-    samples = configuration.configure_samples(args.samples_file)
+    samples = configuration.configure_samples(args.samples_file, config)
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs, cores=1)
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # Per sample jobs
     for sample in samples:
         # Alignment and Refinement Stages
-        align_job = Job.wrapJobFn(bwa.run_bwa_mem, config, sample, samples[sample]['fastq1'], samples[sample]['fastq2'],
+        align_job = Job.wrapJobFn(bwa.run_bwa_mem, config, sample, samples,
                                   cores=int(config['bwa']['num_cores']),
                                   memory="{}G".format(config['bwa']['max_mem']))
 
@@ -79,11 +79,11 @@ if __name__ == "__main__":
                                    cores=1,
                                    memory="{}G".format(config['mutect']['max_mem']))
 
-        vardict_job = Job.wrapJobFn(vardict.vardict_single, config, sample, recal_job.rv(),
+        vardict_job = Job.wrapJobFn(vardict.vardict_single, config, sample, samples, recal_job.rv(),
                                     cores=int(config['vardict']['num_cores']),
                                     memory="{}G".format(config['vardict']['max_mem']))
 
-        scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, recal_job.rv(),
+        scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, samples, recal_job.rv(),
                                     cores=int(config['scalpel']['num_cores']),
                                     memory="{}G".format(config['scalpel']['max_mem']))
 
@@ -91,11 +91,13 @@ if __name__ == "__main__":
         #                                cores=1,
         #                                memory="{}G".format(config['indelminer']['max_mem']))
 
+        # Platypus defined regions not created for all panels. Need to handle stranded pool libraries
         # platypus_job = Job.wrapJobFn(platypus.platypus_single, config, sample, recal_job.rv(),
         #                              cores=int(config['platypus']['num_cores']),
         #                              memory="{}G".format(config['platypus']['max_mem']))
 
         # Merge results and annotate
+        # Need to filter for on target only results somewhere as well
         merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
                                   vardict_job.rv(), scalpel_job.rv()),
                                   cores=1)

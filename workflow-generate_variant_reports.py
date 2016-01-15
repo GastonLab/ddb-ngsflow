@@ -25,7 +25,7 @@ if __name__ == "__main__":
     config = configuration.configure_runtime(args.configuration)
 
     sys.stdout.write("Parsing sample data\n")
-    samples = configuration.configure_samples(args.samples_file)
+    samples = configuration.configure_samples(args.samples_file, config)
 
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
     return_files = list()

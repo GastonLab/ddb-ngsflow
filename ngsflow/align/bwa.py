@@ -12,7 +12,7 @@ from ngsflow import pipeline
 __author__ = 'dgaston'
 
 
-def run_bwa_mem(job, config, sample, fastq1, fastq2):
+def run_bwa_mem(job, config, sample, samples):
     """Run GATK's DiagnoseTargets against the supplied region
 
     :param config: The configuration dictionary.
@@ -41,8 +41,8 @@ def run_bwa_mem(job, config, sample, fastq1, fastq2):
                "-v",
                "2",
                "{}".format(config['reference']),
-               "{}".format(fastq1),
-               "{}".format(fastq2)]
+               "{}".format(samples[sample]['fastq1']),
+               "{}".format(samples[sample]['fastq2'])]
 
     view_cmd = ["{}".format(config['samtools']['bin']),
                 "view",

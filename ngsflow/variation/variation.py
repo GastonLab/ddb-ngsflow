@@ -115,7 +115,7 @@ def generate_variant_report(job, config, sample, database):
     :type sample: str.
     :param database: The GEMINI database to query.
     :type database: str.
-    :returns:  str -- The output vcf file name.
+    :returns:  None
     """
 
     filename = "{}.variant_report.txt".format(sample)
@@ -126,23 +126,60 @@ def generate_variant_report(job, config, sample, database):
             outfile.write("{}\n".format(variant))
 
 
-def compare_ds_library_variants(db1, db2):
-    """Use the GeminiQuery API to filter results based on severity and specific annotations
-    :param db1: GEMINI database from one stranded library for a sample.
-    :type db1: str.
-    :param db2: GEMINI database for other stranded library from a sample.
-    :type db2: str.
-    :returns:  tuple -- The header line for the requested columns and all rows that pass filters.
-    """
-
-
-def merge_variant_calls(job, config, sample, vcf_files):
-    """Run vcf-isec to merge variant calls from multiple variant callers
+def intersect_variant_calls(job, config, sample, vcf_files):
+    """Run vcf-isec to intersect variant calls from multiple variant callers
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
     :type sample: str.
     :param vcf_files: List of input vcf files for merging.
+    :type vcf_files: list.
+    :returns:  str -- The output vcf file name.
+    """
+
+    files = list()
+    for vcf in vcf_files:
+        utilities.bgzip_and_tabix_vcf(job, vcf)
+        files.append("{}.gz".format(vcf))
+    vcf_files_string = " ".join(files)
+
+    merged_vcf = "{}.merged.vcf".format(sample)
+    logfile = "{}.merged.log".format(sample)
+
+    # Put this back in after run: .format(config['vcftools_isec']['bin'])
+    isec_command = ("vcf-isec",
+                    "-f",
+                    "-n",
+                    "+1",
+                    "{}".format(vcf_files_string),
+                    ">",
+                    "{}".format(merged_vcf))
+
+    job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
+    pipeline.run_and_log_command(" ".join(isec_command), logfile)
+
+    return merged_vcf
+
+
+def merge_variant_calls(job, config, sample, vcf_files):
+    """Merge variant calls from multiple variant callers
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param vcf_files: List of input vcf files for merging.
+    :type vcf_files: list.
+    :returns:  str -- The output vcf file name.
+    """
+
+
+def combine_variants(job, config, sample, vcf_files):
+    """Run GATK CatVariants to combine non-overlapping variant calls (ie MuTect + Scalpel)
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param vcf_files: List of input vcf files for combining.
     :type vcf_files: list.
     :returns:  str -- The output vcf file name.
     """
