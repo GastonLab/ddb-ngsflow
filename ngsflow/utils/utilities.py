@@ -100,20 +100,21 @@ def generate_fastqc_summary_report(job, config, samples):
                         summary_file.write(line)
 
 
-def vt_normalization(job, config, sample, input_vcf):
+def vt_normalization(job, config, sample, caller, input_vcf):
     """Decompose and left normalize variants
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
+    :type sample: str.
+    :param sample: caller name.
     :type sample: str.
     :param input_vcf: The input_vcf file name to process.
     :type input_vcf: str.
     :returns:  str -- The output vcf file name.
     """
 
-    file_name_sections = input_vcf.split(".")
-    output_vcf = "{}.{}.normalized.vcf".format(sample, file_name_sections[1])
-    logfile = "{}.{}.vt_normalization.log".format(sample, file_name_sections[1])
+    output_vcf = "{}.{}.normalized.vcf".format(sample, caller)
+    logfile = "{}.{}.vt_normalization.log".format(sample, caller)
 
     normalization = ("zless",
                      "{}".format(input_vcf),
@@ -270,7 +271,7 @@ def generate_coverage_summary(job, config, samples):
                     outfile.write("{sample}\t{region}\t{filter}\n".format(sample=sample, region=target_string, filter=samples[sample][target]['filter_field']))
 
 
-def bcftools_filter_variants_regions(job, config, sample, input_vcf):
+def bcftools_filter_variants_regions(job, config, sample, samples, input_vcf):
     """Use bcftools to filter vcf file to only variants found within the specified regions file
     :param config: The configuration dictionary.
     :type config: dict.
@@ -292,7 +293,7 @@ def bcftools_filter_variants_regions(job, config, sample, input_vcf):
     filter_command = ("{}".format(config['bcftools']['bin']),
                       "isec",
                       "-T",
-                      "{}".format(config['regions']),
+                      "{}".format(samples[sample]['regions']),
                       "{}".format(bgzipped_vcf),
                       ">",
                       "{}".format(filtered_vcf))

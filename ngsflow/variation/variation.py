@@ -126,83 +126,118 @@ def generate_variant_report(job, config, sample, database):
             outfile.write("{}\n".format(variant))
 
 
-def intersect_variant_calls(job, config, sample, vcf_files):
-    """Run vcf-isec to intersect variant calls from multiple variant callers
-    :param config: The configuration dictionary.
-    :type config: dict.
-    :param sample: sample name.
-    :type sample: str.
-    :param vcf_files: List of input vcf files for merging.
-    :type vcf_files: list.
-    :returns:  str -- The output vcf file name.
-    """
+# def intersect_variant_calls(job, config, sample, vcf_files):
+#     """Run vcf-isec to intersect variant calls from multiple variant callers
+#     :param config: The configuration dictionary.
+#     :type config: dict.
+#     :param sample: sample name.
+#     :type sample: str.
+#     :param vcf_files: List of input vcf files for merging.
+#     :type vcf_files: list.
+#     :returns:  str -- The output vcf file name.
+#     """
+#
+#     files = list()
+#     for vcf in vcf_files:
+#         utilities.bgzip_and_tabix_vcf(job, vcf)
+#         files.append("{}.gz".format(vcf))
+#     vcf_files_string = " ".join(files)
+#
+#     merged_vcf = "{}.merged.vcf".format(sample)
+#     logfile = "{}.merged.log".format(sample)
+#
+#     # Put this back in after run: .format(config['vcftools_isec']['bin'])
+#     isec_command = ("vcf-isec",
+#                     "-f",
+#                     "-n",
+#                     "+1",
+#                     "{}".format(vcf_files_string),
+#                     ">",
+#                     "{}".format(merged_vcf))
+#
+#     job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
+#     pipeline.run_and_log_command(" ".join(isec_command), logfile)
+#
+#     return merged_vcf
 
-    files = list()
-    for vcf in vcf_files:
-        utilities.bgzip_and_tabix_vcf(job, vcf)
-        files.append("{}.gz".format(vcf))
-    vcf_files_string = " ".join(files)
 
-    merged_vcf = "{}.merged.vcf".format(sample)
-    logfile = "{}.merged.log".format(sample)
-
-    # Put this back in after run: .format(config['vcftools_isec']['bin'])
-    isec_command = ("vcf-isec",
-                    "-f",
-                    "-n",
-                    "+1",
-                    "{}".format(vcf_files_string),
-                    ">",
-                    "{}".format(merged_vcf))
-
-    job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
-    pipeline.run_and_log_command(" ".join(isec_command), logfile)
-
-    return merged_vcf
-
-
-def merge_variant_calls(job, config, sample, vcf_files):
+def merge_variant_calls(job, config, sample, callers, vcf_files):
     """Merge variant calls from multiple variant callers
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
     :type sample: str.
+    :param callers: Comma-separated list of VCF callers to tag the ensemble output. Must be in same order as vcf_files.
+    :type sample: str.
     :param vcf_files: List of input vcf files for merging.
     :type vcf_files: list.
     :returns:  str -- The output vcf file name.
     """
 
+    merged_vcf = "{}.merged.vcf.gz".format(sample)
+    uncompressed_vcf = "{}.merged.vcf".format(sample)
 
-def combine_variants(job, config, sample, vcf_files):
-    """Run GATK CatVariants to combine non-overlapping variant calls (ie MuTect + Scalpel)
-    :param config: The configuration dictionary.
-    :type config: dict.
-    :param sample: sample name.
-    :type sample: str.
-    :param vcf_files: List of input vcf files for combining.
-    :type vcf_files: list.
-    :returns:  str -- The output vcf file name.
-    """
+    logfile1 = "{}.merging.log".format(sample)
+    logfile2 = "{}.uncompress-merging.log".format(sample)
 
-    files = list()
-    for vcf in vcf_files:
-        utilities.bgzip_and_tabix_vcf(job, vcf)
-        files.append("{}.gz".format(vcf))
-    vcf_files_string = " ".join(files)
+    vcf_files_string = ",".join(vcf_files)
 
-    merged_vcf = "{}.merged.vcf".format(sample)
-    logfile = "{}.merged.log".format(sample)
+    command = ("{}".format(config['ensemble']['bin']),
+               "ensemble",
+               "-c",
+               "{}".format(config['ensemble']['num_cores']),
+               "--numpass",
+               "1",
+               "--names",
+               "{}".format(callers),
+               "{}".format(merged_vcf),
+               "{}".format(config['reference']),
+               "{}".format(vcf_files_string))
 
-    # Put this back in after run: .format(config['vcftools_isec']['bin'])
-    isec_command = ("vcf-isec",
-                    "-f",
-                    "-n",
-                    "+1",
-                    "{}".format(vcf_files_string),
-                    ">",
-                    "{}".format(merged_vcf))
+    command2 = ("bgzip",
+                "-cd",
+                "{}".format(merged_vcf),
+                ">",
+                "{}".format(uncompressed_vcf))
 
-    job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
-    pipeline.run_and_log_command(" ".join(isec_command), logfile)
+    job.fileStore.logToMaster("bcbio-variation-recall Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile1)
 
-    return merged_vcf
+    job.fileStore.logToMaster("Uncompression Command: {}\n".format(command2))
+    pipeline.run_and_log_command(" ".join(command2), logfile2)
+
+    return uncompressed_vcf
+
+# def combine_variants(job, config, sample, vcf_files):
+#     """Run GATK CatVariants to combine non-overlapping variant calls (ie MuTect + Scalpel)
+#     :param config: The configuration dictionary.
+#     :type config: dict.
+#     :param sample: sample name.
+#     :type sample: str.
+#     :param vcf_files: List of input vcf files for combining.
+#     :type vcf_files: list.
+#     :returns:  str -- The output vcf file name.
+#     """
+#
+#     files = list()
+#     for vcf in vcf_files:
+#         utilities.bgzip_and_tabix_vcf(job, vcf)
+#         files.append("{}.gz".format(vcf))
+#     vcf_files_string = " ".join(files)
+#
+#     merged_vcf = "{}.merged.vcf".format(sample)
+#     logfile = "{}.merged.log".format(sample)
+#
+#     # Put this back in after run: .format(config['vcftools_isec']['bin'])
+#     isec_command = ("vcf-isec",
+#                     "-f",
+#                     "-n",
+#                     "+1",
+#                     "{}".format(vcf_files_string),
+#                     ">",
+#                     "{}".format(merged_vcf))
+#
+#     job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
+#     pipeline.run_and_log_command(" ".join(isec_command), logfile)
+#
+#     return merged_vcf

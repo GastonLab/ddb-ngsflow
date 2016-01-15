@@ -40,30 +40,38 @@ if __name__ == "__main__":
     for sample in samples:
         # Need to filter for on target only results somewhere as well
         spawn_variant_job = Job.wrapJobFn(utilities.spawn_variant_jobs)
-        normalization_job1 = Job.wrapJobFn(utilities.vt_normalization, config, sample, samples[sample]['mutect'],
+        normalization_job1 = Job.wrapJobFn(utilities.vt_normalization, config, sample, "mutect",
+                                           samples[sample]['mutect'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
 
-        normalization_job2 = Job.wrapJobFn(utilities.vt_normalization, config, sample, samples[sample]['scalpel'],
+        normalization_job2 = Job.wrapJobFn(utilities.vt_normalization, config, sample, "scalpel",
+                                           samples[sample]['scalpel'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
 
-        normalization_job3 = Job.wrapJobFn(utilities.vt_normalization, config, sample, samples[sample]['freebayes'],
+        normalization_job3 = Job.wrapJobFn(utilities.vt_normalization, config, sample, "freebayes",
+                                           samples[sample]['freebayes'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
 
-        normalization_job4 = Job.wrapJobFn(utilities.vt_normalization, config, sample, samples[sample]['vardict'],
+        normalization_job4 = Job.wrapJobFn(utilities.vt_normalization, config, sample, "vardict",
+                                           samples[sample]['vardict'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
 
-        merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (normalization_job1.rv(),
-                                                                                  normalization_job2.rv(),
-                                                                                  normalization_job3.rv(),
-                                                                                  normalization_job4.rv()))
+        callers = "mutect,scalpel,freebayes,vardict"
 
-        on_target_job = Job.wrapJobFn(utilities.bcftools_filter_variants_regions, config, sample, merge_job.rv())
+        merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, callers, (normalization_job1.rv(),
+                                                                                           normalization_job2.rv(),
+                                                                                           normalization_job3.rv(),
+                                                                                           normalization_job4.rv()))
 
-        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, on_target_job.rv(), samples[sample]['bam'],
+        # Removed temporarily until config generation script more easily adds in appropriate region files
+        # on_target_job = Job.wrapJobFn(utilities.bcftools_filter_variants_regions, config, sample, samples,
+        #                               merge_job.rv())
+
+        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), samples[sample]['bam'],
                                           cores=int(config['gatk']['num_cores']),
                                           memory="{}G".format(config['gatk']['max_mem']))
 
@@ -89,6 +97,7 @@ if __name__ == "__main__":
         spawn_variant_job.addFollowOn(merge_job)
 
         merge_job.addChild(gatk_annotate_job)
+        # on_target_job.addChild(gatk_annotate_job)
         gatk_annotate_job.addChild(gatk_filter_job)
         gatk_filter_job.addChild(snpeff_job)
         snpeff_job.addChild(gemini_job)
