@@ -8,6 +8,7 @@
 
 """
 
+import os
 from gemini import GeminiQuery
 
 from ngsflow.utils import utilities
@@ -219,6 +220,10 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
 
     job.fileStore.logToMaster("Sort Command: {}\n".format(command3))
     pipeline.run_and_log_command(" ".join(command3), logfile3)
+
+    # The Index file created by Picard often causes problems with the GATK
+    index_file = "{}.idx".format(uncompressed_vcf)
+    os.remove(index_file)
 
     return sorted_vcf
 
