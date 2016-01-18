@@ -222,7 +222,7 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
     pipeline.run_and_log_command(" ".join(command3), logfile3)
 
     # The Index file created by Picard often causes problems with the GATK
-    index_file = "{}.idx".format(uncompressed_vcf)
+    index_file = "{}.idx".format(sorted_vcf)
     os.remove(index_file)
 
     return sorted_vcf
