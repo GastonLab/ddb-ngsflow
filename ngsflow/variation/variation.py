@@ -202,13 +202,14 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
                 ">",
                 "{}".format(uncompressed_vcf))
 
-    command3 = ("cat",
-                "{}".format(uncompressed_vcf),
-                "|",
-                "{}".format(config['vcftools_sort']['bin']),
-                "-c",
-                ">",
-                "{}".format(sorted_vcf))
+    command3 = ("java",
+                "-Xmx{}g".format(config['gatk']['max_mem']),
+                "-jar",
+                "{}".format(config['picard']['bin']),
+                "SortVcf",
+                "SEQUENCE_DICTIONARY={}".format(config['dict']),
+                "OUTPUT={}".format(sorted_vcf),
+                "INPUT={}".format(uncompressed_vcf))
 
     job.fileStore.logToMaster("bcbio-variation-recall Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile1)

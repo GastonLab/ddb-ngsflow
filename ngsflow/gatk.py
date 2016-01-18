@@ -28,7 +28,7 @@ def diagnosetargets(job, config, sample, samples, input_bam):
     logfile = "{}.diagnose_targets.log".format(sample)
 
     command = ("java",
-               "-Xmx{}g".format(2),
+               "-Xmx{}g".format(config['gatk']['max_mem']),
                "-jar",
                "{}".format(config['gatk']['bin']),
                "-T",
