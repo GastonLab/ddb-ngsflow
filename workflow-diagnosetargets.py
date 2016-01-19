@@ -28,21 +28,12 @@ if __name__ == "__main__":
     samples = configuration.configure_samples(args.samples_file, config)
 
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
-    return_files = list()
-
-    sys.stdout.write("Processing samples:\n")
-    for sample in samples:
-        sys.stdout.write("{}\n".format(sample))
 
     for sample in samples:
         diagnose_targets_job = Job.wrapJobFn(gatk.diagnosetargets, config, sample, samples, samples[sample]['bam'],
                                              cores=int(config['gatk']['num_cores']),
                                              memory="{}G".format(config['gatk']['max_mem']))
-        return_files.append(diagnose_targets_job.rv())
         root_job.addChild(diagnose_targets_job)
-
-    create_spreadsheet_job = Job.wrapJobFn(utilities.generate_coverage_report, config, return_files)
-    root_job.addFollowOn(create_spreadsheet_job)
 
     # Start workflow execution
     Job.Runner.startToil(root_job, args)

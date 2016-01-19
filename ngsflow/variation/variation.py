@@ -64,7 +64,14 @@ def _var_is_protein_effecting(variant_data):
         return False
 
 
-def _run_gemini_query_and_filter(db):
+def _var_in_gene(variant_data, genes):
+    if variant_data['gene'] in genes:
+        return True
+    else:
+        return False
+
+
+def _run_gemini_query_and_filter(db, genes):
     """Use the GeminiQuery API to filter results based on severity and specific annotations
     :param db: GEMINI database.
     :type db: str.
@@ -83,8 +90,7 @@ def _run_gemini_query_and_filter(db):
             "aaf_esp_ea, aaf_esp_aa, aaf_esp_aa, aaf_esp_all, aaf_1kg_amr, aaf_1kg_eas, aaf_1kg_sas, aaf_1kg_afr, " \
             "aaf_1kg_eur, aaf_1kg_all, aaf_exac_all, aaf_adj_exac_all, aaf_adj_exac_afr, aaf_adj_exac_amr, " \
             "aaf_adj_exac_eas, aaf_adj_exac_fin, aaf_adj_exac_nfe, aaf_adj_exac_oth, aaf_adj_exac_sas, " \
-            "max_aaf_all, in_esp, in_1kg, in_exac, " \
-            "info FROM variants"
+            "max_aaf_all, in_esp, in_1kg, in_exac FROM variants"
     gq = GeminiQuery(db)
     gq.run(query)
     header = gq.header
@@ -94,13 +100,17 @@ def _run_gemini_query_and_filter(db):
     # Filter out variants with minor allele frequencies above the threshold but
     # retain any that are above the threshold but in COSMIC or in ClinVar and not listed as benign.
     for variant_data in gq:
-        if _var_is_in_cosmic(variant_data):
+        if genes:
+            if not _var_in_gene(variant_data, genes):
+                continue
+        # Right now removing this. Many benign and synonymous variants are in cosmic
+        # if _var_is_in_cosmic(variant_data):
+        #     passing_rows.append(variant_data)
+        #     continue
+        if _var_is_in_clinvar(variant_data):
+            # Removed is_benign check temporarily. Some variants not annotated with up to date annotations
             passing_rows.append(variant_data)
             continue
-        if _var_is_in_clinvar(variant_data):
-            if _var_not_benign(variant_data):
-                passing_rows.append(variant_data)
-                continue
         if _var_is_rare(variant_data):
             if _var_is_protein_effecting(variant_data):
                 passing_rows.append(variant_data)
@@ -108,7 +118,7 @@ def _run_gemini_query_and_filter(db):
     return header, passing_rows
 
 
-def generate_variant_report(job, config, sample, database):
+def generate_variant_report(job, config, sample, genes, database):
     """Call the GEMINI Query API and generate a text variant report from the provided database
     :param config: The configuration dictionary.
     :type config: dict.
@@ -120,7 +130,7 @@ def generate_variant_report(job, config, sample, database):
     """
 
     filename = "{}.variant_report.txt".format(sample)
-    header, variants = _run_gemini_query_and_filter(database)
+    header, variants = _run_gemini_query_and_filter(database, genes)
     with open(filename, 'w') as outfile:
         outfile.write("{}\n".format(header))
         for variant in variants:

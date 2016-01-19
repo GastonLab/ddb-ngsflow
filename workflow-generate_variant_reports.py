@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--samples_file', help="Input configuration file for samples")
     parser.add_argument('-c', '--configuration', help="Configuration file for various settings")
+    parser.add_argument('-g', '--genes', help="Comma-separated list of genes to select")
     Job.Runner.addToilOptions(parser)
     args = parser.parse_args()
     # args.logLevel = "INFO"
@@ -28,14 +29,13 @@ if __name__ == "__main__":
     samples = configuration.configure_samples(args.samples_file, config)
 
     root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
-    return_files = list()
 
-    sys.stdout.write("Processing samples:\n")
-    for sample in samples:
-        sys.stdout.write("{}\n".format(sample))
+    genes = list()
+    if args.genes:
+        genes = args.genes.split(',')
 
     for sample in samples:
-        report_job = Job.wrapJobFn(variation.generate_variant_report, config, sample, samples[sample]['db'],
+        report_job = Job.wrapJobFn(variation.generate_variant_report, config, sample, genes, samples[sample]['db'],
                                    cores=1, memory="2G")
         root_job.addChild(report_job)
 
