@@ -14,6 +14,16 @@ if __name__ == "__main__":
         samples = samples_file.read().splitlines()
     root_dir = os.getcwd()
 
+    # Check FastQs
+    os.chdir("./FastQs")
+    sys.stdout.write("Missing fastq files:\n")
+    for sample in samples:
+        if not os.path.isfile("{}_L001_R1_001.fastq.gz".format(sample)):
+            sys.stdout.write("{}\n".format(sample))
+        if not os.path.isfile("{}_L001_R2_001.fastq.gz".format(sample)):
+            sys.stdout.write("{}\n".format(sample))
+    os.chdir(root_dir)
+
     # Check FinalBams
     os.chdir("./FinalBAMs")
     sys.stdout.write("Missing final aligned BAM files:\n")

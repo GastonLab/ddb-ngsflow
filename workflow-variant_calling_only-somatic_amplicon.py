@@ -38,10 +38,10 @@ if __name__ == "__main__":
 
     # Per sample variant calling jobs
     for sample in samples:
-        # freebayes_job = Job.wrapJobFn(freebayes.freebayes_single, config, sample, samples[sample]['bam'],
-        #                               cores=1,
-        #                               memory="{}G".format(config['freebayes']['max_mem']))
-        #
+        freebayes_job = Job.wrapJobFn(freebayes.freebayes_single, config, sample, samples[sample]['bam'],
+                                      cores=1,
+                                      memory="{}G".format(config['freebayes']['max_mem']))
+
         mutect_job = Job.wrapJobFn(mutect.mutect_single, config, sample, samples[sample]['bam'],
                                    cores=1,
                                    memory="{}G".format(config['mutect']['max_mem']))
@@ -50,9 +50,9 @@ if __name__ == "__main__":
                                     cores=int(config['vardict']['num_cores']),
                                     memory="{}G".format(config['vardict']['max_mem']))
 
-        # scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, samples, samples[sample]['bam'],
-        #                             cores=int(config['scalpel']['num_cores']),
-        #                             memory="{}G".format(config['scalpel']['max_mem']))
+        scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, samples, samples[sample]['bam'],
+                                    cores=int(config['scalpel']['num_cores']),
+                                    memory="{}G".format(config['scalpel']['max_mem']))
 
         # indelminer_job = Job.wrapJobFn(indelminer.indelminer_single, config, sample, samples[sample]['bam'],
         #                                cores=1,
@@ -64,10 +64,10 @@ if __name__ == "__main__":
         #                              memory="{}G".format(config['platypus']['max_mem']))
 
         # Create workflow from created jobs
-        # root_job.addChild(freebayes_job)
+        root_job.addChild(freebayes_job)
         root_job.addChild(mutect_job)
         root_job.addChild(vardict_job)
-        # root_job.addChild(scalpel_job)
+        root_job.addChild(scalpel_job)
         # root_job.addChild(indelminer_job)
         # root_job.addChild(platypus_job)
 

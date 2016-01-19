@@ -15,10 +15,10 @@ if __name__ == "__main__":
     with open(args.output_file, 'w') as output_file:
         for sample in samples:
             output_file.write("[{name}]\n".format(name=sample))
-            # output_file.write("bam: ./FinalBAMs/{name}.recalibrated.sorted.bam\n".format(name=sample))
+            output_file.write("bam: ./FinalBAMs/{name}.recalibrated.sorted.bam\n".format(name=sample))
             # output_file.write("mutect: ./MuTect/{name}.mutect.vcf\n".format(name=sample))
             # output_file.write("scalpel: ./Scalpel/{name}.scalpel.vcf\n".format(name=sample))
             # output_file.write("freebayes: ./FreeBayes/{name}.freebayes.vcf\n".format(name=sample))
             # output_file.write("vardict: ./VarDict/{name}.vardict.vcf\n".format(name=sample))
-            output_file.write("db: ./GEMINI/{name}.snpEff.GRCh37.75.db\n".format(name=sample))
+            # output_file.write("db: ./GEMINI/{name}.snpEff.GRCh37.75.db\n".format(name=sample))
             output_file.write("\n")
