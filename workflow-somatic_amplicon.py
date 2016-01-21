@@ -54,8 +54,6 @@ if __name__ == "__main__":
                                 cores=1,
                                 memory="{}G".format(config['gatk']['max_mem']))
 
-        # add_job_bam = add_job.rv()
-
         creator_job = Job.wrapJobFn(gatk.realign_target_creator, config, sample, add_job.rv(),
                                     cores=int(config['gatk']['num_cores']),
                                     memory="{}G".format(config['gatk']['max_mem']))
@@ -68,83 +66,12 @@ if __name__ == "__main__":
                                   cores=int(config['gatk']['num_cores']),
                                   memory="{}G".format(config['gatk']['max_mem']))
 
-        # Variant calling
-        spawn_variant_job = Job.wrapJobFn(utilities.spawn_variant_jobs)
-
-        freebayes_job = Job.wrapJobFn(freebayes.freebayes_single, config, sample, recal_job.rv(),
-                                      cores=1,
-                                      memory="{}G".format(config['freebayes']['max_mem']))
-
-        mutect_job = Job.wrapJobFn(mutect.mutect_single, config, sample, recal_job.rv(),
-                                   cores=1,
-                                   memory="{}G".format(config['mutect']['max_mem']))
-
-        vardict_job = Job.wrapJobFn(vardict.vardict_single, config, sample, samples, recal_job.rv(),
-                                    cores=int(config['vardict']['num_cores']),
-                                    memory="{}G".format(config['vardict']['max_mem']))
-
-        scalpel_job = Job.wrapJobFn(scalpel.scalpel_single, config, sample, samples, recal_job.rv(),
-                                    cores=int(config['scalpel']['num_cores']),
-                                    memory="{}G".format(config['scalpel']['max_mem']))
-
-        # indelminer_job = Job.wrapJobFn(indelminer.indelminer_single, config, sample, recal_job.rv(),
-        #                                cores=1,
-        #                                memory="{}G".format(config['indelminer']['max_mem']))
-
-        # Platypus defined regions not created for all panels. Need to handle stranded pool libraries
-        # platypus_job = Job.wrapJobFn(platypus.platypus_single, config, sample, recal_job.rv(),
-        #                              cores=int(config['platypus']['num_cores']),
-        #                              memory="{}G".format(config['platypus']['max_mem']))
-
-        # Merge results and annotate
-        # Need to filter for on target only results somewhere as well
-        merge_job = Job.wrapJobFn(variation.merge_variant_calls, config, sample, (freebayes_job.rv(), mutect_job.rv(),
-                                  vardict_job.rv(), scalpel_job.rv()),
-                                  cores=1)
-
-        gatk_annotate_job = Job.wrapJobFn(gatk.annotate_vcf, config, sample, merge_job.rv(), (recal_job.rv()),
-                                          cores=int(config['gatk']['num_cores']),
-                                          memory="{}G".format(config['gatk']['max_mem']))
-
-        gatk_filter_job = Job.wrapJobFn(gatk.filter_variants, config, sample, gatk_annotate_job.rv(),
-                                        cores=1,
-                                        memory="{}G".format(config['gatk']['max_mem']))
-
-        normalization_job = Job.wrapJobFn(utilities.vt_normalization, config, sample, gatk_filter_job.rv(),
-                                          cores=1,
-                                          memory="{}G".format(config['gatk']['max_mem']))
-
-        snpeff_job = Job.wrapJobFn(annotation.snpeff, config, sample, normalization_job.rv(),
-                                   cores=int(config['snpeff']['num_cores']),
-                                   memory="{}G".format(config['snpeff']['max_mem']))
-
-        gemini_job = Job.wrapJobFn(annotation.gemini, config, sample, snpeff_job.rv(),
-                                   cores=int(config['gatk']['num_cores']),
-                                   memory="{}G".format(config['gemini']['max_mem']))
-
         # Create workflow from created jobs
         root_job.addChild(align_job)
         align_job.addChild(add_job)
         add_job.addChild(creator_job)
         creator_job.addChild(realign_job)
         realign_job.addChild(recal_job)
-
-        recal_job.addChild(spawn_variant_job)
-
-        spawn_variant_job.addChild(freebayes_job)
-        spawn_variant_job.addChild(mutect_job)
-        spawn_variant_job.addChild(vardict_job)
-        spawn_variant_job.addChild(scalpel_job)
-        # spawn_variant_job.addChild(indelminer_job)
-        # spawn_variant_job.addChild(platypus_job)
-
-        # Use Follow On for Merge so it will follow after all of the spawned variant calling jobs
-        spawn_variant_job.addFollowOn(merge_job)
-        merge_job.addChild(gatk_annotate_job)
-        gatk_annotate_job.addChild(gatk_filter_job)
-        gatk_filter_job.addChild(normalization_job)
-        normalization_job.addChild(snpeff_job)
-        snpeff_job.addChild(gemini_job)
 
     # Start workflow execution
     Job.Runner.startToil(root_job, args)

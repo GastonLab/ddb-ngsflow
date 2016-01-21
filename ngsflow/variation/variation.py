@@ -79,7 +79,6 @@ def _run_gemini_query_and_filter(db, genes):
     """
 
     query = "SELECT chrom, start, end, ref, alt, vcf_id, rs_ids, cosmic_ids, filter, qual, qual_depth, depth, " \
-            "(gts).(*), (gt_depths).(*), (gt_ref_depths).(*), (gt_alt_depths).(*), " \
             "gene, transcript, exon, codon_change, aa_change, biotype, impact, impact_so, impact_severity, aa_length, " \
             "is_lof, is_conserved, pfam_domain, " \
             "in_omim, clinvar_sig, clinvar_disease_name, clinvar_origin, clinvar_causal_allele, clinvar_dbsource, " \
@@ -91,6 +90,7 @@ def _run_gemini_query_and_filter(db, genes):
             "aaf_1kg_eur, aaf_1kg_all, aaf_exac_all, aaf_adj_exac_all, aaf_adj_exac_afr, aaf_adj_exac_amr, " \
             "aaf_adj_exac_eas, aaf_adj_exac_fin, aaf_adj_exac_nfe, aaf_adj_exac_oth, aaf_adj_exac_sas, " \
             "max_aaf_all, in_esp, in_1kg, in_exac FROM variants"
+    # "(gts).(*), (gt_depths).(*), (gt_ref_depths).(*), (gt_alt_depths).(*), " \
     gq = GeminiQuery(db)
     gq.run(query)
     header = gq.header
