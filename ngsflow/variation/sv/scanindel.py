@@ -9,7 +9,7 @@
 from ngsflow import pipeline
 
 
-def scanindel(job, config, sample, input_bam):
+def scanindel(job, config, sample, samples, input_bam):
     """Run MANTA caller for Structural Variant Detection
     :param config: The configuration dictionary.
     :type config: dict.
@@ -36,7 +36,7 @@ def scanindel(job, config, sample, input_bam):
                "-F",
                "{}".format(config['min_alt_af']),
                "-t",
-               "{}".format(config['regions']))
+               "{}".format(samples[sample]['regions']))
 
     job.fileStore.logToMaster("Manta Configuration Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

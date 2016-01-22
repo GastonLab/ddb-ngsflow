@@ -58,6 +58,58 @@ def diagnosetargets(job, config, sample, samples, input_bam):
     return diagnose_targets_vcf
 
 
+def diagnose_pooled_targets(job, config, sample, regions, samples, input_bam1, input_bam2):
+    """Run GATK's DiagnoseTargets against the supplied region
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param regions: regions dictionary key name and tag.
+    :type regions: str.
+    :param samples: samples dictionary.
+    :type samples: str.
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The DiagnoseTargets output vcf file name.
+    """
+
+    diagnose_targets_vcf = "{}.{}.diagnosetargets.vcf".format(sample, regions)
+    missing_intervals = "{}.{}.missing.intervals".format(sample, regions)
+    logfile = "{}.{}.diagnose_targets.log".format(sample, regions)
+
+    command = ("java",
+               "-Xmx{}g".format(config['gatk']['max_mem']),
+               "-jar",
+               "{}".format(config['gatk']['bin']),
+               "-T",
+               "DiagnoseTargets",
+               "-R",
+               "{}".format(config['reference']),
+               "-L",
+               "{}".format(samples[sample][regions]),
+               "--coverage_status_threshold",
+               "{}".format(config['coverage_loci_threshold']),
+               "--bad_mate_status_threshold",
+               "{}".format(config['bad_mate_threshold']),
+               "--minimum_coverage",
+               "{}".format(config['coverage_threshold']),
+               "--quality_status_threshold",
+               "{}".format(config['quality_loci_threshold']),
+               "-I",
+               "{}".format(input_bam1),
+               "-I",
+               "{}".format(input_bam2),
+               "-o",
+               "{}".format(diagnose_targets_vcf),
+               "--missing_intervals",
+               "{}".format(missing_intervals))
+
+    job.fileStore.logToMaster("GATK DiagnoseTargets Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return diagnose_targets_vcf
+
+
 def annotate_vcf(job, config, sample, input_vcf, input_bam):
     """Run GATK's VariantAnnotation on the specified VCF
     :param config: The configuration dictionary.
