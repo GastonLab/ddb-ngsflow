@@ -97,9 +97,11 @@ def configure_samples(infile, configuration):
         if 'regions' not in sample_dict.keys():
             sample_dict['regions'] = configuration['regions']
         if 'snv_regions' not in sample_dict.keys():
-            sample_dict['snv_regions'] = configuration['snv_regions']
+            if 'snv_regions' in configuration:
+                sample_dict['snv_regions'] = configuration['snv_regions']
         if 'indel_regions' not in sample_dict.keys():
-            sample_dict['indel_regions'] = configuration['indel_regions']
+            if 'indel_regions' in configuration:
+                sample_dict['indel_regions'] = configuration['indel_regions']
 
         samples[sample] = sample_dict
 
