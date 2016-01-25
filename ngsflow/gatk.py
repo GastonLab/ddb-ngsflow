@@ -73,8 +73,8 @@ def diagnose_pooled_targets(job, config, sample, regions, samples, input_bam1, i
     :returns:  str -- The DiagnoseTargets output vcf file name.
     """
 
-    diagnose_targets_vcf = "{}.{}.diagnosetargets.vcf".format(sample, regions)
-    missing_intervals = "{}.{}.missing.intervals".format(sample, regions)
+    diagnose_targets_vcf = "{}_{}.diagnosetargets.vcf".format(sample, regions)
+    missing_intervals = "{}_{}.missing.intervals".format(sample, regions)
     logfile = "{}.{}.diagnose_targets.log".format(sample, regions)
 
     command = ("java",

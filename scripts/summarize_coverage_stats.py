@@ -17,6 +17,8 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--depth_output', help="Output file name for depth information")
     parser.add_argument('-f', '--failed_output', help="Output file name for regions with failed samples")
     parser.add_argument('-o', '--output_summary', help="Output containing summary data and statistics")
+    parser.add_argument('-p', '--double_stranded', help="Flag for whether this is a double stranded, pooled experiment",
+                        type=bool)
     args = parser.parse_args()
 
     failed_regions = defaultdict(list)
@@ -40,7 +42,8 @@ if __name__ == "__main__":
     files = os.listdir(os.getcwd())
     for coverage_file in files:
         sections = coverage_file.partition(".")
-        if sections[2] == 'diagnosetargets.vcf':
+        if sections[2] in ('diagnosetargets.vcf', 'snv_regions.diagnosetargets.vcf',
+                           'indel_regions.diagnosetargets.vcf'):
             samples_list.append(sections[0])
             coverage_data = pybedtools.BedTool(coverage_file)
             for region in coverage_data:
@@ -48,8 +51,14 @@ if __name__ == "__main__":
                 data = region[9].split(":")
                 filter_field = region[6]
 
+                # Assumes the depth (IDP) is third position from the end. Should fix this to use the format
+                # field as a map.
                 end = info[0].split('=')
-                depth = data[-3]
+                depth = float(data[-3])
+
+                if args.double_stranded:
+                    data2 = region[10].split(":")
+                    depth += float(data2[-3])
 
                 region_name = "{chr}:{start}-{end}".format(chr=region.chrom, start=region.start, end=end[1])
                 depth_regions[region_name][sections[0]] = depth
