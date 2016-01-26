@@ -98,15 +98,14 @@ def mutect2_single(job, config, sample, input_bam):
     temp_mutect = "{}.tempmutect2.vcf".format(sample)
 
     output_stats = "{}.mutectstats2.txt".format(sample)
-    sample_coverage = "{}.mutect2coverage.wig.txt".format(sample)
 
     mutect_logfile = "{}.mutect2.log".format(sample)
     subset_log = "{}.mutect2_subset.log".format(sample)
 
     mutect_command = ("java",
-                      "-Xmx{}g".format(config['gatk']['max_mem']),
+                      "-Xmx{}g".format(config['gatk3.5']['max_mem']),
                       "-jar",
-                      "{}".format(config['gatk']['bin']),
+                      "{}".format(config['gatk3.5']['bin']),
                       "-T",
                       "MuTect2",
                       "-R",
@@ -118,24 +117,22 @@ def mutect2_single(job, config, sample, input_bam):
                       "-I:tumor",
                       "{}".format(input_bam),
                       "-o",
-                      "{}".format(output_stats),
-                      "-vcf",
                       "{}".format(temp_mutect))
 
-    subset_command = ("cat",
-                      "{}".format(temp_mutect),
-                      "|",
-                      "{}".format(config['vcftools_subset']['bin']),
-                      "-e",
-                      "-c",
-                      "{}".format(sample),
-                      ">",
-                      "{}".format(mutect_vcf))
+    # subset_command = ("cat",
+    #                   "{}".format(temp_mutect),
+    #                   "|",
+    #                   "{}".format(config['vcftools_subset']['bin']),
+    #                   "-e",
+    #                   "-c",
+    #                   "{}".format(sample),
+    #                   ">",
+    #                   "{}".format(mutect_vcf))
 
     job.fileStore.logToMaster("MuTect2 Command: {}\n".format(mutect_command))
     pipeline.run_and_log_command(" ".join(mutect_command), mutect_logfile)
 
-    job.fileStore.logToMaster("Subset Command: {}\n".format(subset_command))
-    pipeline.run_and_log_command(" ".join(subset_command), subset_log)
+    # job.fileStore.logToMaster("Subset Command: {}\n".format(subset_command))
+    # pipeline.run_and_log_command(" ".join(subset_command), subset_log)
 
     return mutect_vcf

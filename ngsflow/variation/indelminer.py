@@ -10,7 +10,8 @@
 from ngsflow import pipeline
 
 
-# indeliminer can be quite slow, doesn't appear to have inbuilt multi-threading, and can use a lot of RAM (>4GB)
+# indeliminer can be quite slow, doesn't appear to have inbuilt multi-threading, and can use a lot of RAM (>6GB?)
+# No longer using as it just takes too long and is too resource hungry.
 def indelminer_single(job, config, sample, input_bam):
     """Run IndelMiner on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.

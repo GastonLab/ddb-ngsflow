@@ -11,7 +11,7 @@ from ngsflow import pipeline
 
 
 # This needs to be fixed, new regions need to be defined for all targeted panels to use this
-def platypus_single(job, config, sample, input_bam):
+def platypus_single(job, config, sample, samples, input_bam):
     """Run Platypus on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
@@ -29,7 +29,7 @@ def platypus_single(job, config, sample, input_bam):
     platypus_command = ("{}".format(config['platypus']['bin']),
                         "callVariants",
                         "--refFile={}".format(config['reference']),
-                        "--regions={}".format(config['platypus']['regions']),
+                        "--regions={}".format(samples[sample]['regions']),
                         "--assemble=1",
                         "--assembleBrokenPairs=1",
                         "--filterDuplicates=0",
