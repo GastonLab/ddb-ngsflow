@@ -46,9 +46,9 @@ if __name__ == "__main__":
         #                            cores=1,
         #                            memory="{}G".format(config['mutect']['max_mem']))
 
-        mutect2_job = Job.wrapJobFn(mutect.mutect2_single, config, sample, samples[sample]['bam'],
-                                    cores=1,
-                                    memory="{}G".format(config['mutect']['max_mem']))
+        # mutect2_job = Job.wrapJobFn(mutect.mutect2_single, config, sample, samples[sample]['bam'],
+        #                             cores=1,
+        #                             memory="{}G".format(config['mutect']['max_mem']))
         #
         # vardict_job = Job.wrapJobFn(vardict.vardict_single, config, sample, samples, samples[sample]['bam'],
         #                             cores=int(config['vardict']['num_cores']),
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         # Create workflow from created jobs
         # root_job.addChild(freebayes_job)
         # root_job.addChild(mutect_job)
-        root_job.addChild(mutect2_job)
+        # root_job.addChild(mutect2_job)
         # root_job.addChild(vardict_job)
         # root_job.addChild(scalpel_job)
         # root_job.addChild(scanindel_job)

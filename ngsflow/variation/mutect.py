@@ -95,12 +95,7 @@ def mutect2_single(job, config, sample, input_bam):
     """
 
     mutect_vcf = "{}.mutect2.vcf".format(sample)
-    temp_mutect = "{}.tempmutect2.vcf".format(sample)
-
-    output_stats = "{}.mutectstats2.txt".format(sample)
-
     mutect_logfile = "{}.mutect2.log".format(sample)
-    subset_log = "{}.mutect2_subset.log".format(sample)
 
     mutect_command = ("java",
                       "-Xmx{}g".format(config['gatk3.5']['max_mem']),
@@ -117,17 +112,7 @@ def mutect2_single(job, config, sample, input_bam):
                       "-I:tumor",
                       "{}".format(input_bam),
                       "-o",
-                      "{}".format(temp_mutect))
-
-    # subset_command = ("cat",
-    #                   "{}".format(temp_mutect),
-    #                   "|",
-    #                   "{}".format(config['vcftools_subset']['bin']),
-    #                   "-e",
-    #                   "-c",
-    #                   "{}".format(sample),
-    #                   ">",
-    #                   "{}".format(mutect_vcf))
+                      "{}".format(mutect_vcf))
 
     job.fileStore.logToMaster("MuTect2 Command: {}\n".format(mutect_command))
     pipeline.run_and_log_command(" ".join(mutect_command), mutect_logfile)
