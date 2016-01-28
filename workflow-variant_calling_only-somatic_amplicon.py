@@ -17,6 +17,7 @@ from ngsflow.variation import vardict
 from ngsflow.variation import scalpel
 from ngsflow.variation import pisces
 from ngsflow.variation.sv import scanindel
+from ngsflow.variation.sv import pindel
 
 
 if __name__ == "__main__":
@@ -62,10 +63,13 @@ if __name__ == "__main__":
         #                               cores=int(config['scanindel']['num_cores']),
         #                               memory="{}G".format(config['scanindel']['max_mem']))
 
-        # Platypus defined regions not created for all panels. Need to handle stranded pool libraries
-        platypus_job = Job.wrapJobFn(platypus.platypus_single, config, sample, samples, samples[sample]['bam'],
-                                     cores=int(config['platypus']['num_cores']),
-                                     memory="{}G".format(config['platypus']['max_mem']))
+        # platypus_job = Job.wrapJobFn(platypus.platypus_single, config, sample, samples, samples[sample]['bam'],
+        #                              cores=int(config['platypus']['num_cores']),
+        #                              memory="{}G".format(config['platypus']['max_mem']))
+
+        pindel_job = Job.wrapJobFn(pindel.run_pindel, config, sample, samples, samples[sample]['bam'],
+                                   cores=int(config['pindel']['num_cores']),
+                                   memory="{}G".format(config['pindel']['max_mem']))
 
         # Create workflow from created jobs
         # root_job.addChild(freebayes_job)
@@ -74,7 +78,8 @@ if __name__ == "__main__":
         # root_job.addChild(vardict_job)
         # root_job.addChild(scalpel_job)
         # root_job.addChild(scanindel_job)
-        root_job.addChild(platypus_job)
+        # root_job.addChild(platypus_job)
+        root_job.addChild(pindel_job)
 
     # Start workflow execution
     Job.Runner.startToil(root_job, args)
