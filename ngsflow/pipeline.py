@@ -3,7 +3,7 @@
    :platform: Unix, OSX
    :synopsis: A wrapper module for executing commands and logging their output.
 
-.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+.. moduleauthor:: Daniel Gaston <daniel.gaston@dal.ca>
 
 
 """

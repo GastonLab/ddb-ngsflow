@@ -3,7 +3,7 @@
    :platform: Unix, OSX
    :synopsis: A module of wrapper methods for configuring pipeline runs.
 
-.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+.. moduleauthor:: Daniel Gaston <daniel.gaston@dal.ca>
 
 """
 

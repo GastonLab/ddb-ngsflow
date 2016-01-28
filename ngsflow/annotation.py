@@ -4,7 +4,7 @@
    :synopsis: A module of methods and utilities for annotating files, post-processing annotated VCFs, and transforming
    into additional formats.
 
-.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+.. moduleauthor:: Daniel Gaston <daniel.gaston@dal.ca>
 
 
 """

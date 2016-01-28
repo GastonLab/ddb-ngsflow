@@ -3,7 +3,7 @@
    :platform: Unix, OSX
    :synopsis: A wrapper module for calling Pisces.
 
-.. moduleauthor:: Daniel Gaston <daniel.gaston@gmail.com>
+.. moduleauthor:: Daniel Gaston <daniel.gaston@dal.ca>
 """
 
 from ngsflow import pipeline
