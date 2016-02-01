@@ -67,7 +67,7 @@ if __name__ == "__main__":
         #                              cores=int(config['platypus']['num_cores']),
         #                              memory="{}G".format(config['platypus']['max_mem']))
 
-        pindel_job = Job.wrapJobFn(pindel.run_pindel, config, sample, samples, samples[sample]['bam'],
+        pindel_job = Job.wrapJobFn(pindel.run_pindel, config, sample, samples[sample]['bam'],
                                    cores=int(config['pindel']['num_cores']),
                                    memory="{}G".format(config['pindel']['max_mem']))
 
