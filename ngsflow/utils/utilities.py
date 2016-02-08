@@ -74,47 +74,6 @@ def generate_fastqc_summary_report(job, config, samples):
                         summary_file.write(line)
 
 
-def vt_normalization(job, config, sample, caller, input_vcf):
-    """Decompose and left normalize variants
-    :param config: The configuration dictionary.
-    :type config: dict.
-    :param sample: sample name.
-    :type sample: str.
-    :param sample: caller name.
-    :type sample: str.
-    :param input_vcf: The input_vcf file name to process.
-    :type input_vcf: str.
-    :returns:  str -- The output vcf file name.
-    """
-
-    output_vcf = "{}.{}.normalized.vcf".format(sample, caller)
-    logfile = "{}.{}.vt_normalization.log".format(sample, caller)
-
-    normalization = ("zless",
-                     "{}".format(input_vcf),
-                     "|",
-                     "sed",
-                     "'s/ID=AD,Number=./ID=AD,Number=R/'",
-                     "|",
-                     "vt",
-                     "decompose",
-                     "-s",
-                     "-",
-                     "|",
-                     "vt",
-                     "normalize",
-                     "-r",
-                     "{}".format(config['reference']),
-                     "-",
-                     ">",
-                     "{}".format(output_vcf))
-
-    job.fileStore.logToMaster("VT Command: {}\n".format(normalization))
-    pipeline.run_and_log_command(" ".join(normalization), logfile)
-
-    return output_vcf
-
-
 def bedtools_coverage_per_site(job, config, sample, input_bam):
     """Run BedTools to calculate the per-site coverage of targeted regions
     :param config: The configuration dictionary.

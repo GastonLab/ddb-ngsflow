@@ -11,8 +11,7 @@ from toil.job import Job
 from ddb import configuration
 from ngsflow import gatk
 from ngsflow import annotation
-from ngsflow.align import bwa
-from ngsflow.utils import utilities
+from ngsflow import pipeline
 from ngsflow.variation import variation
 
 
@@ -31,7 +30,7 @@ if __name__ == "__main__":
     samples = configuration.configure_samples(args.samples_file, config)
 
     # Workflow Graph definition. The following workflow definition should create a valid Directed Acyclic Graph (DAG)
-    root_job = Job.wrapJobFn(utilities.spawn_batch_jobs, cores=1)
+    root_job = Job.wrapJobFn(pipeline.spawn_batch_jobs, cores=1)
     # root_job.addChildJobFn(utilities.run_fastqc, config, samples,
     #                        cores=1,
     #                        memory="{}G".format(config['fastqc']['max_mem']))
@@ -39,23 +38,23 @@ if __name__ == "__main__":
     # Per sample jobs
     for sample in samples:
         # Need to filter for on target only results somewhere as well
-        spawn_variant_job = Job.wrapJobFn(utilities.spawn_variant_jobs)
-        normalization_job1 = Job.wrapJobFn(utilities.vt_normalization, config, sample, "mutect",
+        spawn_variant_job = Job.wrapJobFn(pipeline.spawn_variant_jobs)
+        normalization_job1 = Job.wrapJobFn(variation.vt_normalization, config, sample, "mutect",
                                            samples[sample]['mutect'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
 
-        normalization_job2 = Job.wrapJobFn(utilities.vt_normalization, config, sample, "scalpel",
+        normalization_job2 = Job.wrapJobFn(variation.vt_normalization, config, sample, "scalpel",
                                            samples[sample]['scalpel'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
 
-        normalization_job3 = Job.wrapJobFn(utilities.vt_normalization, config, sample, "freebayes",
+        normalization_job3 = Job.wrapJobFn(variation.vt_normalization, config, sample, "freebayes",
                                            samples[sample]['freebayes'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))
 
-        normalization_job4 = Job.wrapJobFn(utilities.vt_normalization, config, sample, "vardict",
+        normalization_job4 = Job.wrapJobFn(variation.vt_normalization, config, sample, "vardict",
                                            samples[sample]['vardict'],
                                            cores=1,
                                            memory="{}G".format(config['gatk']['max_mem']))

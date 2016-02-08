@@ -82,6 +82,47 @@ def generate_variant_report(job, config, sample, genes, database):
             outfile.write("{}\n".format(variant))
 
 
+def vt_normalization(job, config, sample, caller, input_vcf):
+    """Decompose and left normalize variants
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param sample: caller name.
+    :type sample: str.
+    :param input_vcf: The input_vcf file name to process.
+    :type input_vcf: str.
+    :returns:  str -- The output vcf file name.
+    """
+
+    output_vcf = "{}.{}.normalized.vcf".format(sample, caller)
+    logfile = "{}.{}.vt_normalization.log".format(sample, caller)
+
+    normalization = ("zless",
+                     "{}".format(input_vcf),
+                     "|",
+                     "sed",
+                     "'s/ID=AD,Number=./ID=AD,Number=R/'",
+                     "|",
+                     "vt",
+                     "decompose",
+                     "-s",
+                     "-",
+                     "|",
+                     "vt",
+                     "normalize",
+                     "-r",
+                     "{}".format(config['reference']),
+                     "-",
+                     ">",
+                     "{}".format(output_vcf))
+
+    job.fileStore.logToMaster("VT Command: {}\n".format(normalization))
+    pipeline.run_and_log_command(" ".join(normalization), logfile)
+
+    return output_vcf
+
+
 # def intersect_variant_calls(job, config, sample, vcf_files):
 #     """Run vcf-isec to intersect variant calls from multiple variant callers
 #     :param config: The configuration dictionary.

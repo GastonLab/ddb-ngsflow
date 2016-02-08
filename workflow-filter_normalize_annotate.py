@@ -8,6 +8,7 @@ from toil.job import Job
 from ddb import configuration
 from ngsflow import gatk
 from ngsflow import annotation
+from ngsflow import pipeline
 from ngsflow.utils import utilities
 
 
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     sys.stdout.write("Parsing sample data\n")
     samples = configuration.configure_samples(args.samples_file)
 
-    root_job = Job.wrapJobFn(utilities.spawn_batch_jobs)
+    root_job = Job.wrapJobFn(pipeline.spawn_batch_jobs)
 
     for sample in samples:
         on_target_job = Job.wrapJobFn(utilities.bcftools_filter_variants_regions, config, sample,
