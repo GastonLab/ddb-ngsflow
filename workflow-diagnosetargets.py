@@ -8,8 +8,8 @@ import argparse
 from toil.job import Job
 
 # Package methods
+from ddb import configuration
 from ngsflow import gatk
-from ngsflow.utils import configuration
 from ngsflow.utils import utilities
 
 

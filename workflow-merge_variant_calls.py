@@ -8,10 +8,10 @@ import argparse
 from toil.job import Job
 
 # Package methods
+from ddb import configuration
 from ngsflow import gatk
 from ngsflow import annotation
 from ngsflow.align import bwa
-from ngsflow.utils import configuration
 from ngsflow.utils import utilities
 from ngsflow.variation import variation
 

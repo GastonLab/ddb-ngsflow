@@ -5,9 +5,9 @@ import argparse
 
 from toil.job import Job
 
+from ddb import configuration
 from ngsflow import gatk
 from ngsflow import annotation
-from ngsflow.utils import configuration
 from ngsflow.utils import utilities
 
 
