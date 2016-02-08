@@ -9,4 +9,4 @@ pyexcel
 pyexcel-xlsx
 toil
 requests
-ddb
+ddb-core
