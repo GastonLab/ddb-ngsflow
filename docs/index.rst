@@ -1,17 +1,17 @@
-.. DDBio-NGSFlow documentation master file, created by
-   sphinx-quickstart on Mon Nov 30 11:00:30 2015.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to DDBio-NGSFlow's documentation!
-=========================================
-
-Contents:
+========
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
 
-
+   readme
+   installation
+   usage
+   reference/index
+   contributing
+   authors
+   changelog
 
 Indices and tables
 ==================
