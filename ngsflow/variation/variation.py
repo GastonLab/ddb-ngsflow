@@ -11,64 +11,9 @@
 import os
 from gemini import GeminiQuery
 
+from ddb import gemini_interface
 from ngsflow.utils import utilities
 from ngsflow import pipeline
-
-
-def _var_is_rare(variant_data):
-    """Determine if the MAF of the variant is < 1% in all populations"""
-
-    if variant_data['in_esp'] != 0 or variant_data['in_1kg'] != 0 or variant_data['in_exac'] != 0:
-        if variant_data['max_aaf_all'] > 0.01:
-            return False
-        else:
-            return True
-    else:
-        return True
-
-
-def _var_is_in_cosmic(variant_data):
-    """Determine if the variant has a COSMIC identifier"""
-
-    if variant_data['cosmic_ids'] is not None:
-        return True
-    else:
-        return False
-
-
-def _var_is_in_clinvar(variant_data):
-    """Determine if there is ClinVar data for the variant"""
-
-    if variant_data['clinvar_sig'] is not None:
-        return True
-    else:
-        return False
-
-
-def _var_not_benign(variant_data):
-    """Determine if a variant in clinvar is completely benign"""
-
-    if "benign" in variant_data['clinvar_sig']:
-        if "pathogenic" in variant_data['clinvar_sig']:
-            return True
-        else:
-            return False
-    else:
-        return True
-
-
-def _var_is_protein_effecting(variant_data):
-    if variant_data['impact_severity'] != "LOW":
-        return True
-    else:
-        return False
-
-
-def _var_in_gene(variant_data, genes):
-    if variant_data['gene'] in genes:
-        return True
-    else:
-        return False
 
 
 def _run_gemini_query_and_filter(db, genes):
@@ -101,18 +46,18 @@ def _run_gemini_query_and_filter(db, genes):
     # retain any that are above the threshold but in COSMIC or in ClinVar and not listed as benign.
     for variant_data in gq:
         if genes:
-            if not _var_in_gene(variant_data, genes):
+            if not gemini_interface.var_in_gene(variant_data, genes):
                 continue
         # Right now removing this. Many benign and synonymous variants are in cosmic
         # if _var_is_in_cosmic(variant_data):
         #     passing_rows.append(variant_data)
         #     continue
-        if _var_is_in_clinvar(variant_data):
+        if gemini_interface.var_is_in_clinvar(variant_data):
             # Removed is_benign check temporarily. Some variants not annotated with up to date annotations
             passing_rows.append(variant_data)
             continue
-        if _var_is_rare(variant_data):
-            if _var_is_protein_effecting(variant_data):
+        if gemini_interface.var_is_rare(variant_data):
+            if gemini_interface.var_is_protein_effecting(variant_data):
                 passing_rows.append(variant_data)
 
     return header, passing_rows
