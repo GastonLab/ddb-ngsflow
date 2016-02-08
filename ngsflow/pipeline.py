@@ -34,3 +34,29 @@ def run_and_log_command(command, logfile):
         if code:
             raise RuntimeError("An error occurred when executing the commandline: {}. "
                                "Please check the logfile {} for details\n".format(command, logfile))
+
+
+def spawn_batch_jobs(job):
+    """
+    This is simply a placeholder root job for the workflow
+    """
+
+    job.fileStore.logToMaster("Initializing workflow\n")
+
+
+def spawn_variant_jobs(job):
+    """
+    This is simply a placeholder job to create a node in the graph for spawning
+    off the multiple variant callers
+    """
+
+    job.fileStore.logToMaster("Spawning all variant calling methods\n")
+
+
+def spawn_stranded_jobs(job):
+    """
+    This is simply a placeholder job to create a node in the graph for spawning
+    off the multiple variant callers
+    """
+
+    job.fileStore.logToMaster("Spawning jobs for stranded libraries\n")
