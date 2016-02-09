@@ -7,7 +7,7 @@
 
 """
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 def run_lowfreq(job, config, sample, input_bam):

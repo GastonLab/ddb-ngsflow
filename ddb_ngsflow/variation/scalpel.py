@@ -10,7 +10,7 @@
 
 import os
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 def scalpel_single(job, config, sample, samples, input_bam):

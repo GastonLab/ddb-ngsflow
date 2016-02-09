@@ -7,7 +7,7 @@
 
 """
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 def mutect_pon():

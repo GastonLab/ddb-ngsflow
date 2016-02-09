@@ -7,9 +7,7 @@
 
 
 """
-from ngsflow import pipeline
-
-__author__ = 'dgaston'
+from ddb_ngsflow import pipeline
 
 
 def run_bwa_mem(job, config, sample, samples):

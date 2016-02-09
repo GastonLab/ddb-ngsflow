@@ -1,6 +1,6 @@
 import sys
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 def run_delly2_single(job, config, sample, input_bam):

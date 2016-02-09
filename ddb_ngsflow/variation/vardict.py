@@ -8,7 +8,7 @@
 
 """
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 def vardict_matched():

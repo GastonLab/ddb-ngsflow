@@ -8,7 +8,7 @@
 
 import os
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 def manta(job, config, sample, input_bam):

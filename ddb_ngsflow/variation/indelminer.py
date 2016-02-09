@@ -7,7 +7,7 @@
 
 """
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 # indeliminer can be quite slow, doesn't appear to have inbuilt multi-threading, and can use a lot of RAM (>6GB?)

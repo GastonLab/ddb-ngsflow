@@ -6,7 +6,7 @@
 .. moduleauthor:: Daniel Gaston <daniel.gaston@dal.ca>
 """
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 def freebayes_single(job, config, sample, input_bam):

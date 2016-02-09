@@ -16,7 +16,7 @@ import multiprocessing
 
 from collections import defaultdict
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 def run_fastqc(job, config, samples):

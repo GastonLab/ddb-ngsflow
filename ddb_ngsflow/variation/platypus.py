@@ -7,7 +7,7 @@
 
 """
 
-from ngsflow import pipeline
+from ddb_ngsflow import pipeline
 
 
 # This needs to be fixed, new regions need to be defined for all targeted panels to use this
