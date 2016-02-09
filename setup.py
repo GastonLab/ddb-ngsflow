@@ -20,6 +20,10 @@ def read(*names, **kwargs):
         encoding=kwargs.get('encoding', 'utf8')
     ).read()
 
+with open("requirements.txt", "r") as f:
+    install_requires = [x.strip() for x in f.readlines() if not
+                        x.startswith(("ddb-", "http", "git"))]
+
 
 setup(
     name='ddb-ngsflow',
@@ -33,9 +37,9 @@ setup(
     author='Dan Gaston',
     author_email='daniel.gaston@deaddriftbio.com',
     url='https://github.com/dgaston/ddb-ngsflow',
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
-    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
+    packages=['ddb_ngsflow'],
+    package_dir={'ddb-ngsflow': 'ddb_ngsflow'},
+    # py_modules=[splitext(basename(path))[0] for path in glob('ddb_ngsflow/*.py')],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
@@ -59,9 +63,8 @@ setup(
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
-    install_requires=[
-        # eg: 'aspectlib==1.1.1', 'six>=1.7',
-    ],
+    install_requires=install_requires,
+    requires=['python (>=2.7, <3.0)'],
     extras_require={
         # eg:
         #   'rst': ['docutils>=0.11'],
