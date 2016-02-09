@@ -7,7 +7,7 @@
 
 """
 
-from ngsflow import pipeline
+import pipeline
 
 
 def diagnosetargets(job, config, sample, samples, input_bam):

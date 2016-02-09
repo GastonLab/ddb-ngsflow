@@ -9,11 +9,11 @@
 """
 
 import os
-from gemini import GeminiQuery
 
 from ddb import gemini_interface
-from ngsflow.utils import utilities
-from ngsflow import pipeline
+from gemini import GeminiQuery
+
+from ddb_ngsflow import pipeline
 
 
 def _run_gemini_query_and_filter(db, genes):

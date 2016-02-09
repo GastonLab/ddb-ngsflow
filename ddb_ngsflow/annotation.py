@@ -9,7 +9,7 @@
 
 """
 
-from ngsflow import pipeline
+import pipeline
 
 
 def snpeff(job, config, sample, input_vcf):
