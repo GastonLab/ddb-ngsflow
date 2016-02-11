@@ -24,13 +24,11 @@ def _run_gemini_query_and_filter(db, genes):
     """
 
     query = "SELECT chrom, start, end, ref, alt, vcf_id, rs_ids, cosmic_ids, filter, qual, qual_depth, depth, " \
-            "gene, transcript, exon, codon_change, aa_change, biotype, impact, impact_so, impact_severity, aa_length, " \
-            "is_lof, is_conserved, pfam_domain, " \
-            "in_omim, clinvar_sig, clinvar_disease_name, clinvar_origin, clinvar_causal_allele, clinvar_dbsource, " \
-            "clinvar_dbsource_id, clinvar_on_diag_assay, " \
+            "gene, transcript, exon, codon_change, aa_change, biotype, impact, impact_so, impact_severity, " \
+            "aa_length, is_lof, is_conserved, pfam_domain, in_omim, clinvar_sig, clinvar_disease_name, " \
+            "clinvar_origin, clinvar_causal_allele, clinvar_dbsource, clinvar_dbsource_id, clinvar_on_diag_assay, " \
             "rmsk, in_segdup, strand_bias, rms_map_qual, in_hom_run, num_mapq_zero, num_reads_w_dels, grc, " \
-            "gms_illumina, in_cse, " \
-            "num_alleles, allele_count, haplotype_score, is_somatic, somatic_score, " \
+            "gms_illumina, in_cse, num_alleles, allele_count, haplotype_score, is_somatic, somatic_score, " \
             "aaf_esp_ea, aaf_esp_aa, aaf_esp_aa, aaf_esp_all, aaf_1kg_amr, aaf_1kg_eas, aaf_1kg_sas, aaf_1kg_afr, " \
             "aaf_1kg_eur, aaf_1kg_all, aaf_exac_all, aaf_adj_exac_all, aaf_adj_exac_afr, aaf_adj_exac_amr, " \
             "aaf_adj_exac_eas, aaf_adj_exac_fin, aaf_adj_exac_nfe, aaf_adj_exac_oth, aaf_adj_exac_sas, " \
