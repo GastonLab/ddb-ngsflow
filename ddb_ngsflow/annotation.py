@@ -71,3 +71,33 @@ def gemini(job, config, sample, input_vcf):
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return db
+
+
+def vcfanno(job, config, sample, input_vcf):
+    """Take the specified VCF and use vcfanno to add additional annotations
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_vcf: The input_vcf file name to process.
+    :type input_vcf: str.
+    :returns:  str -- The output vcf file name.
+    """
+
+    output_vcf = "{}.vcfanno.snpEff.{}.vcf".format(sample, config['snpeff']['reference'])
+    logfile = "{}.vcfanno.log".format(sample)
+
+    command = ("{}".format(config['vcfanno']['bin']),
+               "-p",
+               "{}".format(config['vcfanno']['num_cores']),
+               "--lua",
+               "{}".format(config['vcfanno']['lua']),
+               "{}".format(config['vcfanno']['conf']),
+               "{}".format(input_vcf),
+               ">",
+               "{}".format(output_vcf))
+
+    job.fileStore.logToMaster("GEMINI Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_vcf
