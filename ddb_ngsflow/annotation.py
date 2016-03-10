@@ -26,10 +26,8 @@ def snpeff(job, config, sample, input_vcf):
     output_vcf = "{}.snpEff.{}.vcf".format(sample, config['snpeff']['reference'])
     logfile = "{}.snpeff.log".format(sample)
 
-    snpeff_command = ("java",
+    snpeff_command = ("{}".format(config['snpeff']['bin']),
                       "-Xmx{}g".format(config['snpeff']['max_mem']),
-                      "-jar",
-                      "{}".format(config['snpeff']['bin']),
                       "-v",
                       "{}".format(config['snpeff']['reference']),
                       "{}".format(input_vcf),
