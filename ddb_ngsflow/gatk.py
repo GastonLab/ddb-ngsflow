@@ -28,7 +28,6 @@ def diagnosetargets(job, config, sample, samples, input_bam):
     logfile = "{}.diagnose_targets.log".format(sample)
 
     command = ("{}".format(config['gatk']['bin']),
-               "-Xmx{}g".format(config['gatk']['max_mem']),
                "-T",
                "DiagnoseTargets",
                "-R",
@@ -76,7 +75,6 @@ def diagnose_pooled_targets(job, config, sample, regions, samples, input_bam1, i
     logfile = "{}.{}.diagnose_targets.log".format(sample, regions)
 
     command = ("{}".format(config['gatk']['bin']),
-               "-Xmx{}g".format(config['gatk']['max_mem']),
                "-T",
                "DiagnoseTargets",
                "-R",
@@ -123,7 +121,6 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     annotation_logfile = "{}.variantannotation.log".format(sample)
 
     annotation_command = ("{}".format(config['gatk']['bin']),
-                          "-Xmx{}g".format(config['gatk']['max_mem']),
                           "-T",
                           "VariantAnnotator",
                           "-R",
@@ -164,7 +161,6 @@ def filter_variants(job, config, sample, input_vcf):
     filter_log = "{}.variantfiltration.log".format(sample)
 
     filter_command = ("{}".format(config['gatk']['bin']),
-                      "-Xmx{}g".format(config['gatk']['max_mem']),
                       "-T",
                       "VariantFiltration",
                       "-R",
@@ -214,7 +210,6 @@ def run_mark_duplicates(job, config, sample, input_bam):
     logfile = "{}.markduplicates.log".format(sample)
 
     command = ("{}".format(config['picard']['bin']),
-               "-Xmx{}g".format(config['picard']['max_mem']),
                "MarkDuplicates",
                "CREATE_INDEX=true",
                "METRICS_FILE={}".format(metrics_file),
@@ -245,7 +240,6 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     index_log = "{}.buildindex.log".format(sample)
 
     command = ("{}".format(config['picard']['bin']),
-               "-Xmx{}g".format(config['picard']['max_mem']),
                "AddOrReplaceReadGroups",
                "INPUT={}".format(input_bam),
                "OUTPUT={}".format(output_bam),
@@ -256,7 +250,6 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
                "RGPU=miseq")
 
     command2 = ("{}".format(config['picard']['bin']),
-                "-Xmx{}g".format(config['picard']['max_mem']),
                 "BuildBamIndex",
                 "INPUT={}".format(output_bam))
 
@@ -284,7 +277,6 @@ def realign_target_creator(job, config, sample, input_bam):
     targets_log = "{}.targetcreation.log".format(sample)
 
     command = ("{}".format(config['gatk']['bin']),
-               "-Xmx{}g".format(config['gatk']['max_mem']),
                "-T",
                "RealignerTargetCreator",
                "-R",
@@ -324,7 +316,6 @@ def realign_indels(job, config, sample, input_bam, targets):
     realign_log = "{}.realignindels.log".format(sample)
 
     command = ("{}".format(config['gatk']['bin']),
-               "-Xmx{}g".format(config['gatk']['max_mem']),
                "-T",
                "IndelRealigner",
                "-R",
@@ -369,7 +360,6 @@ def recalibrator(job, config, sample, input_bam):
 
     # Calculate covariates
     recal_commands = ("{}".format(config['gatk']['bin']),
-                      "-Xmx{}g".format(config['gatk']['max_mem']),
                       "-T",
                       "BaseRecalibrator",
                       "-R",
@@ -385,7 +375,6 @@ def recalibrator(job, config, sample, input_bam):
 
     # Print recalibrated BAM
     print_reads_command = ("{}".format(config['gatk']['bin']),
-                           "-Xmx{}g".format(config['gatk']['max_mem']),
                            "-T",
                            "PrintReads",
                            "-R",

@@ -43,7 +43,6 @@ def mutect_single(job, config, sample, input_bam):
     subset_log = "{}.mutect_subset.log".format(sample)
 
     mutect_command = ("{}".format(config['mutect']['bin']),
-                      "-Xmx{}g".format(config['mutect']['max_mem']),
                       "-T",
                       "MuTect",
                       "-R",
@@ -96,7 +95,6 @@ def mutect2_single(job, config, sample, input_bam):
     mutect_logfile = "{}.mutect2.log".format(sample)
 
     mutect_command = ("{}".format(config['gatk3.5']['bin']),
-                      "-Xmx{}g".format(config['gatk3.5']['max_mem']),
                       "-T",
                       "MuTect2",
                       "-R",
