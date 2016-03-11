@@ -304,7 +304,7 @@ def _bgzip_and_tabix_vcf_instructions(infile):
 
 
 def bgzip_and_tabix_vcf(job, infile):
-    """Run GATK's VariantFilter on the specified VCF
+    """Run BGZip and Tabix on the specified VCF
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.

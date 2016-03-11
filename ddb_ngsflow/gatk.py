@@ -27,10 +27,8 @@ def diagnosetargets(job, config, sample, samples, input_bam):
     missing_intervals = "{}.missing.intervals".format(sample)
     logfile = "{}.diagnose_targets.log".format(sample)
 
-    command = ("java",
+    command = ("{}".format(config['gatk']['bin']),
                "-Xmx{}g".format(config['gatk']['max_mem']),
-               "-jar",
-               "{}".format(config['gatk']['bin']),
                "-T",
                "DiagnoseTargets",
                "-R",
@@ -77,10 +75,8 @@ def diagnose_pooled_targets(job, config, sample, regions, samples, input_bam1, i
     missing_intervals = "{}_{}.missing.intervals".format(sample, regions)
     logfile = "{}.{}.diagnose_targets.log".format(sample, regions)
 
-    command = ("java",
+    command = ("{}".format(config['gatk']['bin']),
                "-Xmx{}g".format(config['gatk']['max_mem']),
-               "-jar",
-               "{}".format(config['gatk']['bin']),
                "-T",
                "DiagnoseTargets",
                "-R",
@@ -126,10 +122,8 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     output_vcf = "{}.annotated.vcf".format(sample)
     annotation_logfile = "{}.variantannotation.log".format(sample)
 
-    annotation_command = ("java",
+    annotation_command = ("{}".format(config['gatk']['bin']),
                           "-Xmx{}g".format(config['gatk']['max_mem']),
-                          "-jar",
-                          "{}".format(config['gatk']['bin']),
                           "-T",
                           "VariantAnnotator",
                           "-R",
@@ -169,10 +163,8 @@ def filter_variants(job, config, sample, input_vcf):
     output_vcf = "{}.filtered.vcf".format(sample)
     filter_log = "{}.variantfiltration.log".format(sample)
 
-    filter_command = ("java",
+    filter_command = ("{}".format(config['gatk']['bin']),
                       "-Xmx{}g".format(config['gatk']['max_mem']),
-                      "-jar",
-                      "{}".format(config['gatk']['bin']),
                       "-T",
                       "VariantFiltration",
                       "-R",
@@ -221,10 +213,8 @@ def run_mark_duplicates(job, config, sample, input_bam):
     output_bam = "{}.dedup.sorted.bam".format(sample)
     logfile = "{}.markduplicates.log".format(sample)
 
-    command = ("java",
-               "-Xmx{}g".format(config['gatk']['max_mem']),
-               "-jar",
-               "{}".format(config['picard']['bin']),
+    command = ("{}".format(config['picard']['bin']),
+               "-Xmx{}g".format(config['picard']['max_mem']),
                "MarkDuplicates",
                "CREATE_INDEX=true",
                "METRICS_FILE={}".format(metrics_file),
@@ -254,10 +244,8 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     logfile = "{}.addreadgroups.log".format(sample)
     index_log = "{}.buildindex.log".format(sample)
 
-    command = ("java",
-               "-Xmx{}g".format(config['gatk']['max_mem']),
-               "-jar",
-               "{}".format(config['picard']['bin']),
+    command = ("{}".format(config['picard']['bin']),
+               "-Xmx{}g".format(config['picard']['max_mem']),
                "AddOrReplaceReadGroups",
                "INPUT={}".format(input_bam),
                "OUTPUT={}".format(output_bam),
@@ -267,10 +255,8 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
                "RGPL=illumina",
                "RGPU=miseq")
 
-    command2 = ("java",
-                "-Xmx{}g".format(config['gatk']['max_mem']),
-                "-jar",
-                "{}".format(config['picard']['bin']),
+    command2 = ("{}".format(config['picard']['bin']),
+                "-Xmx{}g".format(config['picard']['max_mem']),
                 "BuildBamIndex",
                 "INPUT={}".format(output_bam))
 
@@ -297,10 +283,8 @@ def realign_target_creator(job, config, sample, input_bam):
     targets = "{}.targets.intervals".format(sample)
     targets_log = "{}.targetcreation.log".format(sample)
 
-    command = ("java",
+    command = ("{}".format(config['gatk']['bin']),
                "-Xmx{}g".format(config['gatk']['max_mem']),
-               "-jar",
-               "{}".format(config['gatk']['bin']),
                "-T",
                "RealignerTargetCreator",
                "-R",
@@ -339,10 +323,8 @@ def realign_indels(job, config, sample, input_bam, targets):
     output_bam = "{}.realigned.sorted.bam".format(sample)
     realign_log = "{}.realignindels.log".format(sample)
 
-    command = ("java",
+    command = ("{}".format(config['gatk']['bin']),
                "-Xmx{}g".format(config['gatk']['max_mem']),
-               "-jar",
-               "{}".format(config['gatk']['bin']),
                "-T",
                "IndelRealigner",
                "-R",
@@ -386,10 +368,8 @@ def recalibrator(job, config, sample, input_bam):
     cp_log = "{}.copy.log".format(sample)
 
     # Calculate covariates
-    recal_commands = ("java",
+    recal_commands = ("{}".format(config['gatk']['bin']),
                       "-Xmx{}g".format(config['gatk']['max_mem']),
-                      "-jar",
-                      "{}".format(config['gatk']['bin']),
                       "-T",
                       "BaseRecalibrator",
                       "-R",
@@ -404,10 +384,8 @@ def recalibrator(job, config, sample, input_bam):
                       "{}".format(config['gatk']['num_cores']))
 
     # Print recalibrated BAM
-    print_reads_command = ("java",
+    print_reads_command = ("{}".format(config['gatk']['bin']),
                            "-Xmx{}g".format(config['gatk']['max_mem']),
-                           "-jar",
-                           "{}".format(config['gatk']['bin']),
                            "-T",
                            "PrintReads",
                            "-R",

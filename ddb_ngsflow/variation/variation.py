@@ -198,7 +198,7 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
                 "{}".format(uncompressed_vcf))
 
     command3 = ("java",
-                "-Xmx{}g".format(config['gatk']['max_mem']),
+                "-Xmx{}g".format(config['picard']['max_mem']),
                 "-jar",
                 "{}".format(config['picard']['bin']),
                 "SortVcf",
