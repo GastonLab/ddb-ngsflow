@@ -20,7 +20,7 @@ def scanindel(job, config, sample, samples, input_bam):
     :returns:  str -- The output vcf file name.
     """
 
-    output_vcf = "{}.merged.indel.vcf".format(sample)
+    output_vcf = "{}.scanindel.vcf".format(sample)
     logfile = "{}.scanindel.log".format(sample)
     sample_config_file = "{}.scanindel_sample_config.txt".format(sample)
 
@@ -38,7 +38,7 @@ def scanindel(job, config, sample, samples, input_bam):
                "-t",
                "{}".format(samples[sample]['regions']))
 
-    job.fileStore.logToMaster("Manta Configuration Command: {}\n".format(command))
+    job.fileStore.logToMaster("ScanIndel Configuration Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output_vcf

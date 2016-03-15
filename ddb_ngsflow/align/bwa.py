@@ -58,6 +58,7 @@ def run_bwa_mem(job, config, sample, samples):
                 "-T",
                 "{}".format(temp),
                 "-"]
+
     command = "{} | {} | {}".format(" ".join(bwa_cmd), " ".join(view_cmd), " ".join(sort_cmd))
 
     job.fileStore.logToMaster("BWA Command: {}\n".format(command))
