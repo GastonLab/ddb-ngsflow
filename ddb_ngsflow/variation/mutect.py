@@ -107,7 +107,7 @@ def mutect2_single(job, config, sample, samples, input_bam):
                       "-drf DuplicateRead",
                       "-ip 100",
                       "-L",
-                      "{}".format(samples['sample']['regions']),
+                      "{}".format(samples[sample]['regions']),
                       "-nct",
                       "{}".format(config['gatk3.5']['num_cores']),
                       "-I:tumor",
