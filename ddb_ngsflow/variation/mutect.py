@@ -80,7 +80,7 @@ def mutect_single(job, config, sample, input_bam):
     return mutect_vcf
 
 
-def mutect2_single(job, config, sample, input_bam):
+def mutect2_single(job, config, sample, samples, input_bam):
     """Run MuTect on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
@@ -103,6 +103,13 @@ def mutect2_single(job, config, sample, input_bam):
                       "{}".format(config['dbsnp']),
                       "--cosmic",
                       "{}".format(config['cosmic']),
+                      "-dt NONE",
+                      "-drf DuplicateRead",
+                      "-ip 100",
+                      "-L",
+                      "{}".format(samples['sample']['regions']),
+                      "-nct",
+                      "{}".format(config['gatk3.5']['num_cores']),
                       "-I:tumor",
                       "{}".format(input_bam),
                       "-o",
