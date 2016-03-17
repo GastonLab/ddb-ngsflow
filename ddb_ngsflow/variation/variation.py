@@ -209,8 +209,8 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
     job.fileStore.logToMaster("Uncompression Command: {}\n".format(command2))
     pipeline.run_and_log_command(" ".join(command2), logfile2)
 
-    job.fileStore.logToMaster("Sort Command: {}\n".format(command3))
-    pipeline.run_and_log_command(" ".join(command3), logfile3)
+    # job.fileStore.logToMaster("Sort Command: {}\n".format(command3))
+    # pipeline.run_and_log_command(" ".join(command3), logfile3)
 
     # The Index file created by Picard often causes problems with the GATK
     index_file = "{}.idx".format(sorted_vcf)
