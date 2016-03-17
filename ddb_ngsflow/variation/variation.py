@@ -197,10 +197,7 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
                 ">",
                 "{}".format(uncompressed_vcf))
 
-    command3 = ("java",
-                "-Xmx{}g".format(config['picard']['max_mem']),
-                "-jar",
-                "{}".format(config['picard']['bin']),
+    command3 = ("{}".format(config['picard']['bin']),
                 "SortVcf",
                 "SEQUENCE_DICTIONARY={}".format(config['dict']),
                 "OUTPUT={}".format(sorted_vcf),

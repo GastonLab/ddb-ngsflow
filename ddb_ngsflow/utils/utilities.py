@@ -74,18 +74,51 @@ def generate_fastqc_summary_report(job, config, samples):
                         summary_file.write(line)
 
 
+def sambamba_region_coverage(job, config, sample, samples, input_bam):
+    """Run SamBambam to calculate the coverage of targeted regions
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bam: The input_bam file name to process.
+    :type samples: dict
+    :param samples: The samples configuration dictionary
+    :type input_bam: str.
+    :returns:  str -- The output BED file name.
+    """
+
+    output = "{}.sambamba_coverage.bed".format(sample)
+    logfile = "{}.sambamba_coverage.log".format(sample)
+
+    command = ("{}".format(config['sambamba']['bin']),
+               "depth region",
+               "-L",
+               "{}".format(samples[sample]['region']),
+               "-t",
+               "{}".format(config['sambamba']['num_cores']),
+               "-T".format(config['coverage_threshold']),
+               "{}".format(input_bam),
+               ">",
+               "{}".format(output))
+
+    job.fileStore.logToMaster("SamBamba Coverage Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output
+
+
 def bedtools_coverage_per_site(job, config, sample, input_bam):
     """Run BedTools to calculate the per-site coverage of targeted regions
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
     :type sample: str.
-    :param input_bam: The input_vcf file name to process.
+    :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The output BED file name.
     """
 
-    output = "{}.coverage.bed".format(sample)
+    output = "{}.bedtools_coverage_per_site.bed".format(sample)
     logfile = "{}.bedtools_coverage.log".format(sample)
 
     coverage = ("{}".format(config['bedtools']['bin']),
