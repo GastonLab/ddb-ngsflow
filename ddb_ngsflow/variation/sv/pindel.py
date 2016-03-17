@@ -60,3 +60,5 @@ def run_pindel(job, config, sample, input_bam):
 
     job.fileStore.logToMaster("Pindel2vcf Command: {}\n".format(pindel2vcf_command))
     pipeline.run_and_log_command(" ".join(pindel2vcf_command), vcf_logfile)
+
+    return output_vcf
