@@ -59,7 +59,9 @@ Installation
 
 ::
 
-    pip install ddb-ngsflow
+    git clone https://github.com/dgaston/ddb-ngsflow
+    cd ddb-ngsflow
+    python setup.py install
 
 Documentation
 =============
