@@ -9,6 +9,7 @@
 """
 
 import os
+import sys
 
 from ddb import gemini_interface
 from gemini import GeminiQuery
@@ -203,14 +204,19 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
                 "OUTPUT={}".format(sorted_vcf),
                 "INPUT={}".format(uncompressed_vcf))
 
+    sys.stderr.write("Running commands: \n")
+    sys.stderr.write("bcbio-variation-recall Command: {}\n".format(command))
+    sys.stderr.write("Uncompression Command: {}\n".format(command2))
+    sys.stderr.write("Sort Command: {}\n".format(command3))
+
     job.fileStore.logToMaster("bcbio-variation-recall Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile1)
 
-    # job.fileStore.logToMaster("Uncompression Command: {}\n".format(command2))
-    # pipeline.run_and_log_command(" ".join(command2), logfile2)
+    job.fileStore.logToMaster("Uncompression Command: {}\n".format(command2))
+    pipeline.run_and_log_command(" ".join(command2), logfile2)
 
-    # job.fileStore.logToMaster("Sort Command: {}\n".format(command3))
-    # pipeline.run_and_log_command(" ".join(command3), logfile3)
+    job.fileStore.logToMaster("Sort Command: {}\n".format(command3))
+    pipeline.run_and_log_command(" ".join(command3), logfile3)
 
     # The Index file created by Picard often causes problems with the GATK
     index_file = "{}.idx".format(sorted_vcf)
