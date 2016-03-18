@@ -206,8 +206,8 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
     job.fileStore.logToMaster("bcbio-variation-recall Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile1)
 
-    job.fileStore.logToMaster("Uncompression Command: {}\n".format(command2))
-    pipeline.run_and_log_command(" ".join(command2), logfile2)
+    # job.fileStore.logToMaster("Uncompression Command: {}\n".format(command2))
+    # pipeline.run_and_log_command(" ".join(command2), logfile2)
 
     # job.fileStore.logToMaster("Sort Command: {}\n".format(command3))
     # pipeline.run_and_log_command(" ".join(command3), logfile3)
