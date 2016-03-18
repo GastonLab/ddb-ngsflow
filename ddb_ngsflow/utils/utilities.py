@@ -9,8 +9,8 @@
 """
 
 import sys
-import pyexcel
-import pyexcel.ext.xlsx
+# import pyexcel
+# import pyexcel.ext.xlsx
 import pybedtools
 import multiprocessing
 
