@@ -96,7 +96,10 @@ def sambamba_region_coverage(job, config, sample, samples, input_bam):
                "{}".format(samples[sample]['region']),
                "-t",
                "{}".format(config['sambamba']['num_cores']),
-               "-T".format(config['coverage_threshold']),
+               "-T",
+               "{}".format(config['coverage_threshold']),
+               "-T",
+               "{}".format(config['coverage_threshold2']),
                "{}".format(input_bam),
                ">",
                "{}".format(output))
