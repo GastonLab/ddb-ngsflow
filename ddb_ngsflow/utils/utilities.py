@@ -93,7 +93,7 @@ def sambamba_region_coverage(job, config, sample, samples, input_bam):
     command = ("{}".format(config['sambamba']['bin']),
                "depth region",
                "-L",
-               "{}".format(samples[sample]['region']),
+               "{}".format(samples[sample]['regions']),
                "-t",
                "{}".format(config['sambamba']['num_cores']),
                "-T",
