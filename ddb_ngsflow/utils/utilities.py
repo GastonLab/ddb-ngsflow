@@ -110,7 +110,7 @@ def sambamba_region_coverage(job, config, sample, samples, input_bam):
 
 
 def sambamba_coverage_summary(job, config, samples, outfile):
-    amplicon_coverage = defaultdict(defaultdict(int))
+    amplicon_coverage = defaultdict(lambda: defaultdict(int))
     num_samples = 0.0
     for sample in samples:
         num_samples += 1
