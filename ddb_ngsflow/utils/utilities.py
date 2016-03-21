@@ -9,8 +9,7 @@
 """
 
 import sys
-# import pyexcel
-# import pyexcel.ext.xlsx
+import csv
 import pybedtools
 import multiprocessing
 
@@ -110,6 +109,53 @@ def sambamba_region_coverage(job, config, sample, samples, input_bam):
     return output
 
 
+def sambamba_coverage_summary(job, config, samples, outfile):
+    amplicon_coverage = defaultdict(defaultdict(int))
+    num_samples = 0.0
+    for sample in samples:
+        num_samples += 1
+        coverage_file = "{}.sambamba_coverage.bed".format(sample)
+        with open(coverage_file, 'rb') as coverage:
+            reader = csv.reader(coverage, delimiter='\t')
+            for row in reader:
+                amplicon = "{}-{}-{}-{}".format(row[0], row[1], row[2], row[3])
+
+                amplicon_coverage[amplicon][sample] = row[4]
+                amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold'])] = row[6]
+                amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold2'])] = row[7]
+                amplicon_coverage[amplicon]['readcount_total'] += row[4]
+                amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold'])] += row[6]
+                amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold2'])] += row[7]
+
+    with open(outfile, 'wb') as output:
+        output.write("Amplicon\tAvg Num Read per Sample\tAvg Percent {t1} per Sample\t"
+                     "Avg Percent {t2} per Sample".format(t1=config['coverage_threshold'],
+                                                          t2=config['coverage_threshold2']))
+        for sample in samples:
+            output.write("\t{s} Reads\t{s} percent {t1}\t{s} percent {t2}".format(s=sample,
+                                                                                  t1=config['coverage_threshold'],
+                                                                                  t2=config['coverage_threshold2']))
+        output.write("\n")
+        for amplicon in amplicon_coverage:
+            avg_reads = amplicon_coverage[amplicon]['readcount_total'] / num_samples
+            avg_perc1 = amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold'])] / num_samples
+            avg_perc2 = amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold2'])] / num_samples
+
+            output.write("{amp}\t{avg_reads}\t{avg_perc1}\t{avg_perc2}".format(amp=amplicon,
+                                                                               avg_reads=avg_reads,
+                                                                               avg_perc1=avg_perc1,
+                                                                               avg_perc2=avg_perc2))
+
+            for sample in samples:
+                output.write("\t{samp_reads}"
+                             "\t{s_perc1}"
+                             "\t{s_perc1}".format(samp_reads=amplicon[amplicon][sample],
+                                                  s_perc1=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold'])],
+                                                  s_perc2=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold1'])]))
+
+            output.write("\n")
+
+
 def bedtools_coverage_per_site(job, config, sample, input_bam):
     """Run BedTools to calculate the per-site coverage of targeted regions
     :param config: The configuration dictionary.
@@ -146,55 +192,55 @@ def bedtools_coverage_to_summary(job, config, sample, input_file):
     raise NotImplementedError
 
 
-def generate_coverage_report(job, config, vcfs):
-    """Take DiagnoseTargets data and generate a coverage report
-    :param config: The configuration dictionary.
-    :type config: dict..
-    :param vcfs: The list of input DiagnoseTargets generated vcf file names to process.
-    :type vcfs: str.
-    """
-
-    samples_coverage = {"Chr": [], "Start": [], "Stop": [], "Target": []}
-    first_pass = True
-
-    job.fileStore.logToMaster("Processing DiagnoseTargets outputs and writing to spreadsheet\n")
-    sys.stdout.write("Processing VCFs:\n")
-    for vcf in vcfs:
-        sys.stdout.write("{}\n".format(vcf))
-
-    for vcf in vcfs:
-        filter_field = "{}_filter".format(vcf)
-        depth_field = "{}_depth".format(vcf)
-        low_field = "{}_bp_low".format(vcf)
-        zero_field = "{}_bp_zero".format(vcf)
-
-        samples_coverage[filter_field] = list()
-        samples_coverage[depth_field] = list()
-        samples_coverage[low_field] = list()
-        samples_coverage[zero_field] = list()
-
-        targeted_regions = pybedtools.BedTool(config['regions'])
-        coverage_data = pybedtools.BedTool(vcf)
-        intersections = coverage_data.intersect(targeted_regions, loj=True)
-
-        for region in intersections:
-            if first_pass:
-                samples_coverage['Chr'].append(region.chrom)
-                samples_coverage['Start'].append(region.start)
-                samples_coverage['Stop'].append(region.stop)
-                samples_coverage['Target'].append(region[13])
-            reads_data = region[9].split(":")
-            samples_coverage[filter_field].append(region[6])
-            samples_coverage[depth_field].append(reads_data[-3])
-            samples_coverage[low_field].append(reads_data[-2])
-            samples_coverage[zero_field].append(reads_data[-1])
-
-        if first_pass:
-            first_pass = False
-
-    content = pyexcel.utils.dict_to_array(samples_coverage)
-    sheet = pyexcel.Sheet(content)
-    sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
+# def generate_coverage_report(job, config, vcfs):
+#     """Take DiagnoseTargets data and generate a coverage report
+#     :param config: The configuration dictionary.
+#     :type config: dict..
+#     :param vcfs: The list of input DiagnoseTargets generated vcf file names to process.
+#     :type vcfs: str.
+#     """
+#
+#     samples_coverage = {"Chr": [], "Start": [], "Stop": [], "Target": []}
+#     first_pass = True
+#
+#     job.fileStore.logToMaster("Processing DiagnoseTargets outputs and writing to spreadsheet\n")
+#     sys.stdout.write("Processing VCFs:\n")
+#     for vcf in vcfs:
+#         sys.stdout.write("{}\n".format(vcf))
+#
+#     for vcf in vcfs:
+#         filter_field = "{}_filter".format(vcf)
+#         depth_field = "{}_depth".format(vcf)
+#         low_field = "{}_bp_low".format(vcf)
+#         zero_field = "{}_bp_zero".format(vcf)
+#
+#         samples_coverage[filter_field] = list()
+#         samples_coverage[depth_field] = list()
+#         samples_coverage[low_field] = list()
+#         samples_coverage[zero_field] = list()
+#
+#         targeted_regions = pybedtools.BedTool(config['regions'])
+#         coverage_data = pybedtools.BedTool(vcf)
+#         intersections = coverage_data.intersect(targeted_regions, loj=True)
+#
+#         for region in intersections:
+#             if first_pass:
+#                 samples_coverage['Chr'].append(region.chrom)
+#                 samples_coverage['Start'].append(region.start)
+#                 samples_coverage['Stop'].append(region.stop)
+#                 samples_coverage['Target'].append(region[13])
+#             reads_data = region[9].split(":")
+#             samples_coverage[filter_field].append(region[6])
+#             samples_coverage[depth_field].append(reads_data[-3])
+#             samples_coverage[low_field].append(reads_data[-2])
+#             samples_coverage[zero_field].append(reads_data[-1])
+#
+#         if first_pass:
+#             first_pass = False
+#
+#     content = pyexcel.utils.dict_to_array(samples_coverage)
+#     sheet = pyexcel.Sheet(content)
+#     sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
 
 
 def read_coverage(job, config, sample, vcf):
