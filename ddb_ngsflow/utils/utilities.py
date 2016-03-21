@@ -117,6 +117,8 @@ def sambamba_coverage_summary(job, config, samples, outfile):
         coverage_file = "{}.sambamba_coverage.bed".format(sample)
         with open(coverage_file, 'rb') as coverage:
             reader = csv.reader(coverage, delimiter='\t')
+            # Skip header
+            reader.next()
             for row in reader:
                 amplicon = "{}-{}-{}-{}".format(row[0], row[1], row[2], row[3])
 
