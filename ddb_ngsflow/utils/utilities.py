@@ -151,7 +151,7 @@ def sambamba_coverage_summary(job, config, samples, outfile):
             for sample in samples:
                 output.write("\t{samp_reads}"
                              "\t{s_perc1}"
-                             "\t{s_perc1}".format(samp_reads=amplicon[amplicon][sample],
+                             "\t{s_perc1}".format(samp_reads=amplicon_coverage[amplicon][sample],
                                                   s_perc1=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold'])],
                                                   s_perc2=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold1'])]))
 
