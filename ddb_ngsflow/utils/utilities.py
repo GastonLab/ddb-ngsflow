@@ -120,12 +120,12 @@ def sambamba_coverage_summary(job, config, samples, outfile):
             for row in reader:
                 amplicon = "{}-{}-{}-{}".format(row[0], row[1], row[2], row[3])
 
-                amplicon_coverage[amplicon][sample] = row[4]
-                amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold'])] = row[6]
-                amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold2'])] = row[7]
-                amplicon_coverage[amplicon]['readcount_total'] += row[4]
-                amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold'])] += row[6]
-                amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold2'])] += row[7]
+                amplicon_coverage[amplicon][sample] = int(row[4])
+                amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold'])] = float(row[6])
+                amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold2'])] = float(row[7])
+                amplicon_coverage[amplicon]['readcount_total'] += int(row[4])
+                amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold'])] += float(row[6])
+                amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold2'])] += float(row[7])
 
     with open(outfile, 'wb') as output:
         output.write("Amplicon\tAvg Num Read per Sample\tAvg Percent {t1} per Sample\t"
