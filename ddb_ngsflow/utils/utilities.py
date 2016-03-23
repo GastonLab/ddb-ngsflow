@@ -150,13 +150,11 @@ def sambamba_coverage_summary(job, config, samples, summary_outfile, outfile):
 
                 for sample in samples:
                     output.write("{sample}\t{amp}\t{samp_reads}\t{s_perc1}\t"
-                                 "{s_perc1}".format(sample=sample,
+                                 "{s_perc1}\n".format(sample=sample,
                                                     amp=amplicon,
                                                     samp_reads=amplicon_coverage[amplicon][sample],
                                                     s_perc1=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold'])],
                                                     s_perc2=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold2'])]))
-
-                output.write("\n")
 
 
 def bedtools_coverage_per_site(job, config, sample, input_bam):
