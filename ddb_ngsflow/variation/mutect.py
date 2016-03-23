@@ -103,7 +103,6 @@ def mutect2_single(job, config, sample, samples, input_bam):
                       "{}".format(config['dbsnp']),
                       "--cosmic",
                       "{}".format(config['cosmic']),
-                      "-dt NONE",
                       "-drf DuplicateRead",
                       "-ip 100",
                       "-L",
