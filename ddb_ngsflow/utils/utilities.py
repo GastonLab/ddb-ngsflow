@@ -136,7 +136,7 @@ def sambamba_coverage_summary(job, config, samples, summary_outfile, outfile):
                                                                  t2=config['coverage_threshold2']))
             output.write("Sample\tAmplicon\tNum Reads\tPercent Bases at {t1}\t"
                          "Percent Bases at {t2}\n".format(t1=config['coverage_threshold'],
-                                                          t2=config['coverage_threshold1']))
+                                                          t2=config['coverage_threshold2']))
 
             for amplicon in amplicon_coverage:
                 avg_reads = amplicon_coverage[amplicon]['readcount_total'] / num_samples
