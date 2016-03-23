@@ -143,7 +143,7 @@ def sambamba_coverage_summary(job, config, samples, summary_outfile, outfile):
                 avg_perc1 = amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold'])] / num_samples
                 avg_perc2 = amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold2'])] / num_samples
 
-                summary.write("{amp}\t{avg_reads}\t{avg_perc1}\t{avg_perc2}".format(amp=amplicon,
+                summary.write("{amp}\t{avg_reads}\t{avg_perc1}\t{avg_perc2}\n".format(amp=amplicon,
                                                                                     avg_reads=avg_reads,
                                                                                     avg_perc1=avg_perc1,
                                                                                     avg_perc2=avg_perc2))
@@ -151,10 +151,10 @@ def sambamba_coverage_summary(job, config, samples, summary_outfile, outfile):
                 for sample in samples:
                     output.write("{sample}\t{amp}\t{samp_reads}\t{s_perc1}\t"
                                  "{s_perc1}\n".format(sample=sample,
-                                                    amp=amplicon,
-                                                    samp_reads=amplicon_coverage[amplicon][sample],
-                                                    s_perc1=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold'])],
-                                                    s_perc2=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold2'])]))
+                                                      amp=amplicon,
+                                                      samp_reads=amplicon_coverage[amplicon][sample],
+                                                      s_perc1=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold'])],
+                                                      s_perc2=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold2'])]))
 
 
 def bedtools_coverage_per_site(job, config, sample, input_bam):
