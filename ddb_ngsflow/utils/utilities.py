@@ -129,24 +129,34 @@ def sambamba_coverage_summary(job, config, samples, summary_outfile, outfile):
                 amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold'])] += float(row[6])
                 amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold2'])] += float(row[7])
 
+                if float(row[6]) >= 100:
+                    amplicon_coverage[amplicon]['num_samples_{}'.format(config['coverage_threshold'])] += 1
+                if float(row[7]) >= 100:
+                    amplicon_coverage[amplicon]['num_samples_{}'.format(config['coverage_threshold2'])] += 1
+
     with open(summary_outfile, 'wb') as summary:
         with open(outfile, 'wb') as output:
-            summary.write("Amplicon\tAvg Num Read per Sample\tAvg Percent {t1} per Sample\t"
-                          "Avg Percent {t2} per Sample\n".format(t1=config['coverage_threshold'],
-                                                                 t2=config['coverage_threshold2']))
+            summary.write("Amplicon\tAvg Num Read per Sample\tPercent Samples {t1}\tPercent Samples {t2}\t"
+                          "Avg Percent bases at {t1}\t"
+                          "Avg Percent bases at {t2}\n".format(t1=config['coverage_threshold'],
+                                                               t2=config['coverage_threshold2']))
+
             output.write("Sample\tAmplicon\tNum Reads\tPercent Bases at {t1}\t"
                          "Percent Bases at {t2}\n".format(t1=config['coverage_threshold'],
                                                           t2=config['coverage_threshold2']))
 
             for amplicon in amplicon_coverage:
                 avg_reads = amplicon_coverage[amplicon]['readcount_total'] / num_samples
+                perc_samples1 = amplicon_coverage[amplicon]['num_samples_{}'.format(config['coverage_threshold'])] / num_samples
+                perc_samples2 = amplicon_coverage[amplicon]['num_samples_{}'.format(config['coverage_threshold2'])] / num_samples
+
                 avg_perc1 = amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold'])] / num_samples
                 avg_perc2 = amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold2'])] / num_samples
 
-                summary.write("{amp}\t{avg_reads}\t{avg_perc1}\t{avg_perc2}\n".format(amp=amplicon,
-                                                                                      avg_reads=avg_reads,
-                                                                                      avg_perc1=avg_perc1,
-                                                                                      avg_perc2=avg_perc2))
+                summary.write("{amp}\t{avg_reads}\t{percs1}\t{percs2}\t"
+                              "{avg_perc1}\t{avg_perc2}\n".format(amp=amplicon, avg_reads=avg_reads,
+                                                                  percs1=perc_samples1, percs2=perc_samples2,
+                                                                  avg_perc1=avg_perc1, avg_perc2=avg_perc2))
 
                 for sample in samples:
                     output.write("{sample}\t{amp}\t{samp_reads}\t{s_perc1}\t"
