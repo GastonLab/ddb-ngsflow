@@ -44,6 +44,8 @@ def vardict_single(job, config, sample, samples, input_bam):
                "-g",
                "4",
                "-th",
+               "-a",
+               # "-F 0", Probably don't need this as duplicates aren't marked and ignoring secondary alignment good
                "{}".format(config['vardict']['num_cores']),
                "-f",
                "{}".format(config['min_alt_af']),

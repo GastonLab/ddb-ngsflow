@@ -22,12 +22,14 @@ def mutect_matched():
     raise NotImplementedError()
 
 
-def mutect_single(job, config, sample, input_bam):
+def mutect_single(job, config, sample, samples, input_bam):
     """Run MuTect on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
     :type sample: str.
+    :param samples: samples configuration dictionary
+    :type samples: dict
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The output vcf file name.
@@ -56,6 +58,14 @@ def mutect_single(job, config, sample, input_bam):
                       "{}".format(input_bam),
                       "--coverage_file",
                       "{}".format(sample_coverage),
+                      "-L",
+                      "{}".format(samples[sample]['regions']),
+                      "-isr",
+                      "INTERSECTION",
+                      "-im",
+                      "ALL",
+                      "-dt",
+                      "NONE",
                       "-o",
                       "{}".format(output_stats),
                       "-vcf",
