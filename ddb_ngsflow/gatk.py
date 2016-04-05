@@ -192,7 +192,7 @@ def filter_variants(job, config, sample, input_vcf):
     return output_vcf
 
 
-def run_mark_duplicates(job, config, sample, input_bam):
+def mark_duplicates(job, config, sample, input_bam):
     """Run Picard MarkDuplicates
     :param config: The configuration dictionary.
     :type config: dict.
@@ -216,7 +216,7 @@ def run_mark_duplicates(job, config, sample, input_bam):
                "INPUT={}".format(input_bam),
                "OUTPUT={}".format(output_bam))
 
-    job.fileStore.logToMaster("GATK BuildBamIndex Command: {}\n".format(command))
+    job.fileStore.logToMaster("Picard MarkDuplicates Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output_bam
