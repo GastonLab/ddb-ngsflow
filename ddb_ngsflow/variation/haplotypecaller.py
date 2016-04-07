@@ -67,7 +67,7 @@ def joint_variant_calling(job, config, sample, samples):
 
     gvcfs = list()
     for sample in samples:
-        gvcfs.append("{}.haplotypecaller.g.vcf".format(sample))
+        gvcfs.append("--variant {}.haplotypecaller.g.vcf".format(sample))
 
     gvcf_string = " ".join(gvcfs)
 
@@ -78,6 +78,7 @@ def joint_variant_calling(job, config, sample, samples):
                "{}".format(config['reference']),
                "{}".format(gvcf_string),
                "-o",
+               "-nt 24"
                "{}".format(vcf))
 
     job.fileStore.logToMaster("GenotypeVCFs Command: {}\n".format(command))
