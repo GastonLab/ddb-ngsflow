@@ -26,7 +26,7 @@ def haplotypecaller_single(job, config, name, samples, input_bam):
     gvcf = "{}.haplotypecaller.g.vcf".format(name)
     logfile = "{}.haplotypecaller_gvcf.log".format(name)
 
-    command = ("{}".format(config['gatk']['bin']),
+    command = ("{}".format(config['gatk-haplotypecaller']['bin']),
                "-T",
                "HaplotypeCaller",
                "-R",
@@ -71,13 +71,14 @@ def joint_variant_calling(job, config, name, samples):
 
     gvcf_string = " ".join(gvcfs)
 
-    command = ("{}".format(config['gatk']['bin']),
+    command = ("{}".format(config['gatk-jointgenotyper']['bin']),
                "-T",
                "GenotypeGVCFs",
                "-R",
                "{}".format(config['reference']),
                "{}".format(gvcf_string),
-               "-nt 24",
+               "-nt",
+               "{}".format(config['gatk-jointgenotyper']['num_cpus']),
                "-o",
                "{}".format(vcf))
 

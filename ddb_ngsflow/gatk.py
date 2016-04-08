@@ -120,13 +120,13 @@ def annotate_vcf(job, config, name, input_vcf, input_bam):
     output_vcf = "{}.annotated.vcf".format(name)
     annotation_logfile = "{}.variantannotation.log".format(name)
 
-    annotation_command = ("{}".format(config['gatk']['bin']),
+    annotation_command = ("{}".format(config['gatk-annotate']['bin']),
                           "-T",
                           "VariantAnnotator",
                           "-R",
                           "{}".format(config['reference']),
                           "-nt",
-                          "{}".format(config['gatk']['num_cores']),
+                          "{}".format(config['gatk-annotate']['num_cores']),
                           "--group",
                           "StandardAnnotation",
                           "--dbsnp",
@@ -160,7 +160,7 @@ def filter_variants(job, config, name, input_vcf):
     output_vcf = "{}.filtered.vcf".format(name)
     filter_log = "{}.variantfiltration.log".format(name)
 
-    filter_command = ("{}".format(config['gatk']['bin']),
+    filter_command = ("{}".format(config['gatk-filter']['bin']),
                       "-T",
                       "VariantFiltration",
                       "-R",
@@ -209,7 +209,7 @@ def mark_duplicates(job, config, name, input_bam):
     output_bam = "{}.dedup.sorted.bam".format(name)
     logfile = "{}.markduplicates.log".format(name)
 
-    command = ("{}".format(config['picard']['bin']),
+    command = ("{}".format(config['picard-dedup']['bin']),
                "MarkDuplicates",
                "CREATE_INDEX=true",
                "METRICS_FILE={}".format(metrics_file),
@@ -239,7 +239,7 @@ def add_or_replace_readgroups(job, config, name, input_bam):
     logfile = "{}.addreadgroups.log".format(name)
     index_log = "{}.buildindex.log".format(name)
 
-    command = ("{}".format(config['picard']['bin']),
+    command = ("{}".format(config['picard-add']['bin']),
                "AddOrReplaceReadGroups",
                "INPUT={}".format(input_bam),
                "OUTPUT={}".format(output_bam),
@@ -249,7 +249,7 @@ def add_or_replace_readgroups(job, config, name, input_bam):
                "RGPL=illumina",
                "RGPU=miseq")
 
-    command2 = ("{}".format(config['picard']['bin']),
+    command2 = ("{}".format(config['picard-add']['bin']),
                 "BuildBamIndex",
                 "INPUT={}".format(output_bam))
 
@@ -276,7 +276,7 @@ def realign_target_creator(job, config, name, input_bam):
     targets = "{}.targets.intervals".format(name)
     targets_log = "{}.targetcreation.log".format(name)
 
-    command = ("{}".format(config['gatk']['bin']),
+    command = ("{}".format(config['gatk-realign']['bin']),
                "-T",
                "RealignerTargetCreator",
                "-R",
@@ -290,7 +290,7 @@ def realign_target_creator(job, config, name, input_bam):
                "-known",
                "{}".format(config['indel2']),
                "-nt",
-               "{}".format(config['gatk']['num_cores'])
+               "{}".format(config['gatk-realign']['num_cores'])
                )
 
     job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
@@ -315,7 +315,7 @@ def realign_indels(job, config, name, input_bam, targets):
     output_bam = "{}.realigned.sorted.bam".format(name)
     realign_log = "{}.realignindels.log".format(name)
 
-    command = ("{}".format(config['gatk']['bin']),
+    command = ("{}".format(config['gatk-realign']['bin']),
                "-T",
                "IndelRealigner",
                "-R",
@@ -359,7 +359,7 @@ def recalibrator(job, config, name, input_bam):
     cp_log = "{}.copy.log".format(name)
 
     # Calculate covariates
-    recal_commands = ("{}".format(config['gatk']['bin']),
+    recal_commands = ("{}".format(config['gatk-recal']['bin']),
                       "-T",
                       "BaseRecalibrator",
                       "-R",
@@ -371,10 +371,10 @@ def recalibrator(job, config, name, input_bam):
                       "--knownSites",
                       "{}".format(config['dbsnp']),
                       "-nct",
-                      "{}".format(config['gatk']['num_cores']))
+                      "{}".format(config['gatk-recal']['num_cores']))
 
     # Print recalibrated BAM
-    print_reads_command = ("{}".format(config['gatk']['bin']),
+    print_reads_command = ("{}".format(config['gatk-recal']['bin']),
                            "-T",
                            "PrintReads",
                            "-R",
@@ -386,7 +386,7 @@ def recalibrator(job, config, name, input_bam):
                            "-BQSR",
                            "{}".format(recal_config),
                            "-nct",
-                           "{}".format(config['gatk']['num_cores']))
+                           "{}".format(config['gatk-recal']['num_cores']))
 
     # Copy index to alternative name
     cp_command = ("cp",
