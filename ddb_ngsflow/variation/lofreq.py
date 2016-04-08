@@ -10,7 +10,7 @@
 from ddb_ngsflow import pipeline
 
 
-def run_lowfreq(job, config, sample, input_bam):
+def run_lowfreq(job, config, name, input_bam):
     """Run LoFreq on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
@@ -21,8 +21,8 @@ def run_lowfreq(job, config, sample, input_bam):
     :returns:  str -- The output vcf file name.
     """
 
-    vcf = "{}.lofreq.vcf".format(sample)
-    logfile = "{}.lofreq.log".format(sample)
+    vcf = "{}.lofreq.vcf".format(name)
+    logfile = "{}.lofreq.log".format(name)
 
     command = ("{}".format(config['lofreq']['bin']),
                "somatic",

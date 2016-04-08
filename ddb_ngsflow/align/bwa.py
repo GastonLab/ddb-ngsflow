@@ -10,7 +10,7 @@
 from ddb_ngsflow import pipeline
 
 
-def run_bwa_mem(job, config, sample, samples):
+def run_bwa_mem(job, config, name, samples):
     """Run GATK's DiagnoseTargets against the supplied region
 
     :param config: The configuration dictionary.
@@ -25,11 +25,11 @@ def run_bwa_mem(job, config, sample, samples):
 
     """
 
-    job.fileStore.logToMaster("Running BWA for sample {}\n".format(sample))
+    job.fileStore.logToMaster("Running BWA for sample {}\n".format(name))
 
-    output_bam = "{}.bwa.sorted.bam".format(sample)
-    temp = "{}.bwa.sort.temp".format(sample)
-    logfile = "{}.bwa-align.log".format(sample)
+    output_bam = "{}.bwa.sorted.bam".format(name)
+    temp = "{}.bwa.sort.temp".format(name)
+    logfile = "{}.bwa-align.log".format(name)
 
     bwa_cmd = ["{}".format(config['bwa']['bin']),
                "mem",
@@ -39,8 +39,8 @@ def run_bwa_mem(job, config, sample, samples):
                "-v",
                "2",
                "{}".format(config['reference']),
-               "{}".format(samples[sample]['fastq1']),
-               "{}".format(samples[sample]['fastq2'])]
+               "{}".format(samples[name]['fastq1']),
+               "{}".format(samples[name]['fastq2'])]
 
     view_cmd = ["{}".format(config['samtools']['bin']),
                 "view",

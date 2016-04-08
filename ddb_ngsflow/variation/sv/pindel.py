@@ -11,18 +11,18 @@
 from ddb_ngsflow import pipeline
 
 
-def run_pindel(job, config, sample, input_bam):
+def run_pindel(job, config, name, input_bam):
     """Run pindel on samples"""
 
-    pindel_config = "{}.pindel_config.txt".format(sample)
-    output_dir = "{}_pindel".format(sample)
-    output_vcf = "{}.pindel.vcf".format(sample)
+    pindel_config = "{}.pindel_config.txt".format(name)
+    output_dir = "{}_pindel".format(name)
+    output_vcf = "{}.pindel.vcf".format(name)
 
-    logfile = "{}.pindel.log".format(sample)
-    vcf_logfile = "{}.pindel2vcf.log".format(sample)
+    logfile = "{}.pindel.log".format(name)
+    vcf_logfile = "{}.pindel2vcf.log".format(name)
 
     with open(pindel_config, 'w') as bam_config:
-        bam_config.write("%s %s %s\n" % (input_bam, config['insert_size'], sample))
+        bam_config.write("%s %s %s\n" % (input_bam, config['insert_size'], name))
 
     command = ("{}".format(config['pindel']['bin']),
                "-f",

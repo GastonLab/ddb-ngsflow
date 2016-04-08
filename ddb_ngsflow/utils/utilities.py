@@ -8,7 +8,6 @@
 
 """
 
-import sys
 import csv
 import pybedtools
 import multiprocessing
@@ -73,7 +72,7 @@ def generate_fastqc_summary_report(job, config, samples):
                         summary_file.write(line)
 
 
-def sambamba_region_coverage(job, config, sample, samples, input_bam):
+def sambamba_region_coverage(job, config, name, samples, input_bam):
     """Run SamBambam to calculate the coverage of targeted regions
     :param config: The configuration dictionary.
     :type config: dict.
@@ -86,13 +85,13 @@ def sambamba_region_coverage(job, config, sample, samples, input_bam):
     :returns:  str -- The output BED file name.
     """
 
-    output = "{}.sambamba_coverage.bed".format(sample)
-    logfile = "{}.sambamba_coverage.log".format(sample)
+    output = "{}.sambamba_coverage.bed".format(name)
+    logfile = "{}.sambamba_coverage.log".format(name)
 
     command = ("{}".format(config['sambamba']['bin']),
                "depth region",
                "-L",
-               "{}".format(samples[sample]['regions']),
+               "{}".format(samples[name]['regions']),
                "-t",
                "{}".format(config['sambamba']['num_cores']),
                "-T",
@@ -167,7 +166,7 @@ def sambamba_coverage_summary(job, config, samples, summary_outfile, outfile):
                                                       s_perc2=amplicon_coverage[amplicon]["{}_percent_{}".format(sample, config['coverage_threshold2'])]))
 
 
-def bedtools_coverage_per_site(job, config, sample, input_bam):
+def bedtools_coverage_per_site(job, config, name, input_bam):
     """Run BedTools to calculate the per-site coverage of targeted regions
     :param config: The configuration dictionary.
     :type config: dict.
@@ -178,8 +177,8 @@ def bedtools_coverage_per_site(job, config, sample, input_bam):
     :returns:  str -- The output BED file name.
     """
 
-    output = "{}.bedtools_coverage_per_site.bed".format(sample)
-    logfile = "{}.bedtools_coverage.log".format(sample)
+    output = "{}.bedtools_coverage_per_site.bed".format(name)
+    logfile = "{}.bedtools_coverage.log".format(name)
 
     coverage = ("{}".format(config['bedtools']['bin']),
                 "coverage",
@@ -197,7 +196,7 @@ def bedtools_coverage_per_site(job, config, sample, input_bam):
     return output
 
 
-def bedtools_coverage_to_summary(job, config, sample, input_file):
+def bedtools_coverage_to_summary(job, config, name, input_file):
     """Summarize outputs from BedTools coverage results"""
 
     raise NotImplementedError
@@ -254,7 +253,7 @@ def bedtools_coverage_to_summary(job, config, sample, input_file):
 #     sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
 
 
-def read_coverage(job, config, sample, vcf):
+def read_coverage(job, config, name, vcf):
     """Take DiagnoseTargets data return summarized results
     :param config: The configuration dictionary.
     :type config: dict.
@@ -297,7 +296,7 @@ def generate_coverage_summary(job, config, samples):
                     outfile.write("{sample}\t{region}\t{filter}\n".format(sample=sample, region=target_string, filter=samples[sample][target]['filter_field']))
 
 
-def bcftools_filter_variants_regions(job, config, sample, samples, input_vcf):
+def bcftools_filter_variants_regions(job, config, name, samples, input_vcf):
     """Use bcftools to filter vcf file to only variants found within the specified regions file
     :param config: The configuration dictionary.
     :type config: dict.
@@ -308,18 +307,18 @@ def bcftools_filter_variants_regions(job, config, sample, samples, input_vcf):
     :returns:  str -- The output vcf file name.
     """
 
-    filtered_vcf = "{}.on_target.vcf".format(sample)
-    sorted_vcf = "{}.on_target_sorted.vcf".format(sample)
+    filtered_vcf = "{}.on_target.vcf".format(name)
+    sorted_vcf = "{}.on_target_sorted.vcf".format(name)
     bgzipped_vcf = "{}.gz".format(input_vcf)
-    logfile = "{}.on_target_filter.log".format(sample)
-    sort_logfile = "{}.on_target_sorted.log".format(sample)
+    logfile = "{}.on_target_filter.log".format(name)
+    sort_logfile = "{}.on_target_sorted.log".format(name)
 
     bgzip_and_tabix_vcf(job, input_vcf)
 
     filter_command = ("{}".format(config['bcftools']['bin']),
                       "isec",
                       "-T",
-                      "{}".format(samples[sample]['regions']),
+                      "{}".format(samples[name]['regions']),
                       "{}".format(bgzipped_vcf),
                       ">",
                       "{}".format(filtered_vcf))
@@ -342,11 +341,11 @@ def bcftools_filter_variants_regions(job, config, sample, samples, input_vcf):
     return sorted_vcf
 
 
-def merge_samples(job, config, sample, input_vcf1, input_vcf2):
+def merge_samples(job, config, name, input_vcf1, input_vcf2):
     """Merge samples into a single VCF"""
 
-    output_vcf = "{}.ds.merged.vcf".format(sample)
-    logfile = "{}.ds_merging.log".format(sample)
+    output_vcf = "{}.ds.merged.vcf".format(name)
+    logfile = "{}.ds_merging.log".format(name)
 
     bgzipped_vcf1 = "{}.gz".format(input_vcf1)
     bgzipped_vcf2 = "{}.gz".format(input_vcf2)

@@ -62,7 +62,7 @@ def _run_gemini_query_and_filter(db, genes):
     return header, passing_rows
 
 
-def generate_variant_report(job, config, sample, genes, database):
+def generate_variant_report(job, config, name, genes, database):
     """Call the GEMINI Query API and generate a text variant report from the provided database
     :param config: The configuration dictionary.
     :type config: dict.
@@ -73,7 +73,7 @@ def generate_variant_report(job, config, sample, genes, database):
     :returns:  None
     """
 
-    filename = "{}.variant_report.txt".format(sample)
+    filename = "{}.variant_report.txt".format(name)
     header, variants = _run_gemini_query_and_filter(database, genes)
     with open(filename, 'w') as outfile:
         outfile.write("{}\n".format(header))

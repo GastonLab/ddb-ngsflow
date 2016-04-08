@@ -9,7 +9,7 @@
 from ddb_ngsflow import pipeline
 
 
-def pisces(job, config, sample, input_bam):
+def pisces(job, config, name, input_bam):
     """Run Pisces on a single sample
     :param config: The configuration dictionary.
     :type config: dict.
@@ -20,8 +20,8 @@ def pisces(job, config, sample, input_bam):
     :returns:  str -- The output vcf file name.
     """
 
-    output_vcf = "{}.pisces.vcf".format(sample)
-    logfile = "{}.pisces.log".format(sample)
+    output_vcf = "{}.pisces.vcf".format(name)
+    logfile = "{}.pisces.log".format(name)
     command = ("{}".format(config['pisces']['bin']),
                "-B",
                "-t",

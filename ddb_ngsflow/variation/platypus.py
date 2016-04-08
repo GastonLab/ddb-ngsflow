@@ -11,7 +11,7 @@ from ddb_ngsflow import pipeline
 
 
 # This needs to be fixed, new regions need to be defined for all targeted panels to use this
-def platypus_single(job, config, sample, samples, input_bam):
+def platypus_single(job, config, name, samples, input_bam):
     """Run Platypus on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
@@ -22,14 +22,14 @@ def platypus_single(job, config, sample, samples, input_bam):
     :returns:  str -- The output vcf file name.
     """
 
-    platypus_vcf = "{}.platypus.vcf".format(sample)
-    platypus_log = "{}.platypus.log".format(sample)
-    internal_log = "{}.platypus_internal.log".format(sample)
+    platypus_vcf = "{}.platypus.vcf".format(name)
+    platypus_log = "{}.platypus.log".format(name)
+    internal_log = "{}.platypus_internal.log".format(name)
 
     platypus_command = ("{}".format(config['platypus']['bin']),
                         "callVariants",
                         "--refFile={}".format(config['reference']),
-                        "--regions={}".format(samples[sample]['regions']),
+                        "--regions={}".format(samples[name]['regions']),
                         "--assemble=1",
                         "--assembleBadReads=1",
                         "--assembleBrokenPairs=1",

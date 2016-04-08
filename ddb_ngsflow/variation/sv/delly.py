@@ -3,7 +3,7 @@ import sys
 from ddb_ngsflow import pipeline
 
 
-def run_delly2_single(job, config, sample, input_bam):
+def run_delly2_single(job, config, name, input_bam):
     """Run delly2 for structural variant detection. As delly2 is parallelized on the level of samples,
     we use a single-threaded version
     :param config: The configuration dictionary.
@@ -23,8 +23,8 @@ def run_delly2_single(job, config, sample, input_bam):
                           "{}".format(config['reference']))
 
     for mut_type in ["DEL", "DUP", "TRA", "INV"]:
-        output_vcf = "{sample}.{type}.vcf".format(sample=sample, type=mut_type)
-        logfile = "{sample}.{type}.log".format(sample=sample, type=mut_type)
+        output_vcf = "{sample}.{type}.vcf".format(sample=name, type=mut_type)
+        logfile = "{sample}.{type}.log".format(sample=name, type=mut_type)
 
         delly_vcfs.append(output_vcf)
 

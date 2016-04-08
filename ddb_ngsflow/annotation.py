@@ -12,7 +12,7 @@
 import pipeline
 
 
-def snpeff(job, config, sample, input_vcf):
+def snpeff(job, config, name, input_vcf):
     """Annotate the specified VCF using snpEff
     :param config: The configuration dictionary.
     :type config: dict.
@@ -23,8 +23,8 @@ def snpeff(job, config, sample, input_vcf):
     :returns:  str -- The output vcf file name.
     """
 
-    output_vcf = "{}.snpEff.{}.vcf".format(sample, config['snpeff']['reference'])
-    logfile = "{}.snpeff.log".format(sample)
+    output_vcf = "{}.snpEff.{}.vcf".format(name, config['snpeff']['reference'])
+    logfile = "{}.snpeff.log".format(name)
 
     snpeff_command = ("{}".format(config['snpeff']['bin']),
                       "-Xmx{}g".format(config['snpeff']['max_mem']),
@@ -40,7 +40,7 @@ def snpeff(job, config, sample, input_vcf):
     return output_vcf
 
 
-def gemini(job, config, sample, input_vcf):
+def gemini(job, config, name, input_vcf):
     """Take the specified VCF and use GEMINI to add additional annotations and convert to database format
     :param config: The configuration dictionary.
     :type config: dict.
@@ -51,8 +51,8 @@ def gemini(job, config, sample, input_vcf):
     :returns:  str -- The output GEMINI database name.
     """
 
-    db = "{}.snpEff.{}.db".format(sample, config['snpeff']['reference'])
-    logfile = "{}.gemini.log".format(sample)
+    db = "{}.snpEff.{}.db".format(name, config['snpeff']['reference'])
+    logfile = "{}.gemini.log".format(name)
 
     command = ("{}".format(config['gemini']['bin']),
                "load",
@@ -71,7 +71,7 @@ def gemini(job, config, sample, input_vcf):
     return db
 
 
-def vcfanno(job, config, sample, input_vcf):
+def vcfanno(job, config, name, input_vcf):
     """Take the specified VCF and use vcfanno to add additional annotations
     :param config: The configuration dictionary.
     :type config: dict.
@@ -82,8 +82,8 @@ def vcfanno(job, config, sample, input_vcf):
     :returns:  str -- The output vcf file name.
     """
 
-    output_vcf = "{}.vcfanno.snpEff.{}.vcf".format(sample, config['snpeff']['reference'])
-    logfile = "{}.vcfanno.log".format(sample)
+    output_vcf = "{}.vcfanno.snpEff.{}.vcf".format(name, config['snpeff']['reference'])
+    logfile = "{}.vcfanno.log".format(name)
 
     command = ("{}".format(config['vcfanno']['bin']),
                "-p",

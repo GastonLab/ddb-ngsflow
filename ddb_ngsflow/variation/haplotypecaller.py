@@ -10,12 +10,12 @@
 from ddb_ngsflow import pipeline
 
 
-def haplotypecaller_single(job, config, sample, samples, input_bam):
+def haplotypecaller_single(job, config, name, samples, input_bam):
     """Generate gVCF files for a sample using the HaplotypeCaller
     :param config: The configuration dictionary.
     :type config: dict.
-    :param sample: sample name.
-    :type sample: str.
+    :param name: sample name.
+    :type name: str.
     :param samples: samples configuration dictionary
     :type samples: dict
     :param input_bam: The input_bam file name to process.
@@ -23,8 +23,8 @@ def haplotypecaller_single(job, config, sample, samples, input_bam):
     :returns:  str -- The output vcf file name.
     """
 
-    gvcf = "{}.haplotypecaller.g.vcf".format(sample)
-    logfile = "{}.haplotypecaller_gvcf.log".format(sample)
+    gvcf = "{}.haplotypecaller.g.vcf".format(name)
+    logfile = "{}.haplotypecaller_gvcf.log".format(name)
 
     command = ("{}".format(config['gatk']['bin']),
                "-T",
@@ -36,7 +36,7 @@ def haplotypecaller_single(job, config, sample, samples, input_bam):
                "-I",
                "{}".format(input_bam),
                "-L",
-               "{}".format(samples[sample]['regions']),
+               "{}".format(samples[name]['regions']),
                "--emitRefConfidence GVCF",
                "--variant_index_type LINEAR",
                "--variant_index_parameter 128000",
@@ -49,7 +49,7 @@ def haplotypecaller_single(job, config, sample, samples, input_bam):
     return gvcf
 
 
-def joint_variant_calling(job, config, sample, samples):
+def joint_variant_calling(job, config, name, samples):
     """Create a cohort VCF file based on joint calling from gVCF files
     :param config: The configuration dictionary.
     :type config: dict.
@@ -62,8 +62,8 @@ def joint_variant_calling(job, config, sample, samples):
     :returns:  str -- The output vcf file name.
     """
 
-    vcf = "{}.haplotypecaller.vcf".format(config['project'])
-    logfile = "{}.haplotypecaller_gvcf.log".format(config['project'])
+    vcf = "{}.haplotypecaller.vcf".format(name)
+    logfile = "{}.haplotypecaller_gvcf.log".format(name)
 
     gvcfs = list()
     for sample in samples:

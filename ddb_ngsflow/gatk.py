@@ -10,7 +10,7 @@
 import pipeline
 
 
-def diagnosetargets(job, config, sample, samples, input_bam):
+def diagnosetargets(job, config, name, samples, input_bam):
     """Run GATK's DiagnoseTargets against the supplied region
     :param config: The configuration dictionary.
     :type config: dict.
@@ -23,9 +23,9 @@ def diagnosetargets(job, config, sample, samples, input_bam):
     :returns:  str -- The DiagnoseTargets output vcf file name.
     """
 
-    diagnose_targets_vcf = "{}.diagnosetargets.vcf".format(sample)
-    missing_intervals = "{}.missing.intervals".format(sample)
-    logfile = "{}.diagnose_targets.log".format(sample)
+    diagnose_targets_vcf = "{}.diagnosetargets.vcf".format(name)
+    missing_intervals = "{}.missing.intervals".format(name)
+    logfile = "{}.diagnose_targets.log".format(name)
 
     command = ("{}".format(config['gatk']['bin']),
                "-T",
@@ -33,7 +33,7 @@ def diagnosetargets(job, config, sample, samples, input_bam):
                "-R",
                "{}".format(config['reference']),
                "-L",
-               "{}".format(samples[sample]['regions']),
+               "{}".format(samples[name]['regions']),
                "--coverage_status_threshold",
                "{}".format(config['coverage_loci_threshold']),
                "--bad_mate_status_threshold",
@@ -55,7 +55,7 @@ def diagnosetargets(job, config, sample, samples, input_bam):
     return diagnose_targets_vcf
 
 
-def diagnose_pooled_targets(job, config, sample, regions, samples, input_bam1, input_bam2):
+def diagnose_pooled_targets(job, config, name, regions, samples, input_bam1, input_bam2):
     """Run GATK's DiagnoseTargets against the supplied region
     :param config: The configuration dictionary.
     :type config: dict.
@@ -70,9 +70,9 @@ def diagnose_pooled_targets(job, config, sample, regions, samples, input_bam1, i
     :returns:  str -- The DiagnoseTargets output vcf file name.
     """
 
-    diagnose_targets_vcf = "{}_{}.diagnosetargets.vcf".format(sample, regions)
-    missing_intervals = "{}_{}.missing.intervals".format(sample, regions)
-    logfile = "{}.{}.diagnose_targets.log".format(sample, regions)
+    diagnose_targets_vcf = "{}_{}.diagnosetargets.vcf".format(name, regions)
+    missing_intervals = "{}_{}.missing.intervals".format(name, regions)
+    logfile = "{}.{}.diagnose_targets.log".format(name, regions)
 
     command = ("{}".format(config['gatk']['bin']),
                "-T",
@@ -80,7 +80,7 @@ def diagnose_pooled_targets(job, config, sample, regions, samples, input_bam1, i
                "-R",
                "{}".format(config['reference']),
                "-L",
-               "{}".format(samples[sample][regions]),
+               "{}".format(samples[name][regions]),
                "--coverage_status_threshold",
                "{}".format(config['coverage_loci_threshold']),
                "--bad_mate_status_threshold",
@@ -104,7 +104,7 @@ def diagnose_pooled_targets(job, config, sample, regions, samples, input_bam1, i
     return diagnose_targets_vcf
 
 
-def annotate_vcf(job, config, sample, input_vcf, input_bam):
+def annotate_vcf(job, config, name, input_vcf, input_bam):
     """Run GATK's VariantAnnotation on the specified VCF
     :param config: The configuration dictionary.
     :type config: dict.
@@ -117,8 +117,8 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     :returns:  str -- The output vcf file name.
     """
 
-    output_vcf = "{}.annotated.vcf".format(sample)
-    annotation_logfile = "{}.variantannotation.log".format(sample)
+    output_vcf = "{}.annotated.vcf".format(name)
+    annotation_logfile = "{}.variantannotation.log".format(name)
 
     annotation_command = ("{}".format(config['gatk']['bin']),
                           "-T",
@@ -146,7 +146,7 @@ def annotate_vcf(job, config, sample, input_vcf, input_bam):
     return output_vcf
 
 
-def filter_variants(job, config, sample, input_vcf):
+def filter_variants(job, config, name, input_vcf):
     """Run GATK's VariantFilter on the specified VCF
     :param config: The configuration dictionary.
     :type config: dict.
@@ -157,8 +157,8 @@ def filter_variants(job, config, sample, input_vcf):
     :returns:  str -- The output vcf file name.
     """
 
-    output_vcf = "{}.filtered.vcf".format(sample)
-    filter_log = "{}.variantfiltration.log".format(sample)
+    output_vcf = "{}.filtered.vcf".format(name)
+    filter_log = "{}.variantfiltration.log".format(name)
 
     filter_command = ("{}".format(config['gatk']['bin']),
                       "-T",
@@ -192,7 +192,7 @@ def filter_variants(job, config, sample, input_vcf):
     return output_vcf
 
 
-def mark_duplicates(job, config, sample, input_bam):
+def mark_duplicates(job, config, name, input_bam):
     """Run Picard MarkDuplicates
     :param config: The configuration dictionary.
     :type config: dict.
@@ -203,11 +203,11 @@ def mark_duplicates(job, config, sample, input_bam):
     :returns:  str -- The output bam file name.
     """
 
-    job.fileStore.logToMaster("Running MarkDuplicates for sample: {}".format(sample))
+    job.fileStore.logToMaster("Running MarkDuplicates for sample: {}".format(name))
 
-    metrics_file = "{}.dedup.metrics".format(sample)
-    output_bam = "{}.dedup.sorted.bam".format(sample)
-    logfile = "{}.markduplicates.log".format(sample)
+    metrics_file = "{}.dedup.metrics".format(name)
+    output_bam = "{}.dedup.sorted.bam".format(name)
+    logfile = "{}.markduplicates.log".format(name)
 
     command = ("{}".format(config['picard']['bin']),
                "MarkDuplicates",
@@ -222,7 +222,7 @@ def mark_duplicates(job, config, sample, input_bam):
     return output_bam
 
 
-def add_or_replace_readgroups(job, config, sample, input_bam):
+def add_or_replace_readgroups(job, config, name, input_bam):
     """Run Picard's AddOrReplaceReadGroups on the specified BAM
     :param config: The configuration dictionary.
     :type config: dict.
@@ -233,19 +233,19 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     :returns:  str -- The output bam file name.
     """
 
-    job.fileStore.logToMaster("Running AddOrReplaceReadGroups in sample: {}".format(sample))
+    job.fileStore.logToMaster("Running AddOrReplaceReadGroups in sample: {}".format(name))
 
-    output_bam = "{}.rg.sorted.bam".format(sample)
-    logfile = "{}.addreadgroups.log".format(sample)
-    index_log = "{}.buildindex.log".format(sample)
+    output_bam = "{}.rg.sorted.bam".format(name)
+    logfile = "{}.addreadgroups.log".format(name)
+    index_log = "{}.buildindex.log".format(name)
 
     command = ("{}".format(config['picard']['bin']),
                "AddOrReplaceReadGroups",
                "INPUT={}".format(input_bam),
                "OUTPUT={}".format(output_bam),
-               "RGID={}".format(sample),
-               "RGSM={}".format(sample),
-               "RGLB={}".format(sample),
+               "RGID={}".format(name),
+               "RGSM={}".format(name),
+               "RGLB={}".format(name),
                "RGPL=illumina",
                "RGPU=miseq")
 
@@ -262,7 +262,7 @@ def add_or_replace_readgroups(job, config, sample, input_bam):
     return output_bam
 
 
-def realign_target_creator(job, config, sample, input_bam):
+def realign_target_creator(job, config, name, input_bam):
     """Run GATK TargetCreator on the specified BAM to identify targets for realignment
     :param config: The configuration dictionary.
     :type config: dict.
@@ -273,8 +273,8 @@ def realign_target_creator(job, config, sample, input_bam):
     :returns:  str -- The file name of the targets file.
     """
 
-    targets = "{}.targets.intervals".format(sample)
-    targets_log = "{}.targetcreation.log".format(sample)
+    targets = "{}.targets.intervals".format(name)
+    targets_log = "{}.targetcreation.log".format(name)
 
     command = ("{}".format(config['gatk']['bin']),
                "-T",
@@ -299,7 +299,7 @@ def realign_target_creator(job, config, sample, input_bam):
     return targets
 
 
-def realign_indels(job, config, sample, input_bam, targets):
+def realign_indels(job, config, name, input_bam, targets):
     """Run GATK Indel Realignment on the specified BAM
     :param config: The configuration dictionary.
     :type config: dict.
@@ -312,8 +312,8 @@ def realign_indels(job, config, sample, input_bam, targets):
     :returns:  str -- The output bam file name.
     """
 
-    output_bam = "{}.realigned.sorted.bam".format(sample)
-    realign_log = "{}.realignindels.log".format(sample)
+    output_bam = "{}.realigned.sorted.bam".format(name)
+    realign_log = "{}.realignindels.log".format(name)
 
     command = ("{}".format(config['gatk']['bin']),
                "-T",
@@ -339,7 +339,7 @@ def realign_indels(job, config, sample, input_bam, targets):
     return output_bam
 
 
-def recalibrator(job, config, sample, input_bam):
+def recalibrator(job, config, name, input_bam):
     """Run GATK Recalibrator on the specified BAM
 
     :param config: The configuration dictionary.
@@ -352,11 +352,11 @@ def recalibrator(job, config, sample, input_bam):
 
     """
 
-    output_bam = "{}.recalibrated.sorted.bam".format(sample)
-    recal_config = "{}.recal".format(sample)
-    recal_log = "{}.recalibrate.log".format(sample)
-    print_log = "{}.printrecalibrated.log".format(sample)
-    cp_log = "{}.copy.log".format(sample)
+    output_bam = "{}.recalibrated.sorted.bam".format(name)
+    recal_config = "{}.recal".format(name)
+    recal_log = "{}.recalibrate.log".format(name)
+    print_log = "{}.printrecalibrated.log".format(name)
+    cp_log = "{}.copy.log".format(name)
 
     # Calculate covariates
     recal_commands = ("{}".format(config['gatk']['bin']),
@@ -390,8 +390,8 @@ def recalibrator(job, config, sample, input_bam):
 
     # Copy index to alternative name
     cp_command = ("cp",
-                  "{}.recalibrated.sorted.bai".format(sample),
-                  "{}.recalibrated.sorted.bam.bai".format(sample))
+                  "{}.recalibrated.sorted.bai".format(name),
+                  "{}.recalibrated.sorted.bam.bai".format(name))
 
     job.fileStore.logToMaster("GATK BaseRecalibrator Command: {}\n".format(recal_commands))
     pipeline.run_and_log_command(" ".join(recal_commands), recal_log)

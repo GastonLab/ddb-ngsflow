@@ -22,7 +22,7 @@ def mutect_matched():
     raise NotImplementedError()
 
 
-def mutect_single(job, config, sample, samples, input_bam):
+def mutect_single(job, config, name, samples, input_bam):
     """Run MuTect on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
@@ -35,14 +35,14 @@ def mutect_single(job, config, sample, samples, input_bam):
     :returns:  str -- The output vcf file name.
     """
 
-    mutect_vcf = "{}.mutect.vcf".format(sample)
-    temp_mutect = "{}.tempmutect.vcf".format(sample)
+    mutect_vcf = "{}.mutect.vcf".format(name)
+    temp_mutect = "{}.tempmutect.vcf".format(name)
 
-    output_stats = "{}.mutectstats.txt".format(sample)
-    sample_coverage = "{}.mutectcoverage.wig.txt".format(sample)
+    output_stats = "{}.mutectstats.txt".format(name)
+    sample_coverage = "{}.mutectcoverage.wig.txt".format(name)
 
-    mutect_logfile = "{}.mutect.log".format(sample)
-    subset_log = "{}.mutect_subset.log".format(sample)
+    mutect_logfile = "{}.mutect.log".format(name)
+    subset_log = "{}.mutect_subset.log".format(name)
 
     mutect_command = ("{}".format(config['mutect']['bin']),
                       "-T",
@@ -59,7 +59,7 @@ def mutect_single(job, config, sample, samples, input_bam):
                       "--coverage_file",
                       "{}".format(sample_coverage),
                       "-L",
-                      "{}".format(samples[sample]['regions']),
+                      "{}".format(samples[name]['regions']),
                       "-isr",
                       "INTERSECTION",
                       "-im",
@@ -77,7 +77,7 @@ def mutect_single(job, config, sample, samples, input_bam):
                       "{}".format(config['vcftools_subset']['bin']),
                       "-e",
                       "-c",
-                      "{}".format(sample),
+                      "{}".format(name),
                       ">",
                       "{}".format(mutect_vcf))
 
@@ -90,7 +90,7 @@ def mutect_single(job, config, sample, samples, input_bam):
     return mutect_vcf
 
 
-def mutect2_single(job, config, sample, samples, input_bam):
+def mutect2_single(job, config, name, samples, input_bam):
     """Run MuTect on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
@@ -101,8 +101,8 @@ def mutect2_single(job, config, sample, samples, input_bam):
     :returns:  str -- The output vcf file name.
     """
 
-    mutect_vcf = "{}.mutect2.vcf".format(sample)
-    mutect_logfile = "{}.mutect2.log".format(sample)
+    mutect_vcf = "{}.mutect2.vcf".format(name)
+    mutect_logfile = "{}.mutect2.log".format(name)
 
     mutect_command = ("{}".format(config['gatk3.5']['bin']),
                       "-T",
@@ -116,7 +116,7 @@ def mutect2_single(job, config, sample, samples, input_bam):
                       "-drf DuplicateRead",
                       "-ip 100",
                       "-L",
-                      "{}".format(samples[sample]['regions']),
+                      "{}".format(samples[name]['regions']),
                       "-nct",
                       "{}".format(config['gatk3.5']['num_cores']),
                       "-I:tumor",

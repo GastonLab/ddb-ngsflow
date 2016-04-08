@@ -9,19 +9,19 @@
 from ddb_ngsflow import pipeline
 
 
-def freebayes_single(job, config, sample, input_bam):
+def freebayes_single(job, config, name, input_bam):
     """Run FreeBayes without a matched normal sample
     :param config: The configuration dictionary.
     :type config: dict.
-    :param sample: sample name.
-    :type sample: str.
+    :param name: sample name.
+    :type name: str.
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The output vcf file name.
     """
 
-    freebayes_vcf = "{}.freebayes.vcf".format(sample)
-    logfile = "{}.freebayes.log".format(sample)
+    freebayes_vcf = "{}.freebayes.vcf".format(name)
+    logfile = "{}.freebayes.log".format(name)
 
     command = ("{}".format(config['freebayes']['bin']),
                "--fasta-reference",

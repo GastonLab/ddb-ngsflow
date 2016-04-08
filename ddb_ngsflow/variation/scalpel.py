@@ -13,7 +13,7 @@ import os
 from ddb_ngsflow import pipeline
 
 
-def scalpel_single(job, config, sample, samples, input_bam):
+def scalpel_single(job, config, name, samples, input_bam):
     """Run Scalpel on an an unmatched tumour sample and call somatic variants
     :param config: The configuration dictionary.
     :type config: dict.
@@ -25,11 +25,11 @@ def scalpel_single(job, config, sample, samples, input_bam):
     """
 
     cwd = os.getcwd()
-    output_dir = os.path.join(cwd, "{}-scalpel-output".format(sample))
+    output_dir = os.path.join(cwd, "{}-scalpel-output".format(name))
     scalpel_vcf = os.path.join(output_dir, "variants.indel.vcf")
-    fixed_vcf = "{}.scalpel.vcf".format(sample)
-    logfile = "{}.scalpel.log".format(sample)
-    logfile2 = "{}.scalpel_fix.log".format(sample)
+    fixed_vcf = "{}.scalpel.vcf".format(name)
+    logfile = "{}.scalpel.log".format(name)
+    logfile2 = "{}.scalpel_fix.log".format(name)
 
     scalpel_command = ("{}".format(config['scalpel']['bin']),
                        "--single",
@@ -41,7 +41,7 @@ def scalpel_single(job, config, sample, samples, input_bam):
                        "--ref",
                        "{}".format(config['reference']),
                        "--bed",
-                       "{}".format(samples[sample]['regions']),
+                       "{}".format(samples[name]['regions']),
                        "--format",
                        "vcf",
                        "--numprocs",
@@ -55,7 +55,7 @@ def scalpel_single(job, config, sample, samples, input_bam):
                                "{}".format(scalpel_vcf),
                                "|",
                                "sed",
-                               "'s/sample/{}/g'".format(sample),
+                               "'s/sample/{}/g'".format(name),
                                ">",
                                "{}".format(fixed_vcf))
 
