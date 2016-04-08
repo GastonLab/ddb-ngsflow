@@ -77,8 +77,8 @@ def joint_variant_calling(job, config, sample, samples):
                "-R",
                "{}".format(config['reference']),
                "{}".format(gvcf_string),
+               "-nt 24",
                "-o",
-               "-nt 24"
                "{}".format(vcf))
 
     job.fileStore.logToMaster("GenotypeVCFs Command: {}\n".format(command))
