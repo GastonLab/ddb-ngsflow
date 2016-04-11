@@ -95,7 +95,7 @@ def vcfanno(job, config, name, input_vcf):
                ">",
                "{}".format(output_vcf))
 
-    job.fileStore.logToMaster("GEMINI Command: {}\n".format(command))
+    job.fileStore.logToMaster("VCFAnno Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output_vcf

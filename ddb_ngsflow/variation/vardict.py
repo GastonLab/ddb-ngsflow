@@ -43,10 +43,10 @@ def vardict_single(job, config, name, samples, input_bam):
                "3",
                "-g",
                "4",
-               "-th",
-               "-a",
-               # "-F 0", Probably don't need this as duplicates aren't marked and ignoring secondary alignment good
+               "-B",
                "{}".format(config['vardict']['num_cores']),
+               # "-a", the amplicon flag seems to be creating errors
+               # "-F 0", Probably don't need this as duplicates aren't marked and ignoring secondary alignment good
                "-f",
                "{}".format(config['min_alt_af']),
                "-N",
