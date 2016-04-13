@@ -78,7 +78,7 @@ def joint_variant_calling(job, config, name, samples):
                "{}".format(config['reference']),
                "{}".format(gvcf_string),
                "-nt",
-               "{}".format(config['gatk-jointgenotyper']['num_cpus']),
+               "{}".format(config['gatk-jointgenotyper']['num_cores']),
                "-o",
                "{}".format(vcf))
 
