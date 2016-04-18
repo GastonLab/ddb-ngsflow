@@ -178,37 +178,37 @@ def sambamba_coverage_analysis_job(job, config, samples, outfile):
             perc_samples2 = amplicon_coverage[amplicon]['num_samples_{}'.format(config['coverage_threshold2'])] / num_samples
 
             perc_samples_t1 = amplicon_coverage[amplicon]['num_samples_{}_{}'.format(config['coverage_threshold'],
-                                                                                     samples[sample]['T'])] / num_t
+                                                                                     "T")] / num_t
             perc_samples_t2 = amplicon_coverage[amplicon]['num_samples_{}_{}'.format(config['coverage_threshold2'],
-                                                                                     samples[sample]['T'])] / num_t
+                                                                                     "T")] / num_t
 
             perc_samples_mp1 = amplicon_coverage[amplicon]['num_samples_{}_{}'.format(config['coverage_threshold'],
-                                                                                      samples[sample]['MP'])] / num_mp
+                                                                                      "MP")] / num_mp
             perc_samples_mp2 = amplicon_coverage[amplicon]['num_samples_{}_{}'.format(config['coverage_threshold2'],
-                                                                                      samples[sample]['MP'])] / num_mp
+                                                                                      "MP")] / num_mp
 
             perc_samples_cmp1 = amplicon_coverage[amplicon]['num_samples_{}_{}'.format(config['coverage_threshold'],
-                                                                                       samples[sample]['CMP'])] / num_cmp
+                                                                                       "CMP")] / num_cmp
             perc_samples_cmp2 = amplicon_coverage[amplicon]['num_samples_{}_{}'.format(config['coverage_threshold2'],
-                                                                                       samples[sample]['CMP'])] / num_cmp
+                                                                                       "CMP")] / num_cmp
 
             avg_perc1 = amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold'])] / num_samples
             avg_perc2 = amplicon_coverage[amplicon]['percent_{}_total'.format(config['coverage_threshold2'])] / num_samples
 
             avg_perc_t1 = amplicon_coverage[amplicon]['percent_{}_total_{}'.format(config['coverage_threshold'],
-                                                                                   samples[sample]['T'])] / num_t
+                                                                                   "T")] / num_t
             avg_perc_t2 = amplicon_coverage[amplicon]['percent_{}_total_{}'.format(config['coverage_threshold2'],
-                                                                                   samples[sample]['T'])] / num_t
+                                                                                   "T")] / num_t
 
             avg_perc_mp1 = amplicon_coverage[amplicon]['percent_{}_total_{}'.format(config['coverage_threshold'],
-                                                                                    samples[sample]['MP'])] / num_mp
+                                                                                    "MP")] / num_mp
             avg_perc_mp2 = amplicon_coverage[amplicon]['percent_{}_total_{}'.format(config['coverage_threshold2'],
-                                                                                    samples[sample]['MP'])] / num_mp
+                                                                                    "MP")] / num_mp
 
             avg_perc_cmp1 = amplicon_coverage[amplicon]['percent_{}_total_{}'.format(config['coverage_threshold'],
-                                                                                     samples[sample]['CMP'])] / num_cmp
+                                                                                     "CMP")] / num_cmp
             avg_perc_cmp2 = amplicon_coverage[amplicon]['percent_{}_total_{}'.format(config['coverage_threshold2'],
-                                                                                     samples[sample]['CMP'])] / num_cmp
+                                                                                     "CMP")] / num_cmp
 
             summary.write("{amp}\t{avg_reads}\t{percs1}\t{percs2}\t{percst1}\t{percst2}\t{percsmp1}\t{percsmp2}\t"
                           "{percscmp1}\t{percscmp2}\t{avg_perc1}\t{avg_perc2}\t{avg_perct1}\t{avg_perct2}"
