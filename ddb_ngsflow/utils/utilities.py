@@ -211,8 +211,8 @@ def sambamba_coverage_analysis_job(job, config, samples, outfile):
                                                                                      "CMP")] / num_cmp
 
             summary.write("{amp}\t{avg_reads}\t{percs1}\t{percs2}\t{percst1}\t{percst2}\t{percsmp1}\t{percsmp2}\t"
-                          "{percscmp1}\t{percscmp2}\t{avg_perc1}\t{avg_perc2}\t{avg_perct1}\t{avg_perct2}"
-                          "{avg_percmp1}\t{avg_percmp2}"
+                          "{percscmp1}\t{percscmp2}\t{avg_perc1}\t{avg_perc2}\t{avg_perct1}\t{avg_perct2}\t"
+                          "{avg_percmp1}\t{avg_percmp2}\t"
                           "{avg_perccmp1}\t{avg_perccmp2}"
                           "\n".format(amp=amplicon, avg_reads=avg_reads, percs1=perc_samples1, percs2=perc_samples2,
                                       percst1=perc_samples_t1, percst2=perc_samples_t2,
