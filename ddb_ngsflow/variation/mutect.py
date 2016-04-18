@@ -77,7 +77,7 @@ def mutect_single(job, config, name, samples, input_bam):
                       "{}".format(config['vcftools_subset']['bin']),
                       "-e",
                       "-c",
-                      "{}".format(samples[name]['library_name']),
+                      "{}".format(name),
                       ">",
                       "{}".format(mutect_vcf))
 
