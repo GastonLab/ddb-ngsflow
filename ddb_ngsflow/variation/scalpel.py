@@ -11,6 +11,7 @@
 import os
 
 from ddb_ngsflow import pipeline
+from toil.job import JobException
 
 
 def scalpel_single(job, config, name, samples, input_bam):
@@ -65,4 +66,11 @@ def scalpel_single(job, config, name, samples, input_bam):
     job.fileStore.logToMaster("Scalpel Fix Command: {}\n".format(fix_sample_name_command))
     pipeline.run_and_log_command(" ".join(fix_sample_name_command), logfile2)
 
-    return scalpel_vcf
+    file_path = os.path.join(cwd, fixed_vcf)
+    if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+        return scalpel_vcf
+    else:
+        job.fileStore.logToMaster("Scalpel ran into a problem and no output was generated for file {}. Check logfile"
+                                  "{} for details\n".format(scalpel_vcf, logfile))
+        return JobException("Scalpel ran into a problem and no output was generated for file {}. Check logfile"
+                            "{} for details\n".format(scalpel_vcf, logfile))
