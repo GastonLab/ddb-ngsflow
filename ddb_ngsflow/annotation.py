@@ -71,7 +71,7 @@ def gemini(job, config, name, input_vcf):
     return db
 
 
-def vcfanno(job, config, name, input_vcf):
+def vcfanno(job, config, name, samples, input_vcf):
     """Take the specified VCF and use vcfanno to add additional annotations
     :param config: The configuration dictionary.
     :type config: dict.
@@ -90,7 +90,7 @@ def vcfanno(job, config, name, input_vcf):
                "{}".format(config['vcfanno']['num_cores']),
                "--lua",
                "{}".format(config['vcfanno']['lua']),
-               "{}".format(config['vcfanno']['conf']),
+               "{}".format(samples[name]['vcfanno_config']),
                "{}".format(input_vcf),
                ">",
                "{}".format(output_vcf))
