@@ -34,7 +34,8 @@ def salmon_paired(job, config, name, samples):
                "--numBootstraps {}".format(config['salmon']['num_bootstraps']),
                "--biasCorrect",
                "--useFSPD",
-               "-r {}".format(samples[name]['fastq1']),
+               "-1 {}".format(samples[name]['fastq1']),
+               "-2 {}".format(samples[name]['fastq2']),
                "-o {}".format(output_dir)
                )
 
