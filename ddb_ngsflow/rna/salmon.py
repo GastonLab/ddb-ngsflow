@@ -88,7 +88,7 @@ def salmonEM_unpaired(job, config, name, samples):
     :returns:  str -- The output vcf file name.
     """
 
-    output_dir = "{}.salmon.output".format(name)
+    output_dir = "{}.salmon_quant".format(name)
     logfile = "{}.salmon.log".format(name)
 
     command = ("{} quant".format(config['salmon']['bin']),
