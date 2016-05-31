@@ -40,7 +40,7 @@ def salmon_paired(job, config, name, samples):
                )
 
     job.fileStore.logToMaster("Salmon Command: {}\n".format(command))
-    pipeline.run_and_log_command(command, logfile)
+    pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output_dir
 
@@ -72,7 +72,7 @@ def salmon_unpaired(job, config, name, samples):
                )
 
     job.fileStore.logToMaster("Salmon Command: {}\n".format(command))
-    pipeline.run_and_log_command(command, logfile)
+    pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output_dir
 
@@ -103,6 +103,6 @@ def salmonEM_unpaired(job, config, name, samples):
                )
 
     job.fileStore.logToMaster("Salmon Command: {}\n".format(command))
-    pipeline.run_and_log_command(command, logfile)
+    pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output_dir
