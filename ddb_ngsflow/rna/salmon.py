@@ -13,7 +13,7 @@ from ddb_ngsflow import pipeline
 
 
 def salmonVB_paired(job, config, name, samples):
-    """Annotate the specified VCF using snpEff
+    """Run Salmon Quasi-Mapping with Paired-End data using the VB optimization algorithm
     :param config: The configuration dictionary.
     :type config: dict.
     :param name: sample name.
@@ -46,7 +46,7 @@ def salmonVB_paired(job, config, name, samples):
 
 
 def salmonEM_paired(job, config, name, samples):
-    """Annotate the specified VCF using snpEff
+    """Run Salmon Quasi-Mapping with Paired-End data using the EM optimization algorithm
     :param config: The configuration dictionary.
     :type config: dict.
     :param name: sample name.
@@ -78,7 +78,7 @@ def salmonEM_paired(job, config, name, samples):
 
 
 def salmonVB_unpaired(job, config, name, samples):
-    """Annotate the specified VCF using snpEff
+    """Run Salmon Quasi-Mapping with single-end data using the VB optimization algorithm
     :param config: The configuration dictionary.
     :type config: dict.
     :param name: sample name.
@@ -110,7 +110,7 @@ def salmonVB_unpaired(job, config, name, samples):
 
 
 def salmonEM_unpaired(job, config, name, samples):
-    """Annotate the specified VCF using snpEff
+    """Run Salmon Quasi-Mapping with single end data using the EM optimization algorithm
     :param config: The configuration dictionary.
     :type config: dict.
     :param name: sample name.
