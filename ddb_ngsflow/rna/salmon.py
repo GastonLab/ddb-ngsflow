@@ -12,7 +12,7 @@
 from ddb_ngsflow import pipeline
 
 
-def salmon_paired(job, config, name, samples):
+def salmonVB_paired(job, config, name, samples):
     """Annotate the specified VCF using snpEff
     :param config: The configuration dictionary.
     :type config: dict.
@@ -45,7 +45,39 @@ def salmon_paired(job, config, name, samples):
     return output_dir
 
 
-def salmon_unpaired(job, config, name, samples):
+def salmonEM_paired(job, config, name, samples):
+    """Annotate the specified VCF using snpEff
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param name: sample name.
+    :type name: str.
+    :param samples: The samples info and config dictionary.
+    :type samples: dict.
+    :returns:  str -- The output vcf file name.
+    """
+
+    output_dir = "{}.salmon.output".format(name)
+    logfile = "{}.salmon.log".format(name)
+
+    command = ("{} quant".format(config['salmon']['bin']),
+               "-i {}".format(config['salmon']['index']),
+               "-l {}".format(samples[name]['library_type']),
+               "-p {}".format(config['salmon']['num_cores']),
+               "--numBootstraps {}".format(config['salmon']['num_bootstraps']),
+               "--biasCorrect",
+               "--useFSPD",
+               "-1 {}".format(samples[name]['fastq1']),
+               "-2 {}".format(samples[name]['fastq2']),
+               "-o {}".format(output_dir)
+               )
+
+    job.fileStore.logToMaster("Salmon Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_dir
+
+
+def salmonVB_unpaired(job, config, name, samples):
     """Annotate the specified VCF using snpEff
     :param config: The configuration dictionary.
     :type config: dict.
