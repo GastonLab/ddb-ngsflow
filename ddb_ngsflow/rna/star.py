@@ -27,7 +27,7 @@ def star_paired_uncompressed_basic(job, config, name, samples):
     logfile = "{}.star.log".format(name)
 
     command = ("{}".format(config['star']['bin']),
-               "--genomeDir {}".format(config['star']['reference']),
+               "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
                "--outFileNamePrefix {}".format(output_dir)
@@ -54,7 +54,7 @@ def star_unpaired_uncompressed_basic(job, config, name, samples):
     logfile = "{}.star.log".format(name)
 
     command = ("{}".format(config['star']['bin']),
-               "--genomeDir {}".format(config['star']['reference']),
+               "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {}".format(samples[name]['fastq1']),
                "--outFileNamePrefix {}".format(output_dir)
@@ -81,7 +81,7 @@ def star_paired_compressed_basic(job, config, name, samples):
     logfile = "{}.star.log".format(name)
 
     command = ("{}".format(config['star']['bin']),
-               "--genomeDir {}".format(config['star']['reference']),
+               "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
                "--readFilesCommand {}".format(config['compression']),
@@ -109,7 +109,7 @@ def star_paired_uncompressed_encode(job, config, name, samples):
     logfile = "{}.star.log".format(name)
 
     command = ("{}".format(config['star']['bin']),
-               "--genomeDir {}".format(config['star']['reference']),
+               "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
                "--outFilterType BySJout",
@@ -143,7 +143,7 @@ def star_paired_compressed_encode(job, config, name, samples):
     logfile = "{}.star.log".format(name)
 
     command = ("{}".format(config['star']['bin']),
-               "--genomeDir {}".format(config['star']['reference']),
+               "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
                "--outFilterType BySJout",
