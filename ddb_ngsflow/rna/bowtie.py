@@ -12,7 +12,14 @@
 from ddb_ngsflow import pipeline
 
 
-def bowtie_unpaired(job, config, name, samples):
+def add_additional_options(command_list, config, flags):
+    if 'local' in flags:
+        command_list.append("--local")
+
+    return command_list
+
+
+def bowtie_unpaired(job, config, name, samples, flags):
     """Align RNA-Seq data to a reference using Bowtie2
     :param config: The configuration dictionary.
     :type config: dict.
@@ -33,13 +40,15 @@ def bowtie_unpaired(job, config, name, samples):
                "-S {}".format(output)
                )
 
+    command = add_additional_options(command, config, flags)
+
     job.fileStore.logToMaster("Bowtie Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output
 
 
-def bowtie_paired(job, config, name, samples):
+def bowtie_paired(job, config, name, samples, flags):
     """Align RNA-Seq data to a reference using Bowtie2
     :param config: The configuration dictionary.
     :type config: dict.
@@ -60,6 +69,8 @@ def bowtie_paired(job, config, name, samples):
                "-2 {}".format(samples[name]['fastq1']),
                "-S {}".format(output)
                )
+
+    command = add_additional_options(command, config, flags)
 
     job.fileStore.logToMaster("Bowtie Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

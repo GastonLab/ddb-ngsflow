@@ -12,7 +12,7 @@
 from ddb_ngsflow import pipeline
 
 
-def add_additional_options(command_list, config, flags, sj_files):
+def add_additional_options(command_list, config, flags):
     if 'compressed' in flags:
         command_list.append("--readFilesCommand {}".format(config['compression']))
 
@@ -26,13 +26,10 @@ def add_additional_options(command_list, config, flags, sj_files):
                           "--alignMatesGapMax 1000000")
         command_list.extend(encode_options)
 
-    if sj_files:
-        command_list.append("----sjdbFileChrStartEnd {}".format(sj_files))
-
     return command_list
 
 
-def star_paired(job, config, name, samples, flags, sj_files):
+def star_paired(job, config, name, samples, flags):
     """Align RNA-Seq data to a reference using STAR
     :param config: The configuration dictionary.
     :type config: dict.
@@ -43,22 +40,23 @@ def star_paired(job, config, name, samples, flags, sj_files):
     :returns:  str -- The output vcf file name.
     """
 
-    output_dir = "{}.star.output".format(name)
+    output = "{}.star.output".format(name)
     logfile = "{}.star.log".format(name)
 
     command = ("{}".format(config['star']['bin']),
                "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
-               "--outFileNamePrefix {}".format(output_dir)
+               "--outFileNamePrefix {}".format(output),
+               "--outReadsUnmapped Fastx"
                )
 
-    command = add_additional_options(command, config, flags, sj_files)
+    command = add_additional_options(command, config, flags)
 
     job.fileStore.logToMaster("STAR Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
-    return output_dir
+    return output
 
 
 def star_unpaired(job, config, name, samples, flags, sj_files):
@@ -72,14 +70,15 @@ def star_unpaired(job, config, name, samples, flags, sj_files):
     :returns:  str -- The output vcf file name.
     """
 
-    output_dir = "{}.star.output".format(name)
+    output = "{}.star.output".format(name)
     logfile = "{}.star.log".format(name)
 
     command = ("{}".format(config['star']['bin']),
                "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {}".format(samples[name]['fastq1']),
-               "--outFileNamePrefix {}".format(output_dir)
+               "--outFileNamePrefix {}".format(output),
+               "--outReadsUnmapped Fastx"
                )
 
     command = add_additional_options(command, config, flags, sj_files)
@@ -87,7 +86,7 @@ def star_unpaired(job, config, name, samples, flags, sj_files):
     job.fileStore.logToMaster("STAR Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
-    return output_dir
+    return output
 
 
 # def star_paired_compressed_basic(job, config, name, samples):
