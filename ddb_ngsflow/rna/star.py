@@ -59,7 +59,7 @@ def star_paired(job, config, name, samples, flags):
     return output
 
 
-def star_unpaired(job, config, name, samples, flags, sj_files):
+def star_unpaired(job, config, name, samples, flags):
     """Align RNA-Seq data to a reference using STAR
     :param config: The configuration dictionary.
     :type config: dict.
@@ -81,7 +81,7 @@ def star_unpaired(job, config, name, samples, flags, sj_files):
                "--outReadsUnmapped Fastx"
                )
 
-    command = add_additional_options(command, config, flags, sj_files)
+    command = add_additional_options(command, config, flags)
 
     job.fileStore.logToMaster("STAR Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
