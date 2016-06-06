@@ -403,3 +403,31 @@ def recalibrator(job, config, name, input_bam):
     pipeline.run_and_log_command(" ".join(cp_command), cp_log)
 
     return output_bam
+
+
+def merge_sam(job, config, name, input_bams):
+    """Run Picard MergeSamFiles
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param input_bams: The list of input_bam files to merge.
+    :type input_bams: str.
+    :returns:  str -- The output bam file name.
+    """
+
+    output_bam = "{}.merged.sorted.bam".format(name)
+    logfile = "{}.markduplicates.log".format(name)
+
+    bam_string = " I=".join(input_bams)
+
+    command = ["{}".format(config['picard-dedup']['bin']),
+               "MergeSamFiles",
+               "I={}".format(bam_string),
+               "O={}".format(output_bam),
+               "USE_THREADING=True"]
+
+    job.fileStore.logToMaster("Picard MarkDuplicates Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_bam
