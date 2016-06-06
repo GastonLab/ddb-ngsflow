@@ -36,12 +36,12 @@ def bowtie_unpaired(job, config, name, samples, flags):
     if "2-pass" in flags:
         samples[name]['unmapped_fastq'] = samples[name]['fastq1']
 
-    command = ("{}".format(config['bowtie']['bin']),
+    command = ["{}".format(config['bowtie']['bin']),
                "-x {}".format(config['bowtie']['index']),
                "-p {}".format(config['bowtie']['num_cores']),
                "-U {}".format(samples[name]['fastq1']),
                "-S {}".format(output)
-               )
+               ]
 
     command = add_additional_options(command, config, flags)
 
@@ -65,13 +65,13 @@ def bowtie_paired(job, config, name, samples, flags):
     output = "{}.bowtie.sam".format(name)
     logfile = "{}.bowtie.log".format(name)
 
-    command = ("{}".format(config['bowtie']['bin']),
+    command = ["{}".format(config['bowtie']['bin']),
                "-x {}".format(config['bowtie']['index']),
                "-p {}".format(config['bowtie']['num_cores']),
                "-1 {}".format(samples[name]['fastq1']),
                "-2 {}".format(samples[name]['fastq2']),
                "-S {}".format(output)
-               )
+               ]
 
     command = add_additional_options(command, config, flags)
 

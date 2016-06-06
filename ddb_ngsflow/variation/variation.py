@@ -97,7 +97,7 @@ def vt_normalization(job, config, sample, caller, input_vcf):
     output_vcf = "{}.{}.normalized.vcf".format(sample, caller)
     logfile = "{}.{}.vt_normalization.log".format(sample, caller)
 
-    normalization = ("zless",
+    normalization = ["zless",
                      "{}".format(input_vcf),
                      "|",
                      "sed",
@@ -114,7 +114,7 @@ def vt_normalization(job, config, sample, caller, input_vcf):
                      "{}".format(config['reference']),
                      "-",
                      ">",
-                     "{}".format(output_vcf))
+                     "{}".format(output_vcf)]
 
     job.fileStore.logToMaster("VT Command: {}\n".format(normalization))
     pipeline.run_and_log_command(" ".join(normalization), logfile)
@@ -180,7 +180,7 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
 
     vcf_files_string = " ".join(vcf_files)
 
-    command = ("{}".format(config['ensemble']['bin']),
+    command = ["{}".format(config['ensemble']['bin']),
                "ensemble",
                "-c",
                "{}".format(config['ensemble']['num_cores']),
@@ -190,19 +190,19 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
                "{}".format(callers),
                "{}".format(merged_vcf),
                "{}".format(config['reference']),
-               "{}".format(vcf_files_string))
+               "{}".format(vcf_files_string)]
 
-    command2 = ("bgzip",
+    command2 = ["bgzip",
                 "-cd",
                 "{}".format(merged_vcf),
                 ">",
-                "{}".format(uncompressed_vcf))
+                "{}".format(uncompressed_vcf)]
 
-    command3 = ("{}".format(config['picard']['bin']),
+    command3 = ["{}".format(config['picard']['bin']),
                 "SortVcf",
                 "SEQUENCE_DICTIONARY={}".format(config['dict']),
                 "OUTPUT={}".format(sorted_vcf),
-                "INPUT={}".format(uncompressed_vcf))
+                "INPUT={}".format(uncompressed_vcf)]
 
     sys.stderr.write("Running commands: \n")
     sys.stderr.write("bcbio-variation-recall Command: {}\n".format(command))

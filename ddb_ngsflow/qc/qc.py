@@ -28,9 +28,9 @@ def run_fastqc(job, config, samples):
         fastq_files_list.append(samples[sample]['fastq2'])
 
     fastq_files_string = " ".join(fastq_files_list)
-    command = ("{}".format(config['fastqc']['bin']),
+    command = ["{}".format(config['fastqc']['bin']),
                "{}".format(fastq_files_string),
-               "--extract")
+               "--extract"]
 
     job.fileStore.logToMaster("FastQC Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

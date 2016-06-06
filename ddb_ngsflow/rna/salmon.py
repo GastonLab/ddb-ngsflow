@@ -26,7 +26,7 @@ def salmonVB_paired(job, config, name, samples):
     output_dir = "{}.salmon.output".format(name)
     logfile = "{}.salmon.log".format(name)
 
-    command = ("{} quant".format(config['salmon']['bin']),
+    command = ["{} quant".format(config['salmon']['bin']),
                "-i {}".format(config['salmon']['index']),
                "-l {}".format(samples[name]['library_type']),
                "-p {}".format(config['salmon']['num_cores']),
@@ -37,7 +37,7 @@ def salmonVB_paired(job, config, name, samples):
                "-1 {}".format(samples[name]['fastq1']),
                "-2 {}".format(samples[name]['fastq2']),
                "-o {}".format(output_dir)
-               )
+               ]
 
     job.fileStore.logToMaster("Salmon Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -59,7 +59,7 @@ def salmonEM_paired(job, config, name, samples):
     output_dir = "{}.salmon.output".format(name)
     logfile = "{}.salmon.log".format(name)
 
-    command = ("{} quant".format(config['salmon']['bin']),
+    command = ["{} quant".format(config['salmon']['bin']),
                "-i {}".format(config['salmon']['index']),
                "-l {}".format(samples[name]['library_type']),
                "-p {}".format(config['salmon']['num_cores']),
@@ -69,7 +69,7 @@ def salmonEM_paired(job, config, name, samples):
                "-1 {}".format(samples[name]['fastq1']),
                "-2 {}".format(samples[name]['fastq2']),
                "-o {}".format(output_dir)
-               )
+               ]
 
     job.fileStore.logToMaster("Salmon Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -91,7 +91,7 @@ def salmonVB_unpaired(job, config, name, samples):
     output_dir = "{}.salmon.output".format(name)
     logfile = "{}.salmon.log".format(name)
 
-    command = ("{} quant".format(config['salmon']['bin']),
+    command = ["{} quant".format(config['salmon']['bin']),
                "-i {}".format(config['salmon']['index']),
                "-l {}".format(samples[name]['library_type']),
                "-p {}".format(config['salmon']['num_cores']),
@@ -101,7 +101,7 @@ def salmonVB_unpaired(job, config, name, samples):
                "--useFSPD",
                "-r {}".format(samples[name]['fastq1']),
                "-o {}".format(output_dir)
-               )
+               ]
 
     job.fileStore.logToMaster("Salmon Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -123,7 +123,7 @@ def salmonEM_unpaired(job, config, name, samples):
     output_dir = "{}.salmon_quant".format(name)
     logfile = "{}.salmon.log".format(name)
 
-    command = ("{} quant".format(config['salmon']['bin']),
+    command = ["{} quant".format(config['salmon']['bin']),
                "-i {}".format(config['salmon']['index']),
                "-l {}".format(samples[name]['library_type']),
                "-p {}".format(config['salmon']['num_cores']),
@@ -132,7 +132,7 @@ def salmonEM_unpaired(job, config, name, samples):
                "--useFSPD",
                "-r {}".format(samples[name]['fastq1']),
                "-o {}".format(output_dir)
-               )
+               ]
 
     job.fileStore.logToMaster("Salmon Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

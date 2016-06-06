@@ -17,13 +17,13 @@ def add_additional_options(command_list, config, flags):
         command_list.append("--readFilesCommand {}".format(config['compression']))
 
     if 'encode_options' in flags:
-        encode_options = ("--outFilterType BySJout",
+        encode_options = ["--outFilterType BySJout",
                           "--outFilterMultimapNmax 20",
                           "--alignSJDBoverhangMin 1",
                           "--outFilterMismatchNMax 999",
                           "--alignIntronMin 20",
                           "--alignIntronMax 1000000",
-                          "--alignMatesGapMax 1000000")
+                          "--alignMatesGapMax 1000000"]
         command_list.extend(encode_options)
 
     return command_list
@@ -43,13 +43,13 @@ def star_paired(job, config, name, samples, flags):
     output = "{}.star.output".format(name)
     logfile = "{}.star.log".format(name)
 
-    command = ("{}".format(config['star']['bin']),
+    command = ["{}".format(config['star']['bin']),
                "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
                "--outFileNamePrefix {}".format(output),
                "--outReadsUnmapped Fastx"
-               )
+               ]
 
     command = add_additional_options(command, config, flags)
 
@@ -73,13 +73,13 @@ def star_unpaired(job, config, name, samples, flags):
     output = "{}.star.output".format(name)
     logfile = "{}.star.log".format(name)
 
-    command = ("{}".format(config['star']['bin']),
+    command = ["{}".format(config['star']['bin']),
                "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {}".format(samples[name]['fastq1']),
                "--outFileNamePrefix {}".format(output),
                "--outReadsUnmapped Fastx"
-               )
+               ]
 
     command = add_additional_options(command, config, flags)
 

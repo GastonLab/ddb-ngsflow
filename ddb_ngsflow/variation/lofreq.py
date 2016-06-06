@@ -24,7 +24,7 @@ def run_lowfreq(job, config, name, input_bam):
     vcf = "{}.lofreq.vcf".format(name)
     logfile = "{}.lofreq.log".format(name)
 
-    command = ("{}".format(config['lofreq']['bin']),
+    command = ["{}".format(config['lofreq']['bin']),
                "somatic",
                "-t",
                "{}".format(input_bam),
@@ -36,7 +36,7 @@ def run_lowfreq(job, config, name, input_bam):
                "-d",
                "{}".format(config['dbsnp']),
                "-o",
-               "{}".format(vcf))
+               "{}".format(vcf)]
 
     job.fileStore.logToMaster("LoFreq Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

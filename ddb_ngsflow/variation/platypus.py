@@ -26,7 +26,7 @@ def platypus_single(job, config, name, samples, input_bam):
     platypus_log = "{}.platypus.log".format(name)
     internal_log = "{}.platypus_internal.log".format(name)
 
-    platypus_command = ("{}".format(config['platypus']['bin']),
+    platypus_command = ["{}".format(config['platypus']['bin']),
                         "callVariants",
                         "--refFile={}".format(config['reference']),
                         "--regions={}".format(samples[name]['regions']),
@@ -38,7 +38,7 @@ def platypus_single(job, config, name, samples, input_bam):
                         "--nCPU={}".format(config['platypus']['num_cores']),
                         "--logFileName={}".format(internal_log),
                         "--bamFiles={}".format(input_bam),
-                        "--output={}".format(platypus_vcf))
+                        "--output={}".format(platypus_vcf)]
 
     job.fileStore.logToMaster("Platypus Command: {}\n".format(platypus_command))
     pipeline.run_and_log_command(" ".join(platypus_command), platypus_log)

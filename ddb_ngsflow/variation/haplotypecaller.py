@@ -26,7 +26,7 @@ def haplotypecaller_single(job, config, name, samples, input_bam):
     gvcf = "{}.haplotypecaller.g.vcf".format(name)
     logfile = "{}.haplotypecaller_gvcf.log".format(name)
 
-    command = ("{}".format(config['gatk-haplotypecaller']['bin']),
+    command = ["{}".format(config['gatk-haplotypecaller']['bin']),
                "-T",
                "HaplotypeCaller",
                "-R",
@@ -41,7 +41,7 @@ def haplotypecaller_single(job, config, name, samples, input_bam):
                "--variant_index_type LINEAR",
                "--variant_index_parameter 128000",
                "-o",
-               "{}".format(gvcf))
+               "{}".format(gvcf)]
 
     job.fileStore.logToMaster("HaplotypeCaller Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -71,7 +71,7 @@ def joint_variant_calling(job, config, name, samples):
 
     gvcf_string = " ".join(gvcfs)
 
-    command = ("{}".format(config['gatk-jointgenotyper']['bin']),
+    command = ["{}".format(config['gatk-jointgenotyper']['bin']),
                "-T",
                "GenotypeGVCFs",
                "-R",
@@ -80,7 +80,7 @@ def joint_variant_calling(job, config, name, samples):
                "-nt",
                "{}".format(config['gatk-jointgenotyper']['num_cores']),
                "-o",
-               "{}".format(vcf))
+               "{}".format(vcf)]
 
     job.fileStore.logToMaster("GenotypeVCFs Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

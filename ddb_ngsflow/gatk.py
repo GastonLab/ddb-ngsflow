@@ -27,7 +27,7 @@ def diagnosetargets(job, config, name, samples, input_bam):
     missing_intervals = "{}.missing.intervals".format(name)
     logfile = "{}.diagnose_targets.log".format(name)
 
-    command = ("{}".format(config['gatk']['bin']),
+    command = ["{}".format(config['gatk']['bin']),
                "-T",
                "DiagnoseTargets",
                "-R",
@@ -47,7 +47,7 @@ def diagnosetargets(job, config, name, samples, input_bam):
                "-o",
                "{}".format(diagnose_targets_vcf),
                "--missing_intervals",
-               "{}".format(missing_intervals))
+               "{}".format(missing_intervals)]
 
     job.fileStore.logToMaster("GATK DiagnoseTargets Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -74,7 +74,7 @@ def diagnose_pooled_targets(job, config, name, regions, samples, input_bam1, inp
     missing_intervals = "{}_{}.missing.intervals".format(name, regions)
     logfile = "{}.{}.diagnose_targets.log".format(name, regions)
 
-    command = ("{}".format(config['gatk']['bin']),
+    command = ["{}".format(config['gatk']['bin']),
                "-T",
                "DiagnoseTargets",
                "-R",
@@ -96,7 +96,7 @@ def diagnose_pooled_targets(job, config, name, regions, samples, input_bam1, inp
                "-o",
                "{}".format(diagnose_targets_vcf),
                "--missing_intervals",
-               "{}".format(missing_intervals))
+               "{}".format(missing_intervals)]
 
     job.fileStore.logToMaster("GATK DiagnoseTargets Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -120,7 +120,7 @@ def annotate_vcf(job, config, name, input_vcf, input_bam):
     output_vcf = "{}.annotated.vcf".format(name)
     annotation_logfile = "{}.variantannotation.log".format(name)
 
-    annotation_command = ("{}".format(config['gatk-annotate']['bin']),
+    annotation_command = ["{}".format(config['gatk-annotate']['bin']),
                           "-T",
                           "VariantAnnotator",
                           "-R",
@@ -138,7 +138,7 @@ def annotate_vcf(job, config, name, input_vcf, input_bam):
                           "-L",
                           "{}".format(input_vcf),
                           "-o",
-                          "{}".format(output_vcf))
+                          "{}".format(output_vcf)]
 
     job.fileStore.logToMaster("GATK VariantAnnotator Command: {}\n".format(annotation_command))
     pipeline.run_and_log_command(" ".join(annotation_command), annotation_logfile)
@@ -160,7 +160,7 @@ def filter_variants(job, config, name, input_vcf):
     output_vcf = "{}.filtered.vcf".format(name)
     filter_log = "{}.variantfiltration.log".format(name)
 
-    filter_command = ("{}".format(config['gatk-filter']['bin']),
+    filter_command = ["{}".format(config['gatk-filter']['bin']),
                       "-T",
                       "VariantFiltration",
                       "-R",
@@ -184,7 +184,7 @@ def filter_variants(job, config, name, input_vcf):
                       "--variant",
                       "{}".format(input_vcf),
                       "-o",
-                      "{}".format(output_vcf))
+                      "{}".format(output_vcf)]
 
     job.fileStore.logToMaster("GATK VariantFiltration Command: {}\n".format(filter_command))
     pipeline.run_and_log_command(" ".join(filter_command), filter_log)
@@ -209,12 +209,12 @@ def mark_duplicates(job, config, name, input_bam):
     output_bam = "{}.dedup.sorted.bam".format(name)
     logfile = "{}.markduplicates.log".format(name)
 
-    command = ("{}".format(config['picard-dedup']['bin']),
+    command = ["{}".format(config['picard-dedup']['bin']),
                "MarkDuplicates",
                "CREATE_INDEX=true",
                "METRICS_FILE={}".format(metrics_file),
                "INPUT={}".format(input_bam),
-               "OUTPUT={}".format(output_bam))
+               "OUTPUT={}".format(output_bam)]
 
     job.fileStore.logToMaster("Picard MarkDuplicates Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -239,7 +239,7 @@ def add_or_replace_readgroups(job, config, name, input_bam):
     logfile = "{}.addreadgroups.log".format(name)
     index_log = "{}.buildindex.log".format(name)
 
-    command = ("{}".format(config['picard-add']['bin']),
+    command = ["{}".format(config['picard-add']['bin']),
                "AddOrReplaceReadGroups",
                "INPUT={}".format(input_bam),
                "OUTPUT={}".format(output_bam),
@@ -247,11 +247,11 @@ def add_or_replace_readgroups(job, config, name, input_bam):
                "RGSM={}".format(name),
                "RGLB={}".format(name),
                "RGPL=illumina",
-               "RGPU=miseq")
+               "RGPU=miseq"]
 
-    command2 = ("{}".format(config['picard-add']['bin']),
+    command2 = ["{}".format(config['picard-add']['bin']),
                 "BuildBamIndex",
-                "INPUT={}".format(output_bam))
+                "INPUT={}".format(output_bam)]
 
     job.fileStore.logToMaster("GATK AddOrReplaceReadGroupsCommand Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -276,7 +276,7 @@ def realign_target_creator(job, config, name, input_bam):
     targets = "{}.targets.intervals".format(name)
     targets_log = "{}.targetcreation.log".format(name)
 
-    command = ("{}".format(config['gatk-realign']['bin']),
+    command = ["{}".format(config['gatk-realign']['bin']),
                "-T",
                "RealignerTargetCreator",
                "-R",
@@ -291,7 +291,7 @@ def realign_target_creator(job, config, name, input_bam):
                "{}".format(config['indel2']),
                "-nt",
                "{}".format(config['gatk-realign']['num_cores'])
-               )
+               ]
 
     job.fileStore.logToMaster("GATK RealignerTargetCreator Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), targets_log)
@@ -315,7 +315,7 @@ def realign_indels(job, config, name, input_bam, targets):
     output_bam = "{}.realigned.sorted.bam".format(name)
     realign_log = "{}.realignindels.log".format(name)
 
-    command = ("{}".format(config['gatk-realign']['bin']),
+    command = ["{}".format(config['gatk-realign']['bin']),
                "-T",
                "IndelRealigner",
                "-R",
@@ -331,7 +331,7 @@ def realign_indels(job, config, name, input_bam, targets):
                "--read_filter",
                "NotPrimaryAlignment",
                "-o",
-               "{}".format(output_bam))
+               "{}".format(output_bam)]
 
     job.fileStore.logToMaster("GATK IndelRealigner Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), realign_log)
@@ -359,7 +359,7 @@ def recalibrator(job, config, name, input_bam):
     cp_log = "{}.copy.log".format(name)
 
     # Calculate covariates
-    recal_commands = ("{}".format(config['gatk-recal']['bin']),
+    recal_commands = ["{}".format(config['gatk-recal']['bin']),
                       "-T",
                       "BaseRecalibrator",
                       "-R",
@@ -371,10 +371,10 @@ def recalibrator(job, config, name, input_bam):
                       "--knownSites",
                       "{}".format(config['dbsnp']),
                       "-nct",
-                      "{}".format(config['gatk-recal']['num_cores']))
+                      "{}".format(config['gatk-recal']['num_cores'])]
 
     # Print recalibrated BAM
-    print_reads_command = ("{}".format(config['gatk-recal']['bin']),
+    print_reads_command = ["{}".format(config['gatk-recal']['bin']),
                            "-T",
                            "PrintReads",
                            "-R",
@@ -386,12 +386,12 @@ def recalibrator(job, config, name, input_bam):
                            "-BQSR",
                            "{}".format(recal_config),
                            "-nct",
-                           "{}".format(config['gatk-recal']['num_cores']))
+                           "{}".format(config['gatk-recal']['num_cores'])]
 
     # Copy index to alternative name
-    cp_command = ("cp",
+    cp_command = ["cp",
                   "{}.recalibrated.sorted.bai".format(name),
-                  "{}.recalibrated.sorted.bam.bai".format(name))
+                  "{}.recalibrated.sorted.bam.bai".format(name)]
 
     job.fileStore.logToMaster("GATK BaseRecalibrator Command: {}\n".format(recal_commands))
     pipeline.run_and_log_command(" ".join(recal_commands), recal_log)

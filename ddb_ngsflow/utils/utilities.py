@@ -36,7 +36,7 @@ def bedtools_coverage_per_site(job, config, name, input_bam):
     output = "{}.bedtools_coverage_per_site.bed".format(name)
     logfile = "{}.bedtools_coverage.log".format(name)
 
-    coverage = ("{}".format(config['bedtools']['bin']),
+    coverage = ["{}".format(config['bedtools']['bin']),
                 "coverage",
                 "-d",
                 "-a",
@@ -44,7 +44,7 @@ def bedtools_coverage_per_site(job, config, name, input_bam):
                 "-b",
                 "{}".format(input_bam),
                 ">",
-                "{}".format(output))
+                "{}".format(output)]
 
     job.fileStore.logToMaster("BedTools Coverage Command: {}\n".format(coverage))
     pipeline.run_and_log_command(" ".join(coverage), logfile)
@@ -171,22 +171,22 @@ def bcftools_filter_variants_regions(job, config, name, samples, input_vcf):
 
     bgzip_and_tabix_vcf(job, input_vcf)
 
-    filter_command = ("{}".format(config['bcftools']['bin']),
+    filter_command = ["{}".format(config['bcftools']['bin']),
                       "isec",
                       "-T",
                       "{}".format(samples[name]['regions']),
                       "{}".format(bgzipped_vcf),
                       ">",
-                      "{}".format(filtered_vcf))
+                      "{}".format(filtered_vcf)]
 
-    sort_command = ("cat",
+    sort_command = ["cat",
                     "{}".format(filtered_vcf),
                     "|",
                     "{}".format(config['vcftools_sort']['bin']),
                     "-c",
                     ">",
                     "{}".format(sorted_vcf)
-                    )
+                    ]
 
     job.fileStore.logToMaster("BCFTools isec command for filtering to only target regions: {}\n".format(filter_command))
     pipeline.run_and_log_command(" ".join(filter_command), logfile)
@@ -225,7 +225,8 @@ def bcftools_filter_variants_regions(job, config, name, samples, input_vcf):
 #                ">",
 #                "{}".format(output_vcf))
 #
-#     job.fileStore.logToMaster("Merging stranded libraries into multi-sample VCF with the command: {}\n".format(command))
+#     job.fileStore.logToMaster("Merging stranded libraries into multi-sample VCF with the command:
+#                                {}\n".format(command))
 #     pipeline.run_and_log_command(" ".join(command), logfile)
 #
 #     return output_vcf

@@ -32,7 +32,7 @@ def scalpel_single(job, config, name, samples, input_bam):
     logfile = "{}.scalpel.log".format(name)
     logfile2 = "{}.scalpel_fix.log".format(name)
 
-    scalpel_command = ("{}".format(config['scalpel']['bin']),
+    scalpel_command = ["{}".format(config['scalpel']['bin']),
                        "--single",
                        "--intarget",
                        # "--covthr",
@@ -50,15 +50,15 @@ def scalpel_single(job, config, name, samples, input_bam):
                        "--bam",
                        "{}".format(input_bam),
                        "--dir",
-                       "{}".format(output_dir))
+                       "{}".format(output_dir)]
 
-    fix_sample_name_command = ("cat",
+    fix_sample_name_command = ["cat",
                                "{}".format(scalpel_vcf),
                                "|",
                                "sed",
                                "'s/sample/{}/g'".format(name),
                                ">",
-                               "{}".format(fixed_vcf))
+                               "{}".format(fixed_vcf)]
 
     job.fileStore.logToMaster("Scalpel Command: {}\n".format(scalpel_command))
     pipeline.run_and_log_command(" ".join(scalpel_command), logfile)

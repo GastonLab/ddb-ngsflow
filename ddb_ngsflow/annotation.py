@@ -26,13 +26,13 @@ def snpeff(job, config, name, input_vcf):
     output_vcf = "{}.snpEff.{}.vcf".format(name, config['snpeff']['reference'])
     logfile = "{}.snpeff.log".format(name)
 
-    snpeff_command = ("{}".format(config['snpeff']['bin']),
+    snpeff_command = ["{}".format(config['snpeff']['bin']),
                       "-Xmx{}g".format(config['snpeff']['max_mem']),
                       "-v",
                       "{}".format(config['snpeff']['reference']),
                       "{}".format(input_vcf),
                       ">"
-                      "{}".format(output_vcf))
+                      "{}".format(output_vcf)]
 
     job.fileStore.logToMaster("snpEff Command: {}\n".format(snpeff_command))
     pipeline.run_and_log_command(" ".join(snpeff_command), logfile)
@@ -54,7 +54,7 @@ def gemini(job, config, name, input_vcf):
     db = "{}.snpEff.{}.db".format(name, config['snpeff']['reference'])
     logfile = "{}.gemini.log".format(name)
 
-    command = ("{}".format(config['gemini']['bin']),
+    command = ["{}".format(config['gemini']['bin']),
                "load",
                "--cores",
                "{}".format(config['gemini']['num_cores']),
@@ -63,7 +63,7 @@ def gemini(job, config, name, input_vcf):
                "{}".format(input_vcf),
                "-t",
                "snpEff",
-               "{}".format(db))
+               "{}".format(db)]
 
     job.fileStore.logToMaster("GEMINI Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
@@ -85,7 +85,7 @@ def vcfanno(job, config, name, samples, input_vcf):
     output_vcf = "{}.vcfanno.snpEff.{}.vcf".format(name, config['snpeff']['reference'])
     logfile = "{}.vcfanno.log".format(name)
 
-    command = ("{}".format(config['vcfanno']['bin']),
+    command = ["{}".format(config['vcfanno']['bin']),
                "-p",
                "{}".format(config['vcfanno']['num_cores']),
                "--lua",
@@ -93,7 +93,7 @@ def vcfanno(job, config, name, samples, input_vcf):
                "{}".format(samples[name]['vcfanno_config']),
                "{}".format(input_vcf),
                ">",
-               "{}".format(output_vcf))
+               "{}".format(output_vcf)]
 
     job.fileStore.logToMaster("VCFAnno Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

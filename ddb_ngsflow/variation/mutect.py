@@ -44,7 +44,7 @@ def mutect_single(job, config, name, samples, input_bam):
     mutect_logfile = "{}.mutect.log".format(name)
     subset_log = "{}.mutect_subset.log".format(name)
 
-    mutect_command = ("{}".format(config['mutect']['bin']),
+    mutect_command = ["{}".format(config['mutect']['bin']),
                       "-T",
                       "MuTect",
                       "-R",
@@ -69,9 +69,9 @@ def mutect_single(job, config, name, samples, input_bam):
                       "-o",
                       "{}".format(output_stats),
                       "-vcf",
-                      "{}".format(temp_mutect))
+                      "{}".format(temp_mutect)]
 
-    subset_command = ("cat",
+    subset_command = ["cat",
                       "{}".format(temp_mutect),
                       "|",
                       "{}".format(config['vcftools_subset']['bin']),
@@ -79,7 +79,7 @@ def mutect_single(job, config, name, samples, input_bam):
                       "-c",
                       "{}".format(name),
                       ">",
-                      "{}".format(mutect_vcf))
+                      "{}".format(mutect_vcf)]
 
     job.fileStore.logToMaster("MuTect Command: {}\n".format(mutect_command))
     pipeline.run_and_log_command(" ".join(mutect_command), mutect_logfile)
@@ -104,7 +104,7 @@ def mutect2_single(job, config, name, samples, input_bam):
     mutect_vcf = "{}.mutect2.vcf".format(name)
     mutect_logfile = "{}.mutect2.log".format(name)
 
-    mutect_command = ("{}".format(config['gatk3.5']['bin']),
+    mutect_command = ["{}".format(config['gatk3.5']['bin']),
                       "-T",
                       "MuTect2",
                       "-R",
@@ -122,7 +122,7 @@ def mutect2_single(job, config, name, samples, input_bam):
                       "-I:tumor",
                       "{}".format(input_bam),
                       "-o",
-                      "{}".format(mutect_vcf))
+                      "{}".format(mutect_vcf)]
 
     job.fileStore.logToMaster("MuTect2 Command: {}\n".format(mutect_command))
     pipeline.run_and_log_command(" ".join(mutect_command), mutect_logfile)

@@ -31,7 +31,7 @@ def vardict_single(job, config, name, samples, input_bam):
     vardict_vcf = "{}.vardict.vcf".format(name)
     logfile = "{}.vardict.log".format(name)
 
-    vardict = ("{}".format(config['vardict']['bin']),
+    vardict = ["{}".format(config['vardict']['bin']),
                "-G",
                "{}".format(config['reference']),
                "-z",
@@ -53,17 +53,17 @@ def vardict_single(job, config, name, samples, input_bam):
                "{}".format(name),
                "-b",
                "{}".format(input_bam),
-               "{}".format(samples[name]['regions']))
+               "{}".format(samples[name]['regions'])]
 
-    vardict2vcf = ("{}".format(config['vardict2vcf']['bin']),
+    vardict2vcf = ["{}".format(config['vardict2vcf']['bin']),
                    "-E",
                    "-f",
                    "{}".format(config['min_alt_af']),
                    "-N",
-                   "{}".format(name))
+                   "{}".format(name)]
 
-    vcfsort = ("{}".format(config['vcftools_sort']['bin']),
-               "-c")
+    vcfsort = ["{}".format(config['vcftools_sort']['bin']),
+               "-c"]
 
     command = ("{vardict} | {strandbias} | {vardict2vcf} | "
                "{sort} > {vcf}".format(vardict=" ".join(vardict), strandbias=config['vardict_strandbias']['bin'],

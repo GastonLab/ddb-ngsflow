@@ -22,7 +22,7 @@ def pisces(job, config, name, input_bam):
 
     output_vcf = "{}.pisces.vcf".format(name)
     logfile = "{}.pisces.log".format(name)
-    command = ("{}".format(config['pisces']['bin']),
+    command = ["{}".format(config['pisces']['bin']),
                "-B",
                "-t",
                "{}".format(config['pisces']['num_cores']),
@@ -47,7 +47,7 @@ def pisces(job, config, name, input_bam):
                "-F",
                "{}".format(config['var_qscore_threshold']),
                "-gVCF",
-               "True")
+               "True"]
 
     job.fileStore.logToMaster("Pisces Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

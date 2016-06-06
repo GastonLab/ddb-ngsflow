@@ -8,6 +8,8 @@
 
 """
 
+import sys
+import csv
 from collections import defaultdict
 from ddb_ngsflow import pipeline
 
@@ -28,7 +30,7 @@ def sambamba_region_coverage(job, config, name, samples, input_bam):
     output = "{}.sambamba_coverage.bed".format(name)
     logfile = "{}.sambamba_coverage.log".format(name)
 
-    command = ("{}".format(config['sambamba']['bin']),
+    command = ["{}".format(config['sambamba']['bin']),
                "depth region",
                "-L",
                "{}".format(samples[name]['regions']),
@@ -40,7 +42,7 @@ def sambamba_region_coverage(job, config, name, samples, input_bam):
                "{}".format(config['coverage_threshold2']),
                "{}".format(input_bam),
                ">",
-               "{}".format(output))
+               "{}".format(output)]
 
     job.fileStore.logToMaster("SamBamba Coverage Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

@@ -23,7 +23,7 @@ def freebayes_single(job, config, name, input_bam):
     freebayes_vcf = "{}.freebayes.vcf".format(name)
     logfile = "{}.freebayes.log".format(name)
 
-    command = ("{}".format(config['freebayes']['bin']),
+    command = ["{}".format(config['freebayes']['bin']),
                "--fasta-reference",
                "{}".format(config['reference']),
                "--min-alternate-fraction",
@@ -37,7 +37,7 @@ def freebayes_single(job, config, name, input_bam):
                "--min-repeat-entropy 1",
                "-v",
                "{}".format(freebayes_vcf),
-               "{}".format(input_bam))
+               "{}".format(input_bam)]
 
     job.fileStore.logToMaster("FreeBayes Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)

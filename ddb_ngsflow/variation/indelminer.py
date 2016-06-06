@@ -26,11 +26,11 @@ def indelminer_single(job, config, name, input_bam):
     indelminer_vcf = "{}.indelminer.vcf".format(name)
     logfile = "{}.indelminer.log".format(name)
 
-    command = ("{}".format(config['indelminer']['bin']),
+    command = ["{}".format(config['indelminer']['bin']),
                "{}".format(config['reference']),
                "sample={}".format(input_bam),
                ">",
-               "{}".format(indelminer_vcf))
+               "{}".format(indelminer_vcf)]
 
     job.fileStore.logToMaster("IndelMiner Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
