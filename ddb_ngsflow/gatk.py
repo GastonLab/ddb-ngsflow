@@ -427,7 +427,7 @@ def merge_sam(job, config, name, input_bams):
                "O={}".format(output_bam),
                "USE_THREADING=True"]
 
-    job.fileStore.logToMaster("Picard MarkDuplicates Command: {}\n".format(command))
+    job.fileStore.logToMaster("Picard MergeSam Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output_bam
