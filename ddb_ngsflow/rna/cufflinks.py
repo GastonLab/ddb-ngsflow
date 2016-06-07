@@ -34,6 +34,7 @@ def cufflinks(job, config, name, input_bam):
                "-g {}".format(config['transcript_reference']),
                "-b {}".format(config['reference']),
                "-u",
+               "-p {}".format(config['cufflinks']['num_cores']),
                "--library-type {}".format(),
                "{}".format(input_bam)]
 
