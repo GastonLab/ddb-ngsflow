@@ -421,7 +421,7 @@ def merge_sam(job, config, name, input_bams):
 
     bam_string = " I=".join(input_bams)
 
-    command = ["{}".format(config['picard-dedup']['bin']),
+    command = ["{}".format(config['picard-merge']['bin']),
                "MergeSamFiles",
                "I={}".format(bam_string),
                "O={}".format(output_bam),
