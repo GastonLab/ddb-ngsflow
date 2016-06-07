@@ -9,6 +9,7 @@
 
 """
 
+import os
 from ddb_ngsflow import pipeline
 
 
@@ -22,7 +23,24 @@ def cufflinks(job, config, name, input_bam):
     :type input_bam: str.
     :returns:  str -- The output transcriptome from cufflinks.
     """
-    pass
+
+    outdir = "{}_cufflinks".format(name)
+    logfile = "{}.cufflinks.log".format(name)
+
+    os.mkdir("./{}".format(outdir))
+    os.chdir("./{}".format(outdir))
+
+    command = ["{}".format(config['cufflinks']['bin']),
+               "-g {}".format(config['transcript_reference']),
+               "-b {}".format(config['reference']),
+               "-u",
+               "--library-type {}".format(),
+               "{}".format(input_bam)]
+
+    job.fileStore.logToMaster("Cufflinks Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return outdir
 
 
 def cuffmerge(job, config, name, input_transcripts):
