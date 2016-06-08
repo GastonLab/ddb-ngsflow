@@ -416,18 +416,18 @@ def merge_sam(job, config, name, input_bams):
     :returns:  str -- The output bam file name.
     """
 
-    output_bam = "{}.merged.sorted.bam".format(name)
-    logfile = "{}.markduplicates.log".format(name)
+    output_sam = "{}.merged.sorted.bam".format(name)
+    logfile = "{}.mergesam.log".format(name)
 
     bam_string = " I=".join(input_bams)
 
     command = ["{}".format(config['picard-merge']['bin']),
                "MergeSamFiles",
                "I={}".format(bam_string),
-               "O={}".format(output_bam),
+               "O={}".format(output_sam),
                "USE_THREADING=True"]
 
     job.fileStore.logToMaster("Picard MergeSam Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
-    return output_bam
+    return output_sam
