@@ -89,6 +89,9 @@ def star_unpaired(job, config, name, samples, flags):
     job.fileStore.logToMaster("STAR Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
+    aligned_sam = "{}Aligned.out.sam".format(output)
+    samples[name]['bam'] = aligned_sam
+
     return output
 
 
