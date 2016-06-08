@@ -37,7 +37,7 @@ def cufflinks(job, config, name, samples):
                "-b {}".format(config['reference']),
                "-u",
                "-p {}".format(config['cufflinks']['num_cores']),
-               "--library-type {}".format(),
+               "--library-type {}".format(samples[name]['cufflinks_lib']),
                "{}".format(samples[name]['bam'])]
 
     job.fileStore.logToMaster("Cufflinks Command: {}\n".format(command))
