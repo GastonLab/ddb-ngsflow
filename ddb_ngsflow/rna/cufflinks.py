@@ -78,6 +78,9 @@ def cuffmerge(job, config, name, samples):
     job.fileStore.logToMaster("Cufflinks Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
+    pwd = os.getcwd()
+    config['transcript_reference'] = os.path.join(pwd, "merged.gtf")
+
     return stats_root
 
 
@@ -107,7 +110,7 @@ def cuffquant(job, config, name, samples):
     return outdir
 
 
-def cuffnorm(job, config, name):
+def cuffnorm(job, config, name, samples):
     """Run Cuffnorm on cuffquant results form all samples
     :param config: The configuration dictionary.
     :type config: dict.
