@@ -50,19 +50,24 @@ def cufflinks(job, config, name, samples):
     return path
 
 
-def cuffmerge(job, config, name, manifest):
+def cuffmerge(job, config, name, samples):
     """Merge assembled cufflinks transcriptomes from all samples
     :param config: The configuration dictionary.
     :type config: dict.
     :param name: sample name.
     :type name: str.
-    :param manifest: The file name containing all of the transcript assemblies to be merged.
-    :type manifest: str.
+    :param samples: Samples config data
+    :type samples: dict.
     :returns:  str -- The merged output transcriptome from cufflinks.
     """
 
     stats_root = "{}_cuffmerge_stats".format(config['run_id'])
     logfile = "{}.cuffmerge.log".format(name)
+
+    manifest_file = "transcript_assemblies.txt"
+    with open(manifest_file, 'w') as manifest:
+        for sample in samples:
+            manifest.write("{}\n".format(samples[sample]['cufflinks_assembly']))
 
     command = ["{}".format(config['cuffmerge']['bin']),
                "-g {}".format(config['transcript_reference']),
