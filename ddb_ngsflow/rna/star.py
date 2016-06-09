@@ -83,7 +83,7 @@ def star_paired(job, config, name, samples, flags):
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     job.fileStore.logToMaster("Sort and Convert Command: {}\n".format(sort_command))
-    pipeline.run_and_log_command(" ".join(sort_command), sort_logfile)
+    pipeline.run_and_log_command(sort_command, sort_logfile)
 
     samples[name]['bam'] = output_bam
 
