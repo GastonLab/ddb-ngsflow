@@ -41,7 +41,7 @@ def star_paired(job, config, name, samples, flags):
     """
 
     output = "{}.star.output".format(name)
-    output_sam = "{}Aligned.out.sam".format()
+    output_sam = "{}Aligned.out.sam".format(output)
     logfile = "{}.star.log".format(name)
     sort_logfile = "{}.sortconvert.log".format(name)
     temp = "{}.bwa.sort.temp".format(name)
