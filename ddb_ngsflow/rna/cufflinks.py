@@ -42,8 +42,11 @@ def cufflinks(job, config, name, samples):
                "--library-type {}".format(samples[name]['cufflinks_lib']),
                "{}".format(samples[name]['bam'])]
 
-    job.fileStore.logToMaster("Cufflinks Command: {}\n".format(command))
-    pipeline.run_and_log_command(" ".join(command), logfile)
+    if not os.path.isfile("transcripts.gtf"):
+        job.fileStore.logToMaster("Cufflinks Command: {}\n".format(command))
+        pipeline.run_and_log_command(" ".join(command), logfile)
+    else:
+        job.fileStore.logToMaster("Cufflinks appears to have already executed for {}. Skipping...\n".format(name))
 
     os.chdir(working_dir)
 
