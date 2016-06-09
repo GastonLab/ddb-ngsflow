@@ -10,6 +10,7 @@
 """
 
 import os
+import sys
 from ddb_ngsflow import pipeline
 
 
@@ -29,7 +30,11 @@ def cufflinks(job, config, name, samples):
 
     working_dir = os.getcwd()
     path = os.path.join(working_dir, outdir)
-    os.mkdir(path)
+    try:
+        os.mkdir(path)
+    except:
+        sys.stderr.write("Directory {} already exists. Not creating...\n".format(path))
+
     os.chdir(path)
 
     samples[name]['cufflinks_assembly'] = os.path.join(path, "transcripts.gtf")
