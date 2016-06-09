@@ -41,7 +41,7 @@ def cufflinks(job, config, name, samples):
 
     command = ["{}".format(config['cufflinks']['bin']),
                "-g {}".format(config['transcript_reference']),
-               "-b {}".format(config['reference']),
+               # "-b {}".format(config['reference']),
                "-u",
                "-p {}".format(config['cufflinks']['num_cores']),
                "--library-type {}".format(samples[name]['cufflinks_lib']),
@@ -105,7 +105,7 @@ def cuffquant(job, config, name, samples):
     logfile = "{}.cuffquant.log".format(name)
 
     command = ["{}".format(config['cuffquant']['bin']),
-               "-b {}".format(config['reference']),
+               # "-b {}".format(config['reference']),
                "-p {}".format(config['cuffquant']['num_cores']),
                "-u",
                "{}".format(config['transcript_reference']),
