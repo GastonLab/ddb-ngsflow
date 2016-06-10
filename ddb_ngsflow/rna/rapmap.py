@@ -24,8 +24,8 @@ def rapmap_quasi_unpaired(job, config, name, samples, flags):
     :returns:  str -- The output vcf file name.
     """
 
-    output = "{}".format(name)
-    logfile = "{}".format(name)
+    output = "{}.rapmap.sam".format(name)
+    logfile = "{}.rapmap_quasi.log".format(name)
 
     command = ["{} quasimap".format(config['rapmap']['bin']),
                "-t {}".format(config['rapmap']['num_cores']),
@@ -51,8 +51,8 @@ def rapmap_quasi_paired(job, config, name, samples, flags):
     :returns:  str -- The output vcf file name.
     """
 
-    output = "{}".format(name)
-    logfile = "{}".format(name)
+    output = "{}.rapmap.sam".format(name)
+    logfile = "{}.rapmap_quasi.log".format(name)
 
     command = ["{} quasimap".format(config['rapmap']['bin']),
                "-t {}".format(config['rapmap']['num_cores']),
@@ -66,8 +66,6 @@ def rapmap_quasi_paired(job, config, name, samples, flags):
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output
-
-    return NotImplementedError
 
 
 def rapmap_pseudo_unpaired(job, config, name, samples, flags):
