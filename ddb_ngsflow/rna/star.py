@@ -100,7 +100,8 @@ def star_unpaired(job, config, name, samples, flags):
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {}".format(samples[name]['fastq1']),
                "--outFileNamePrefix {}".format(output),
-               "--outReadsUnmapped Fastx"
+               "--outReadsUnmapped Fastx",
+               "--outSAMtype BAM SortedByCoordinate"
                ]
 
     command = add_additional_options(command, config, flags)
