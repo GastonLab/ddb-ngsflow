@@ -37,8 +37,6 @@ def cufflinks(job, config, name, samples):
 
     os.chdir(path)
 
-    samples[name]['cufflinks_assembly'] = os.path.join(path, "transcripts.gtf")
-
     command = ["{}".format(config['cufflinks']['bin']),
                "-g {}".format(config['transcript_reference']),
                "-b {}".format(config['reference']),
@@ -58,7 +56,7 @@ def cufflinks(job, config, name, samples):
     return path
 
 
-def cuffmerge(job, config, name, samples):
+def cuffmerge(job, config, name, samples, manifest):
     """Merge assembled cufflinks transcriptomes from all samples
     :param config: The configuration dictionary.
     :type config: dict.
