@@ -80,7 +80,7 @@ def cuffmerge(job, config, name, samples, manifest):
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     pwd = os.getcwd()
-    config['transcript_reference'] = os.path.join(pwd, "merged.gtf")
+    config['merged_transcript_reference'] = os.path.join(pwd, "merged.gtf")
 
     return stats_root
 
@@ -101,7 +101,7 @@ def cuffquant(job, config, name, samples):
                "-b {}".format(config['reference']),
                "-p {}".format(config['cuffquant']['num_cores']),
                "-u",
-               "{}".format(config['transcript_reference']),
+               "{}".format(config['merged_transcript_reference']),
                "{}".format(samples[name]['bam'])
                ]
 
@@ -127,7 +127,7 @@ def cuffnorm(job, config, name, samples):
                "-b {}".format(config['reference']),
                "-p {}".format(config['cuffquant']['num_cores']),
                "-u",
-               "{}".format(config['transcript_reference']),
+               "{}".format(config['merged_transcript_reference']),
                "{}".format(samples[name]['bam'])
                ]
 
