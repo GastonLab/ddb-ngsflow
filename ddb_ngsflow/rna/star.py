@@ -57,6 +57,17 @@ def star_paired(job, config, name, samples, flags):
 
     command = add_additional_options(command, config, flags)
 
+    if "cufflinks" in flags:
+        compat_sam = "{}.STAR.noS.sam".format(name)
+        compat_awk = ["awk",
+                      'BEGIN {OFS="\t"} {split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S")',
+                      '{$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S")',
+                      '{L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); };',
+                      'gsub(/[0-9]*S/,"",$6); print}',
+                      "{}".format(output_sam),
+                      ">",
+                      "{}".format(compat_sam)]
+
     view_cmd = ["{}".format(config['samtools']['bin']),
                 "view",
                 "-T {}".format(config['reference']),
