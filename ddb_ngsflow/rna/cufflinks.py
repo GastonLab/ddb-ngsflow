@@ -70,11 +70,6 @@ def cuffmerge(job, config, name, samples, manifest):
     stats_root = "{}_cuffmerge_stats".format(config['run_id'])
     logfile = "{}.cuffmerge.log".format(config['run_id'])
 
-    # manifest_file = "transcript_assemblies.txt"
-    # with open(manifest_file, 'w') as manifest:
-    #     for sample in samples:
-    #         manifest.write("{}\n".format(samples[name]['cufflinks_assembly']))
-
     command = ["{}".format(config['cuffmerge']['bin']),
                "-g {}".format(config['transcript_reference']),
                "-s {}".format(config['reference']),
