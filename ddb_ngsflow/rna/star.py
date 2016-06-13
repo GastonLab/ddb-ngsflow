@@ -32,6 +32,9 @@ def add_additional_options(command_list, config, flags):
     if 'removeNonCanonical' in flags:
         command_list.append("--outFilterIntronMotifs RemoveNoncanonical")
 
+    if 'cufflinks' in flags:
+        command_list.append("--alignEndsType EndToEnd")
+
     return command_list
 
 
