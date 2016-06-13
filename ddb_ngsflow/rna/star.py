@@ -26,6 +26,12 @@ def add_additional_options(command_list, config, flags):
                           "--alignMatesGapMax 1000000"]
         command_list.extend(encode_options)
 
+    if 'unstranded' in flags:
+        command_list.append("--outSAMstrandField intronMotif")
+
+    if 'removeNonCanonical' in flags:
+        command_list.append("--outFilterIntronMotifs RemoveNoncanonical")
+
     return command_list
 
 
@@ -40,65 +46,36 @@ def star_paired(job, config, name, samples, flags):
     :returns:  str -- The output vcf file name.
     """
 
-    output = "{}.star.output".format(name)
-    output_sam = "{}Aligned.out.sam".format(output)
+    output = "{}.star.".format(name)
     logfile = "{}.star.log".format(name)
-    sort_logfile = "{}.sortconvert.log".format(name)
-    temp = "{}.bwa.sort.temp".format(name)
-    output_bam = "{}.star.bam".format(name)
+    output_file = "{}Aligned.sortedByCoord.out.bam".format(output)
 
     command = ["{}".format(config['star']['bin']),
                "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
                "--outFileNamePrefix {}".format(output),
-               "--outReadsUnmapped Fastx"
+               "--outReadsUnmapped Fastx",
+               "--outSAMtype BAM SortedByCoordinate"
                ]
 
     command = add_additional_options(command, config, flags)
 
-    if "cufflinks" in flags:
-        compat_sam = "{}.STAR.noS.sam".format(name)
-        compat_awk = ["awk",
-                      'BEGIN {OFS="\t"} {split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S")',
-                      '{$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S")',
-                      '{L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); };',
-                      'gsub(/[0-9]*S/,"",$6); print}',
-                      "{}".format(output_sam),
-                      ">",
-                      "{}".format(compat_sam)]
-
-    view_cmd = ["{}".format(config['samtools']['bin']),
-                "view",
-                "-T {}".format(config['reference']),
-                "-u",
-                "{}".format(output_sam)
-                ]
-
-    sort_cmd = ["{}".format(config['samtools']['bin']),
-                "sort",
-                "-@",
-                "{}".format(config['star']['num_cores']),
-                "-O",
-                "bam",
-                "-o",
-                "{}".format(output_bam),
-                "-T",
-                "{}".format(temp),
-                "-"
-                ]
-
-    sort_command = "{} | {}".format(" ".join(view_cmd), " ".join(sort_cmd))
+    # if "cufflinks" in flags:
+    #     compat_sam = "{}.STAR.noS.sam".format(name)
+    #     compat_awk = ["awk",
+    #                   'BEGIN {OFS="\t"} {split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S")',
+    #                   '{$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S")',
+    #                   '{L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); };',
+    #                   'gsub(/[0-9]*S/,"",$6); print}',
+    #                   "{}".format(output_sam),
+    #                   ">",
+    #                   "{}".format(compat_sam)]
 
     job.fileStore.logToMaster("STAR Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
-    job.fileStore.logToMaster("Sort and Convert Command: {}\n".format(sort_command))
-    pipeline.run_and_log_command(sort_command, sort_logfile)
-
-    samples[name]['bam'] = output_bam
-
-    return output_bam
+    return output_file
 
 
 def star_unpaired(job, config, name, samples, flags):
@@ -124,6 +101,17 @@ def star_unpaired(job, config, name, samples, flags):
                ]
 
     command = add_additional_options(command, config, flags)
+
+    # if "cufflinks" in flags:
+    #     compat_sam = "{}.STAR.noS.sam".format(name)
+    #     compat_awk = ["awk",
+    #                   'BEGIN {OFS="\t"} {split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S")',
+    #                   '{$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S")',
+    #                   '{L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); };',
+    #                   'gsub(/[0-9]*S/,"",$6); print}',
+    #                   "{}".format(output_sam),
+    #                   ">",
+    #                   "{}".format(compat_sam)]
 
     job.fileStore.logToMaster("STAR Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
