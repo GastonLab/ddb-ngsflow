@@ -72,7 +72,7 @@ def stringtie(job, config, name, samples, flags):
     command = ["{}".format(config['strintie']['bin']),
                "{}".format(samples[name]['bam']),
                "-p {}".format(config['stringtie']['num_cores']),
-               "-G {}".format(config['merged_transcripts']),
+               "-G {}".format(config['merged_transcript_reference']),
                "-A {}".format(abundances_file),
                "-f 0.05",
                "-m 100",
@@ -89,7 +89,7 @@ def stringtie(job, config, name, samples, flags):
     return outfile
 
 
-def stringtie_merge(job, config, name, samples, flags):
+def stringtie_merge(job, config, samples, flags, transcripts_list):
     """Perform transcript assembly and quantification with StringTie
     :param config: The configuration dictionary.
     :type config: dict.
@@ -102,11 +102,11 @@ def stringtie_merge(job, config, name, samples, flags):
     :returns:  str -- The transcript assembly GTF file name.
     """
 
-    logfile = "{}.stringtie_merge.log".format(name)
-    outfile = "{}.stringtie.merged.gtf".format(name)
+    logfile = "{}.stringtie_merge.log".format(config['run_id'])
+    outfile = "{}.stringtie.merged.gtf".format(config['run_id'])
 
     command = ["{}".format(config['strintie']['bin']),
-               "{}".format(samples[name]['bam']),
+               "{}".format(transcripts_list),
                "--merge",
                "-p {}".format(config['stringtie']['num_cores']),
                "-G {}".format(config['merged_transcripts']),
