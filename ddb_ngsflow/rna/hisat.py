@@ -60,7 +60,7 @@ def hisat_paired(job, config, name, samples, flags):
     command = "{} | {} | {}".format(" ".join(hisat_cmd), " ".join(view_cmd), " ".join(sort_cmd))
 
     job.fileStore.logToMaster("HiSat2 Command: {}\n".format(command))
-    pipeline.run_and_log_command(" ".join(command), logfile)
+    pipeline.run_and_log_command(command, logfile)
 
     return output
 
@@ -107,6 +107,6 @@ def hisat_unpaired(job, config, name, samples, flags):
     command = "{} | {} | {}".format(" ".join(hisat_cmd), " ".join(view_cmd), " ".join(sort_cmd))
 
     job.fileStore.logToMaster("HiSat2 Command: {}\n".format(command))
-    pipeline.run_and_log_command(" ".join(command), logfile)
+    pipeline.run_and_log_command(command, logfile)
 
     return output
