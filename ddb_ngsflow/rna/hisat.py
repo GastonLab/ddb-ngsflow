@@ -40,8 +40,6 @@ def hisat_paired(job, config, name, samples, flags):
                  "-2 {}".format(samples[name]['fastq2'])
                  ]
 
-    # hisat_cmd = add_additional_options(hisat_cmd, config, flags)
-
     view_cmd = ["{}".format(config['samtools']['bin']),
                 "view",
                 "-u",
@@ -88,8 +86,6 @@ def hisat_unpaired(job, config, name, samples, flags):
                  "-x {}".format(config['hisat']['index']),
                  "-U {}".format(samples[name]['fastq1'])
                  ]
-
-    # hisat_cmd = add_additional_options(hisat_cmd, config, flags)
 
     view_cmd = ["{}".format(config['samtools']['bin']),
                 "view",
