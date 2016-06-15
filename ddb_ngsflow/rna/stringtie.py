@@ -35,7 +35,7 @@ def stringtie_first(job, config, name, samples, flags):
     logfile = "{}.stringtie_first.log".format(name)
     outfile = "{}.stringtie_first.gtf".format(name)
 
-    command = ["{}".format(config['strintie']['bin']),
+    command = ["{}".format(config['stringtie']['bin']),
                "{}".format(samples[name]['bam']),
                "-p {}".format(config['stringtie']['num_cores']),
                "-G {}".format(config['transcript_reference_gff']),
@@ -69,7 +69,7 @@ def stringtie(job, config, name, samples, flags):
     outfile = "{}.stringtie.gtf".format(name)
     abundances_file = "{}.gene_abundances.txt".format(name)
 
-    command = ["{}".format(config['strintie']['bin']),
+    command = ["{}".format(config['stringtie']['bin']),
                "{}".format(samples[name]['bam']),
                "-p {}".format(config['stringtie']['num_cores']),
                "-G {}".format(config['merged_transcript_reference']),
@@ -105,7 +105,7 @@ def stringtie_merge(job, config, samples, flags, transcripts_list):
     logfile = "{}.stringtie_merge.log".format(config['run_id'])
     outfile = "{}.stringtie.merged.gtf".format(config['run_id'])
 
-    command = ["{}".format(config['strintie']['bin']),
+    command = ["{}".format(config['stringtie']['bin']),
                "{}".format(transcripts_list),
                "--merge",
                "-p {}".format(config['stringtie']['num_cores']),
