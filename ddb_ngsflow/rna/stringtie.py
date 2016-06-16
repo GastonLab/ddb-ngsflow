@@ -109,7 +109,7 @@ def stringtie_merge(job, config, samples, flags, transcripts_list):
                "{}".format(transcripts_list),
                "--merge",
                "-p {}".format(config['stringtie']['num_cores']),
-               "-G {}".format(config['merged_transcripts']),
+               "-G {}".format(config['transcript_reference_gff']),
                "-o {}".format(outfile)
                ]
 
