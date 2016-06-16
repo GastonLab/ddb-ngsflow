@@ -9,6 +9,7 @@
 
 """
 
+import os
 from ddb_ngsflow import pipeline
 
 
@@ -69,6 +70,11 @@ def stringtie(job, config, name, samples, flags):
     outfile = "{}.stringtie.gtf".format(name)
     abundances_file = "{}.gene_abundances.txt".format(name)
 
+    outdir = "{}_stringtie_final".format(name)
+
+    working_dir = os.getcwd()
+    full_path_outfile = os.path.join(working_dir, outdir, outfile)
+
     command = ["{}".format(config['stringtie']['bin']),
                "{}".format(samples[name]['bam']),
                "-p {}".format(config['stringtie']['num_cores']),
@@ -78,7 +84,7 @@ def stringtie(job, config, name, samples, flags):
                "-m 100",
                "-B",
                "-e",
-               "-o {}".format(outfile)
+               "-o {}".format(full_path_outfile)
                ]
 
     command = add_additional_options(command, config, flags)
