@@ -9,6 +9,7 @@
 
 """
 
+import os
 from ddb_ngsflow import pipeline
 
 
@@ -76,15 +77,19 @@ def hisat_unpaired(job, config, name, samples, flags):
     :returns:  str -- The output bam file name.
     """
 
+    working_dir = os.getcwd()
+
     logfile = "{}.hisat.log".format(name)
     output = "{}.hisat.sorted.bam".format(name)
+    unaligned = os.path.join(working_dir, "{}.unaligned.sam".format(name))
     temp = "{}.hisat.sort.temp".format(name)
 
     hisat_cmd = ["{}".format(config['hisat']['bin']),
                  "-p {}".format(config['hisat']['num_cores']),
                  "--dta",
                  "-x {}".format(config['hisat']['index']),
-                 "-U {}".format(samples[name]['fastq1'])
+                 "-U {}".format(samples[name]['fastq1']),
+                 "--un {}".format(unaligned)
                  ]
 
     view_cmd = ["{}".format(config['samtools']['bin']),
