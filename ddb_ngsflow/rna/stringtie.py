@@ -39,7 +39,7 @@ def stringtie_first(job, config, name, samples, flags):
     command = ["{}".format(config['stringtie']['bin']),
                "{}".format(samples[name]['bam']),
                "-p {}".format(config['stringtie']['num_cores']),
-               "-G {}".format(config['transcript_reference_gff']),
+               "-G {}".format(config['transcript_reference']),
                "-f 0.05",
                "-m 100",
                "-o {}".format(outfile)
@@ -115,7 +115,7 @@ def stringtie_merge(job, config, samples, flags, transcripts_list):
                "{}".format(transcripts_list),
                "--merge",
                "-p {}".format(config['stringtie']['num_cores']),
-               "-G {}".format(config['transcript_reference_gff']),
+               "-G {}".format(config['transcript_reference']),
                "-o {}".format(outfile)
                ]
 
