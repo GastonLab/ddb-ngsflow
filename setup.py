@@ -38,7 +38,7 @@ setup(
     author_email='daniel.gaston@deaddriftbio.com',
     url='https://github.com/dgaston/ddb-ngsflow',
     packages=['ddb_ngsflow', 'ddb_ngsflow.align', 'ddb_ngsflow.utils', 'ddb_ngsflow.variation',
-              'ddb_ngsflow.variation.sv', 'ddb_ngsflow.rna', 'ddb_ngsflow.qc'],
+              'ddb_ngsflow.variation.sv', 'ddb_ngsflow.rna', 'ddb_ngsflow.qc', 'ddb_ngsflow.coverage'],
     # package_dir={'ddb-ngsflow': 'ddb_ngsflow'},
     # py_modules=[splitext(basename(path))[0] for path in glob('ddb_ngsflow/*.py')],
     include_package_data=True,
