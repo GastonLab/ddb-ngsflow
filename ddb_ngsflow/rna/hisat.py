@@ -99,6 +99,8 @@ def hisat_unpaired(job, config, name, samples, flags):
                  "--un {}".format(unaligned)
                  ]
 
+    hisat_cmd = add_additional_options(hisat_cmd, config, flags)
+
     view_cmd = ["{}".format(config['samtools']['bin']),
                 "view",
                 "-u",
