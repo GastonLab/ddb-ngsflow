@@ -14,6 +14,11 @@ from ddb_ngsflow import pipeline
 
 
 def add_additional_options(command_list, config, flags):
+    if 'stranded' in flags:
+        command_list.append("--rna-strandness {}".format(config['library-type']))
+
+    if 'max_intron' in flags:
+        command_list.append("--max-intronlen {}".format(config['hisat']['max_intron_size']))
 
     return command_list
 
@@ -40,6 +45,8 @@ def hisat_paired(job, config, name, samples, flags):
                  "-1 {}".format(samples[name]['fastq1']),
                  "-2 {}".format(samples[name]['fastq2'])
                  ]
+
+    hisat_cmd = add_additional_options(hisat_cmd, config, flags)
 
     view_cmd = ["{}".format(config['samtools']['bin']),
                 "view",
