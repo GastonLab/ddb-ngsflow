@@ -35,6 +35,9 @@ def add_additional_options(command_list, config, flags):
     if 'cufflinks' in flags:
         command_list.append("--alignEndsType EndToEnd")
 
+    if 'limit_bam_sort_ram' in flags:
+        command_list.append("--limitBAMsortRAM 1041088739")
+
     return command_list
 
 
