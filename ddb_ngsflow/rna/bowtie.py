@@ -30,7 +30,7 @@ def bowtie_unpaired(job, config, name, samples, flags):
     :returns:  str -- The output vcf file name.
     """
 
-    output = "{}.bowtie.bam".format(name)
+    output = "{}.bowtie.sam".format(name)
     logfile = "{}.bowtie.log".format(name)
 
     if "2-stage" in flags:
