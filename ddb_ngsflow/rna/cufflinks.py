@@ -76,7 +76,7 @@ def cuffmerge(job, config, name, samples, manifest):
                "-p {}".format(config['cuffmerge']['num_cores']),
                "{}".format(manifest)]
 
-    job.fileStore.logToMaster("Cufflinks Command: {}\n".format(command))
+    job.fileStore.logToMaster("Cuffmerge Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     pwd = os.getcwd()
@@ -100,6 +100,7 @@ def cuffquant(job, config, name, samples):
     command = ["{}".format(config['cuffquant']['bin']),
                "-b {}".format(config['reference']),
                "-p {}".format(config['cuffquant']['num_cores']),
+               "-o ./{}_cuffquant".format(name),
                "-u",
                "{}".format(config['merged_transcript_reference']),
                "{}".format(samples[name]['bam'])
