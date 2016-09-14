@@ -9,14 +9,12 @@
 from ddb_ngsflow import pipeline
 
 
-def run_flt3_itdseek(job, config, name, samples):
+def run_flt3_itdseek(job, config, name):
     """Run ITDseek without a matched normal sample
     :param config: The configuration dictionary.
     :type config: dict.
     :param name: sample name.
     :type name: str.
-    :param samples: The samples configuration dictionary.
-    :type config: dict.
     :returns:  str -- The output vcf file name.
     """
 
