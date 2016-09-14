@@ -1,5 +1,5 @@
 """
-.. module:: freebayes
+.. module:: scanindel
    :platform: Unix, OSX
    :synopsis: A wrapper module for calling ScanIndel.
 
@@ -10,11 +10,13 @@ from ddb_ngsflow import pipeline
 
 
 def scanindel(job, config, name, samples, input_bam):
-    """Run MANTA caller for Structural Variant Detection
+    """Run ScanIndel caller for Structural Variant Detection
     :param config: The configuration dictionary.
     :type config: dict.
     :param name: sample name.
     :type name: str.
+    :param samples: The samples configuration dictionary.
+    :type config: dict.
     :param input_bam: The input_bam file name to process.
     :type input_bam: str.
     :returns:  str -- The output vcf file name.
