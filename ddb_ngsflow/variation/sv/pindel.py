@@ -12,7 +12,15 @@ from ddb_ngsflow import pipeline
 
 
 def run_pindel(job, config, name, input_bam):
-    """Run pindel on samples"""
+    """Run Pindel caller for InDel Detection
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param name: sample name.
+    :type name: str..
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output vcf file name.
+    """
 
     pindel_config = "{}.pindel_config.txt".format(name)
     output_dir = "{}_pindel".format(name)
