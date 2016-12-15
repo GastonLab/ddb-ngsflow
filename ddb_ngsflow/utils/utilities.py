@@ -58,57 +58,6 @@ def bedtools_coverage_to_summary(job, config, name, input_file):
     raise NotImplementedError
 
 
-# def generate_coverage_report(job, config, vcfs):
-#     """Take DiagnoseTargets data and generate a coverage report
-#     :param config: The configuration dictionary.
-#     :type config: dict..
-#     :param vcfs: The list of input DiagnoseTargets generated vcf file names to process.
-#     :type vcfs: str.
-#     """
-#
-#     samples_coverage = {"Chr": [], "Start": [], "Stop": [], "Target": []}
-#     first_pass = True
-#
-#     job.fileStore.logToMaster("Processing DiagnoseTargets outputs and writing to spreadsheet\n")
-#     sys.stdout.write("Processing VCFs:\n")
-#     for vcf in vcfs:
-#         sys.stdout.write("{}\n".format(vcf))
-#
-#     for vcf in vcfs:
-#         filter_field = "{}_filter".format(vcf)
-#         depth_field = "{}_depth".format(vcf)
-#         low_field = "{}_bp_low".format(vcf)
-#         zero_field = "{}_bp_zero".format(vcf)
-#
-#         samples_coverage[filter_field] = list()
-#         samples_coverage[depth_field] = list()
-#         samples_coverage[low_field] = list()
-#         samples_coverage[zero_field] = list()
-#
-#         targeted_regions = pybedtools.BedTool(config['regions'])
-#         coverage_data = pybedtools.BedTool(vcf)
-#         intersections = coverage_data.intersect(targeted_regions, loj=True)
-#
-#         for region in intersections:
-#             if first_pass:
-#                 samples_coverage['Chr'].append(region.chrom)
-#                 samples_coverage['Start'].append(region.start)
-#                 samples_coverage['Stop'].append(region.stop)
-#                 samples_coverage['Target'].append(region[13])
-#             reads_data = region[9].split(":")
-#             samples_coverage[filter_field].append(region[6])
-#             samples_coverage[depth_field].append(reads_data[-3])
-#             samples_coverage[low_field].append(reads_data[-2])
-#             samples_coverage[zero_field].append(reads_data[-1])
-#
-#         if first_pass:
-#             first_pass = False
-#
-#     content = pyexcel.utils.dict_to_array(samples_coverage)
-#     sheet = pyexcel.Sheet(content)
-#     sheet.save_as("{}_coverage_results.xlsx".format(config['run_name']))
-
-
 def read_coverage(job, config, name, vcf):
     """Take DiagnoseTargets data return summarized results
     :param config: The configuration dictionary.
@@ -195,41 +144,6 @@ def bcftools_filter_variants_regions(job, config, name, samples, input_vcf):
     pipeline.run_and_log_command(" ".join(sort_command), sort_logfile)
 
     return sorted_vcf
-
-
-# def merge_samples(job, config, name, input_vcf1, input_vcf2):
-#     """Merge samples into a single VCF"""
-#
-#     output_vcf = "{}.ds.merged.vcf".format(name)
-#     logfile = "{}.ds_merging.log".format(name)
-#
-#     bgzipped_vcf1 = "{}.gz".format(input_vcf1)
-#     bgzipped_vcf2 = "{}.gz".format(input_vcf2)
-#
-#     bgzip_and_tabix_vcf(job, input_vcf1)
-#     bgzip_and_tabix_vcf(job, input_vcf2)
-#
-#     # Prefer to use BCFTools but merge returns errors about LSEQ fields
-#     # command = ("{}".format(config['bcftools']['bin']),
-#     #            "merge",
-#     #            "-O",
-#     #            "v",
-#     #            "-o",
-#     #            "{}".format(output_vcf),
-#     #            "{}".format(bgzipped_vcf1),
-#     #            "{}".format(bgzipped_vcf2))
-#
-#     command = ("{}".format(config['vcftools_merge']['bin']),
-#                "{}".format(bgzipped_vcf1),
-#                "{}".format(bgzipped_vcf2),
-#                ">",
-#                "{}".format(output_vcf))
-#
-#     job.fileStore.logToMaster("Merging stranded libraries into multi-sample VCF with the command:
-#                                {}\n".format(command))
-#     pipeline.run_and_log_command(" ".join(command), logfile)
-#
-#     return output_vcf
 
 
 def _bgzip_and_tabix_vcf_instructions(infile):
