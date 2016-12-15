@@ -14,7 +14,7 @@ import subprocess as sub
 
 def run_and_log_command(command, logfile):
     """This function uses the python subprocess method to run the specified command and writes all error to the
-    specified logfile
+    specified logfile. Development branch
 
     :param command: The command-line command to execute.
     :type name: str.
