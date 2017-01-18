@@ -28,6 +28,7 @@ def snpeff(job, config, name, input_vcf):
 
     snpeff_command = ["{}".format(config['snpeff']['bin']),
                       "-Xmx{}g".format(config['snpeff']['max_mem']),
+                      "-onlyTr {}".format(config['transcripts']),
                       "-v",
                       "{}".format(config['snpeff']['reference']),
                       "{}".format(input_vcf),
