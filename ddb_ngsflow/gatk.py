@@ -359,7 +359,8 @@ def recalibrator(job, config, name, input_bam):
     cp_log = "{}.copy.log".format(name)
 
     # Calculate covariates
-    recal_commands = ["{}".format(config['gatk-recal']['bin']),
+    recal_commands = ["java -Xmx8g -jar /mnt/shared-data/anaconda2/envs/ddb/bin/GenomeAnalysisTK.jar",
+                      #"{}".format(config['gatk-recal']['bin']),
                       "-T",
                       "BaseRecalibrator",
                       "-R",
