@@ -86,3 +86,43 @@ def joint_variant_calling(job, config, name, samples):
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return vcf
+
+
+def haplotypecaller_amplicon(job, config, name, samples, input_bam):
+    """Generate gVCF files for a sample using the HaplotypeCaller
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param name: sample name.
+    :type name: str.
+    :param samples: samples configuration dictionary
+    :type samples: dict
+    :param input_bam: The input_bam file name to process.
+    :type input_bam: str.
+    :returns:  str -- The output vcf file name.
+    """
+
+    gvcf = "{}.haplotypecaller.g.vcf".format(name)
+    logfile = "{}.haplotypecaller_gvcf.log".format(name)
+
+    command = ["{}".format(config['gatk-haplotypecaller']['bin']),
+               "-T",
+               "HaplotypeCaller",
+               "-R",
+               "{}".format(config['reference']),
+               "--dbsnp",
+               "{}".format(config['dbsnp']),
+               "-I",
+               "{}".format(input_bam),
+               "-L",
+               "--drf DuplicateRead"
+               "{}".format(samples[name]['regions']),
+               "--emitRefConfidence GVCF",
+               "--variant_index_type LINEAR",
+               "--variant_index_parameter 128000",
+               "-o",
+               "{}".format(gvcf)]
+
+    job.fileStore.logToMaster("HaplotypeCaller Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return gvcf
