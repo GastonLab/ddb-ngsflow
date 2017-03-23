@@ -114,8 +114,8 @@ def haplotypecaller_amplicon(job, config, name, samples, input_bam):
                "-I",
                "{}".format(input_bam),
                "-L",
-               "--drf DuplicateRead"
                "{}".format(samples[name]['regions']),
+               "--drf DuplicateRead"
                "--emitRefConfidence GVCF",
                "--variant_index_type LINEAR",
                "--variant_index_parameter 128000",
