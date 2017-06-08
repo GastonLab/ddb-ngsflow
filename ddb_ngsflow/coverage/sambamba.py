@@ -48,3 +48,36 @@ def sambamba_region_coverage(job, config, name, samples, input_bam):
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output
+
+
+def sambamba_base_coverage(job, config, name, samples, input_bam):
+    """Run SamBambam to calculate the coverage of targeted regions
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param name: sample/library name.
+    :type name: str.
+    :param input_bam: The input_bam file name to process.
+    :type samples: dict
+    :param samples: The samples configuration dictionary
+    :type input_bam: str.
+    :returns:  str -- The output BED file name.
+    """
+
+    output = "{}.sambamba_coverage.bed".format(name)
+    logfile = "{}.sambamba_coverage.log".format(name)
+
+    command = ["{}".format(config['sambamba']['bin']),
+               "depth base",
+               "-L",
+               "{}".format(samples[name]['regions']),
+               "-z",
+               "-t",
+               "{}".format(config['sambamba']['num_cores']),
+               "{}".format(input_bam),
+               ">",
+               "{}".format(output)]
+
+    job.fileStore.logToMaster("SamBamba Coverage Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output
