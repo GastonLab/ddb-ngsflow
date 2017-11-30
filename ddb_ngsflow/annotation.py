@@ -27,7 +27,7 @@ def snpeff(job, config, name, input_vcf):
     logfile = "{}.snpeff.log".format(name)
 
     snpeff_command = ["{}".format(config['snpeff']['bin']),
-                      "-Xmx{}g".format(config['snpeff']['max_mem']),
+                      # "-Xmx{}g".format(config['snpeff']['max_mem']),
                       "-onlyTr {}".format(config['transcripts']),
                       "-v",
                       "{}".format(config['snpeff']['reference']),
