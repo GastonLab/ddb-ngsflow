@@ -225,7 +225,7 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
     return sorted_vcf
 
 
-def filter_somatic_cassandra_variants(job, config, sample, samples):
+# def filter_somatic_cassandra_variants(job, config, sample, samples):
 
 # def combine_variants(job, config, sample, vcf_files):
 #     """Run GATK CatVariants to combine non-overlapping variant calls (ie MuTect + Scalpel)

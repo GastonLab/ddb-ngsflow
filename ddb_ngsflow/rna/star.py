@@ -72,6 +72,47 @@ def star_paired(job, config, name, samples, flags):
 
     return output_file
 
+def star_paired_illumina_minimal(job, config, name, samples, flags):
+    """Align RNA-Seq data to a reference using STAR
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param name: sample name.
+    :type name: str.
+    :param samples: The samples info and config dictionary.
+    :type samples: dict.
+    :returns:  str -- The output vcf file name.
+    """
+
+    output = "{}.star.".format(name)
+    logfile = "{}.star.log".format(name)
+    output_file = "{}Aligned.sortedByCoord.out.bam".format(output)
+
+    command = ["{}".format(config['star']['bin']),
+               "--genomeDir {}".format(config['star']['index']),
+               "--runThreadN {}".format(config['star']['num_cores']),
+               "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
+               # "--outFileNamePrefix {}".format(output),
+               # "--outReadsUnmapped Fastx",
+               # "--outSAMtype BAM SortedByCoordinate"
+               "--outSAMmapqUnique 50",
+               "--outFilterType BySJout",
+               "--outSJfilterCountUniqueMin -1 2 2",
+               "--outSJfilterCountTotalMin -1 2 2 2",
+               "--outFilterIntronMotifs RemoveNoncanonical",
+               "--chimSegmentMin 12",
+               "--chimJunctionOverhangMin 12",
+               "--chimScoreDropMax 30",
+               "--chimSegmentReadGapMax 5",
+               "--chimScoreSeparation 5"
+               ]
+
+    command = add_additional_options(command, config, flags)
+
+    job.fileStore.logToMaster("STAR Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_file
+
 
 def star_unpaired(job, config, name, samples, flags):
     """Align RNA-Seq data to a reference using STAR
