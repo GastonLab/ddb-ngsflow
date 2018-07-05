@@ -91,12 +91,12 @@ def star_paired_illumina_minimal(job, config, name, samples, flags):
                "--genomeDir {}".format(config['star']['index']),
                "--runThreadN {}".format(config['star']['num_cores']),
                "--readFilesIn {} {}".format(samples[name]['fastq1'], samples[name]['fastq2']),
-               # "--outFileNamePrefix {}".format(output),
+               "--outFileNamePrefix {}".format(output),
                # "--outReadsUnmapped Fastx",
-               # "--outSAMtype BAM SortedByCoordinate"
+               "--outSAMtype BAM SortedByCoordinate"
                "--outSAMmapqUnique 50",
                "--outFilterType BySJout",
-               "--outSJfilterCountUniqueMin -1 2 2",
+               "--outSJfilterCountUniqueMin -1 2 2 2",
                "--outSJfilterCountTotalMin -1 2 2 2",
                "--outFilterIntronMotifs RemoveNoncanonical",
                "--chimSegmentMin 12",
