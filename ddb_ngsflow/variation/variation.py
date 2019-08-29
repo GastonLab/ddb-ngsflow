@@ -87,8 +87,8 @@ def vt_normalization(job, config, sample, caller, input_vcf):
     :type config: dict.
     :param sample: sample name.
     :type sample: str.
-    :param sample: caller name.
-    :type sample: str.
+    :param caller: caller name.
+    :type caller: str.
     :param input_vcf: The input_vcf file name to process.
     :type input_vcf: str.
     :returns:  str -- The output vcf file name.
@@ -155,6 +155,44 @@ def vt_normalization(job, config, sample, caller, input_vcf):
 #     pipeline.run_and_log_command(" ".join(isec_command), logfile)
 #
 #     return merged_vcf
+
+def filter_low_quality_variants(job, confif, sample, caller):
+    """Filter out very low quality calls from VCFs so they are not included in database
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param caller: caller name.
+    :type caller: str.
+    :returns:  str -- The output vcf file name.
+    """
+
+    output_vcf = "{}.{}.low_qual_filtered.vcf".format(sample, caller)
+    logfile = "{}.{}.low_qual_filtered.log".format(sample, caller)
+
+    normalization = ["zless",
+                     "{}".format(input_vcf),
+                     "|",
+                     "sed",
+                     "'s/ID=AD,Number=./ID=AD,Number=R/'",
+                     "|",
+                     "{}".format(config['vt']['bin']),
+                     "decompose",
+                     "-s",
+                     "-",
+                     "|",
+                     "{}".format(config['vt']['bin']),
+                     "normalize",
+                     "-r",
+                     "{}".format(config['reference']),
+                     "-",
+                     ">",
+                     "{}".format(output_vcf)]
+
+    job.fileStore.logToMaster("VT Command: {}\n".format(normalization))
+    pipeline.run_and_log_command(" ".join(normalization), logfile)
+
+    return output_vcf
 
 
 def merge_variant_calls(job, config, sample, callers, vcf_files):

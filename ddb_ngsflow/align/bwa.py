@@ -65,3 +65,38 @@ def run_bwa_mem(job, config, name, samples):
     pipeline.run_and_log_command(command, logfile)
 
     return output_bam
+
+
+def run_bedtools_filter(job, config, sample, samples, input_bam):
+    """Run GATK's DiagnoseTargets against the supplied region
+
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param fastq1: Input FastQ File.
+    :type fastq1: str.
+    :param fastq2: Input FastQ File.
+    :type fastq2: str.
+    :returns:  str -- Aligned and sorted BAM file name.
+
+    """
+
+    job.fileStore.logToMaster("Running Bedtools for alignment {}\n".format(input_bam))
+
+    output_bam = "{}.on_target.bam".format(sample)
+    logfile = "{}.bedtools.log".format(sample)
+
+    command = ["bedtools",
+               "intersect",
+               "-a",
+               "{}".format(input_bam),
+               "-b",
+               "{}".format(samples[sample]['regions']),
+               ">",
+               "{}".format(output_bam)]
+
+    job.fileStore.logToMaster("Bedtools Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_bam
