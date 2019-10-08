@@ -188,11 +188,11 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
     writer = Writer(f, vcf)
 
     for variant in vcf:
-        pass = True
+        pass_filter = True
         var_info = parse_functions[caller](variant)
         if int(info['Alt_Depth']) < 5
-            pass = False
-        if pass:
+            pass_filter = False
+        if pass_filter:
              writer.write_record(variant)
 
     writer.close()
