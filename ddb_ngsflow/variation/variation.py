@@ -10,11 +10,14 @@
 
 import os
 import sys
+import cyvcf2
 
 from ddb import gemini_interface
 from gemini import GeminiQuery
-
 from ddb_ngsflow import pipeline
+from ddb import vcf_parsing
+from cyvcf2 import VCF
+from cyvcf2 import Writer
 
 
 def _run_gemini_query_and_filter(db, genes):
@@ -130,7 +133,7 @@ def vt_normalization(job, config, sample, caller, input_vcf):
 #     :type sample: str.
 #     :param vcf_files: List of input vcf files for merging.
 #     :type vcf_files: list.
-#     :returns:  str -- The output vcf file name.
+#     :returns:  str -- The output vcf file name.import cyvcf2
 #     """
 #
 #     files = list()
@@ -156,7 +159,7 @@ def vt_normalization(job, config, sample, caller, input_vcf):
 #
 #     return merged_vcf
 
-def filter_low_quality_variants(job, confif, sample, caller):
+def filter_low_quality_variants(job, config, sample, caller, input_vcf):
     """Filter out very low quality calls from VCFs so they are not included in database
     :param config: The configuration dictionary.
     :type config: dict.
@@ -170,28 +173,30 @@ def filter_low_quality_variants(job, confif, sample, caller):
     output_vcf = "{}.{}.low_qual_filtered.vcf".format(sample, caller)
     logfile = "{}.{}.low_qual_filtered.log".format(sample, caller)
 
-    normalization = ["zless",
-                     "{}".format(input_vcf),
-                     "|",
-                     "sed",
-                     "'s/ID=AD,Number=./ID=AD,Number=R/'",
-                     "|",
-                     "{}".format(config['vt']['bin']),
-                     "decompose",
-                     "-s",
-                     "-",
-                     "|",
-                     "{}".format(config['vt']['bin']),
-                     "normalize",
-                     "-r",
-                     "{}".format(config['reference']),
-                     "-",
-                     ">",
-                     "{}".format(output_vcf)]
+    job.fileStore.logToMaster("Filtering VCF {}\n".format(input_vcf))
+    parse_functions = {'mutect': vcf_parsing.parse_mutect_vcf_record,
+                       'freebayes': vcf_parsing.parse_freebayes_vcf_record,
+                       'vardict': vcf_parsing.parse_vardict_vcf_record,
+                       'scalpel': vcf_parsing.parse_scalpel_vcf_record,
+                       'platypus': vcf_parsing.parse_platypus_vcf_record,
+                       'pindel': vcf_parsing.parse_pindel_vcf_record}
 
-    job.fileStore.logToMaster("VT Command: {}\n".format(normalization))
-    pipeline.run_and_log_command(" ".join(normalization), logfile)
+    reader = cyvcf2.VCFReader(input_vcf)
+    desc = reader["ANN"]["Description"]
+    annotation_keys = [x.strip("\"'") for x in re.split("\s*\|\s*", desc.split(":", 1)[1].strip('" '))]
+    vcf = VCF(input_vcf)
+    writer = Writer(f, vcf)
 
+    for variant in vcf:
+        pass = True
+        var_info = parse_functions[caller](variant)
+        if int(info['Alt_Depth']) < 5
+            pass = False
+        if pass:
+             writer.write_record(variant)
+
+    writer.close()
+    vcf.close()
     return output_vcf
 
 
