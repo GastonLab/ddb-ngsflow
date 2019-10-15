@@ -171,7 +171,25 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
     """
 
     output_vcf = "{}.{}.low_qual_filtered.vcf".format(sample, caller)
-    logfile = "{}.{}.low_qual_filtered.log".format(sample, caller)
+
+    bgzip_cmd = ["bgzip",
+                 "-c",
+                 "{}".format(input_vcf),
+                 ">",
+                 "{}.gz".format(input_vcf)]
+
+    tabix_cmd = ["tabix",
+                 "-p",
+                 "vcf",
+                 "{}.gz".format(input_vcf)]
+
+    logfile = "{}.{}.low_qual_filtering.log".format(sample, caller)
+
+    job.fileStore.logToMaster("Bgzip Command: {}\n".format(bgzip_cmd))
+    pipeline.run_and_log_command(" ".join(bgzip_cmd), logfile)
+
+    job.fileStore.logToMaster("Tabix Command: {}\n".format(tabix_cmd))
+    pipeline.run_and_log_command(" ".join(tabix_cmd), logfile)
 
     job.fileStore.logToMaster("Filtering VCF {}\n".format(input_vcf))
     parse_functions = {'mutect': vcf_parsing.parse_mutect_vcf_record,
@@ -181,22 +199,20 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
                        'platypus': vcf_parsing.parse_platypus_vcf_record,
                        'pindel': vcf_parsing.parse_pindel_vcf_record}
 
-    reader = cyvcf2.VCFReader(input_vcf)
-    desc = reader["ANN"]["Description"]
-    annotation_keys = [x.strip("\"'") for x in re.split("\s*\|\s*", desc.split(":", 1)[1].strip('" '))]
-    vcf = VCF(input_vcf)
-    writer = Writer(f, vcf)
+    vcf_file = "{}.gz".format(input_vcf)
+
+    vcf = VCF(vcf_file)
+    writer = Writer(output_vcf, vcf)
 
     for variant in vcf:
         pass_filter = True
         var_info = parse_functions[caller](variant)
-        if int(info['Alt_Depth']) < 5:
+        if int(var_info['Alt_Depth']) < 5:
             pass_filter = False
         if pass_filter:
-             writer.write_record(variant)
+            writer.write_record(variant)
 
     writer.close()
-    vcf.close()
     return output_vcf
 
 
