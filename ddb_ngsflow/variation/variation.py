@@ -183,7 +183,7 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
                  "vcf",
                  "{}.gz".format(input_vcf)]
 
-    rehead_cmd = ["bcftools",
+    rehead_cmd = ["bcftools-1.9dev",
                   "reheader",
                   "-f",
                   "{}.fai".format(config['reference']),
