@@ -202,8 +202,7 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
     vcf_file = "{}.gz".format(input_vcf)
 
     vcf = VCF(vcf_file)
-    original_vcf = VCF(input_vcf)
-    writer = Writer(output_vcf, original_vcf)
+    writer = Writer(output_vcf, vcf_file)
 
     for variant in vcf:
         pass_filter = True
