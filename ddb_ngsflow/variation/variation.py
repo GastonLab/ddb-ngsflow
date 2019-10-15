@@ -170,6 +170,7 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
     :returns:  str -- The output vcf file name.
     """
 
+    interim_vcf = "{}.{}.normalized.rehead.vcf.gz".format(sample, caller)
     output_vcf = "{}.{}.low_qual_filtered.vcf".format(sample, caller)
 
     bgzip_cmd = ["bgzip",
@@ -187,20 +188,24 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
                   "reheader",
                   "-f",
                   "{}.fai".format(config['reference']),
+                  "-o",
+                  "{}".format(interim_vcf),
                   "{}.gz".format(input_vcf)]
 
-    logfile = "{}.{}.low_qual_filtering.log".format(sample, caller)
+    logfile1 = "{}.{}.bgzip.log".format(sample, caller)
+    logfile2 = "{}.{}.tabix.log".format(sample, caller)
+    logfile3 = "{}.{}.bcftools_rehead.log".format(sample, caller)
 
     job.fileStore.logToMaster("Bgzip Command: {}\n".format(bgzip_cmd))
-    pipeline.run_and_log_command(" ".join(bgzip_cmd), logfile)
+    pipeline.run_and_log_command(" ".join(bgzip_cmd), logfile1)
 
     job.fileStore.logToMaster("Tabix Command: {}\n".format(tabix_cmd))
-    pipeline.run_and_log_command(" ".join(tabix_cmd), logfile)
+    pipeline.run_and_log_command(" ".join(tabix_cmd), logfile2)
 
     job.fileStore.logToMaster("BCFTools Reheader Command: {}\n".format(rehead_cmd))
-    pipeline.run_and_log_command(" ".join(rehead_cmd), logfile)
+    pipeline.run_and_log_command(" ".join(rehead_cmd), logfile3)
 
-    job.fileStore.logToMaster("Filtering VCF {}\n".format(input_vcf))
+    job.fileStore.logToMaster("Filtering VCF {}\n".format(interim_vcf))
     parse_functions = {'mutect': vcf_parsing.parse_mutect_vcf_record,
                        'freebayes': vcf_parsing.parse_freebayes_vcf_record,
                        'vardict': vcf_parsing.parse_vardict_vcf_record,
@@ -208,10 +213,8 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
                        'platypus': vcf_parsing.parse_platypus_vcf_record,
                        'pindel': vcf_parsing.parse_pindel_vcf_record}
 
-    vcf_file = "{}.gz".format(input_vcf)
-
-    vcf = VCF(vcf_file)
-    writer = Writer(output_vcf, vcf_file)
+    vcf = VCF(interim_vcf)
+    writer = Writer(output_vcf, interim_vcf)
 
     for variant in vcf:
         pass_filter = True
