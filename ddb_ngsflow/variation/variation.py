@@ -183,6 +183,12 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
                  "vcf",
                  "{}.gz".format(input_vcf)]
 
+    rehead_cmd = ["bcftools-1.9dev",
+                  "reheader",
+                  "-f",
+                  "{}.fai".format(config['reference']),
+                  "{}.gz".format(input_vcf)]
+
     logfile = "{}.{}.low_qual_filtering.log".format(sample, caller)
 
     job.fileStore.logToMaster("Bgzip Command: {}\n".format(bgzip_cmd))
@@ -190,6 +196,9 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
 
     job.fileStore.logToMaster("Tabix Command: {}\n".format(tabix_cmd))
     pipeline.run_and_log_command(" ".join(tabix_cmd), logfile)
+
+    job.fileStore.logToMaster("BCFTools Reheader Command: {}\n".format(rehead_cmd))
+    pipeline.run_and_log_command(" ".join(rehead_cmd), logfile)
 
     job.fileStore.logToMaster("Filtering VCF {}\n".format(input_vcf))
     parse_functions = {'mutect': vcf_parsing.parse_mutect_vcf_record,
