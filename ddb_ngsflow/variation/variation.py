@@ -209,7 +209,7 @@ def filter_low_support_variants(job, config, sample, caller, input_vcf):
                        'pindel': vcf_parsing.parse_pindel_vcf_record}
 
     vcf = VCF(input_vcf)
-    writer = Writer(output_vcf, input_vcf)
+    writer = Writer(output_vcf, vcf)
 
     for variant in vcf:
         pass_filter = True
