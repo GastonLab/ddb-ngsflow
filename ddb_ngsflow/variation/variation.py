@@ -187,6 +187,32 @@ def add_refcontig_info_header(job, config, sample, caller, input_vcf):
     return output_vcf
 
 
+def PicardUpdateVCFDict(job, config, sample, caller, input_vcf):
+    """Use Picard to add contig info from reference to VCF
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param caller: caller name.
+    :type caller: str.
+    :returns:  str -- The output vcf file name.
+    """
+
+    output_vcf = "{}.{}.rehead.vcf".format(sample, caller)
+    logfile = "{}.{}.picard_rehead.log".format(sample, caller)
+
+    command = ["{}".format(config['picard']['bin']),
+               "UpdateVcfSequenceDictionary",
+               "INPUT={}".format(input_vcf),
+               "OUTPUT={}".format(output_vcf),
+               "SEQUENCE_DICTIONARY={}".format(config['reference'])]
+
+    job.fileStore.logToMaster("Picard UpdateVcfSequenceDictionary Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_vcf
+
+
 def filter_low_support_variants(job, config, sample, caller, input_vcf):
     """Filter out very low quality calls from VCFs so they are not included in database
     :param config: The configuration dictionary.
