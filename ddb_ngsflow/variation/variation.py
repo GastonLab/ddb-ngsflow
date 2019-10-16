@@ -125,39 +125,67 @@ def vt_normalization(job, config, sample, caller, input_vcf):
     return output_vcf
 
 
-# def intersect_variant_calls(job, config, sample, vcf_files):
-#     """Run vcf-isec to intersect variant calls from multiple variant callers
-#     :param config: The configuration dictionary.
-#     :type config: dict.
-#     :param sample: sample name.
-#     :type sample: str.
-#     :param vcf_files: List of input vcf files for merging.
-#     :type vcf_files: list.
-#     :returns:  str -- The output vcf file name.import cyvcf2
-#     """
-#
-#     files = list()
-#     for vcf in vcf_files:
-#         utilities.bgzip_and_tabix_vcf(job, vcf)
-#         files.append("{}.gz".format(vcf))
-#     vcf_files_string = " ".join(files)
-#
-#     merged_vcf = "{}.merged.vcf".format(sample)
-#     logfile = "{}.merged.log".format(sample)
-#
-#     # Put this back in after run: .format(config['vcftools_isec']['bin'])
-#     isec_command = ("vcf-isec",
-#                     "-f",
-#                     "-n",
-#                     "+1",
-#                     "{}".format(vcf_files_string),
-#                     ">",
-#                     "{}".format(merged_vcf))
-#
-#     job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
-#     pipeline.run_and_log_command(" ".join(isec_command), logfile)
-#
-#     return merged_vcf
+def bgzip_tabix_vcf(job, config, sample, caller, input_vcf):
+    """BGZip and Tabix an input VCF file
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param caller: caller name.
+    :type caller: str.
+    :returns:  str -- The output vcf file name.
+    """
+
+    bgzip_vcf = "{}.gz".format(input_vcf)
+    bgzip_cmd = ["bgzip",
+                 "-c",
+                 "{}".format(input_vcf),
+                 ">",
+                 "{}.gz".format(input_vcf)]
+
+    tabix_cmd = ["tabix",
+                 "-p",
+                 "vcf",
+                 "{}.gz".format(input_vcf)]
+
+    bgzip_logfile = "{}.{}.bgzip.log".format(sample, caller)
+    tabix_logfile = "{}.{}.tabix.log".format(sample, caller)
+
+    job.fileStore.logToMaster("Bgzip Command: {}\n".format(bgzip_cmd))
+    pipeline.run_and_log_command(" ".join(bgzip_cmd), bgzip_logfile)
+
+    job.fileStore.logToMaster("Tabix Command: {}\n".format(tabix_cmd))
+    pipeline.run_and_log_command(" ".join(tabix_cmd), tabix_logfile)
+
+    return bgzip_vcf
+
+
+def add_refcontig_info_header(job, config, sample, caller, input_vcf):
+    """Use BCFTools to add contig info from reference to VCF
+    :param config: The configuration dictionary.
+    :type config: dict.
+    :param sample: sample name.
+    :type sample: str.
+    :param caller: caller name.
+    :type caller: str.
+    :returns:  str -- The output vcf file name.
+    """
+
+    output_vcf = "{}.{}.rehead.vcf.gz".format(sample, caller)
+    logfile = "{}.{}.bcftools_rehead.log".format(sample, caller)
+    command = ["bcftools-1.9dev",
+               "reheader",
+               "-f",
+               "{}.fai".format(config['reference']),
+               "-o",
+               "{}".format(output_vcf),
+               "{}.gz".format(input_vcf)]
+
+    job.fileStore.logToMaster("BCFTools Reheader Command: {}\n".format(command))
+    pipeline.run_and_log_command(" ".join(command), logfile)
+
+    return output_vcf
+
 
 def filter_low_quality_variants(job, config, sample, caller, input_vcf):
     """Filter out very low quality calls from VCFs so they are not included in database
@@ -170,40 +198,7 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
     :returns:  str -- The output vcf file name.
     """
 
-    interim_vcf = "{}.{}.normalized.rehead.vcf.gz".format(sample, caller)
     output_vcf = "{}.{}.low_qual_filtered.vcf".format(sample, caller)
-
-    bgzip_cmd = ["bgzip",
-                 "-c",
-                 "{}".format(input_vcf),
-                 ">",
-                 "{}.gz".format(input_vcf)]
-
-    tabix_cmd = ["tabix",
-                 "-p",
-                 "vcf",
-                 "{}.gz".format(input_vcf)]
-
-    rehead_cmd = ["bcftools-1.9dev",
-                  "reheader",
-                  "-f",
-                  "{}.fai".format(config['reference']),
-                  "-o",
-                  "{}".format(interim_vcf),
-                  "{}.gz".format(input_vcf)]
-
-    logfile1 = "{}.{}.bgzip.log".format(sample, caller)
-    logfile2 = "{}.{}.tabix.log".format(sample, caller)
-    logfile3 = "{}.{}.bcftools_rehead.log".format(sample, caller)
-
-    job.fileStore.logToMaster("Bgzip Command: {}\n".format(bgzip_cmd))
-    pipeline.run_and_log_command(" ".join(bgzip_cmd), logfile1)
-
-    job.fileStore.logToMaster("Tabix Command: {}\n".format(tabix_cmd))
-    pipeline.run_and_log_command(" ".join(tabix_cmd), logfile2)
-
-    job.fileStore.logToMaster("BCFTools Reheader Command: {}\n".format(rehead_cmd))
-    pipeline.run_and_log_command(" ".join(rehead_cmd), logfile3)
 
     job.fileStore.logToMaster("Filtering VCF {}\n".format(interim_vcf))
     parse_functions = {'mutect': vcf_parsing.parse_mutect_vcf_record,
@@ -294,40 +289,3 @@ def merge_variant_calls(job, config, sample, callers, vcf_files):
     os.remove(index_file)
 
     return sorted_vcf
-
-
-# def filter_somatic_cassandra_variants(job, config, sample, samples):
-
-# def combine_variants(job, config, sample, vcf_files):
-#     """Run GATK CatVariants to combine non-overlapping variant calls (ie MuTect + Scalpel)
-#     :param config: The configuration dictionary.
-#     :type config: dict.
-#     :param sample: sample name.
-#     :type sample: str.
-#     :param vcf_files: List of input vcf files for combining.
-#     :type vcf_files: list.
-#     :returns:  str -- The output vcf file name.
-#     """
-#
-#     files = list()
-#     for vcf in vcf_files:
-#         utilities.bgzip_and_tabix_vcf(job, vcf)
-#         files.append("{}.gz".format(vcf))
-#     vcf_files_string = " ".join(files)
-#
-#     merged_vcf = "{}.merged.vcf".format(sample)
-#     logfile = "{}.merged.log".format(sample)
-#
-#     # Put this back in after run: .format(config['vcftools_isec']['bin'])
-#     isec_command = ("vcf-isec",
-#                     "-f",
-#                     "-n",
-#                     "+1",
-#                     "{}".format(vcf_files_string),
-#                     ">",
-#                     "{}".format(merged_vcf))
-#
-#     job.fileStore.logToMaster("Vcftools intersect Command: {}\n".format(isec_command))
-#     pipeline.run_and_log_command(" ".join(isec_command), logfile)
-#
-#     return merged_vcf
