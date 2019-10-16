@@ -205,9 +205,9 @@ def PicardUpdateVCFDict(job, config, sample, caller, input_vcf):
                "UpdateVcfSequenceDictionary",
                "INPUT={}".format(input_vcf),
                "OUTPUT={}".format(output_vcf),
-               "SEQUENCE_DICTIONARY={}".format(config['reference'])]
+               "SEQUENCE_DICTIONARY={}".format(config['dict'])]
 
-    job.fileStore.logToMaster("Picard UpdateVcfSequenceDictionary Command: {}\n".format(command))
+    job.fileStore.logToMaster("Picard Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
 
     return output_vcf
