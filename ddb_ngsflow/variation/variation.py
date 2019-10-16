@@ -141,12 +141,12 @@ def bgzip_tabix_vcf(job, config, sample, caller, input_vcf):
                  "-c",
                  "{}".format(input_vcf),
                  ">",
-                 "{}.gz".format(input_vcf)]
+                 "{}".format(bgzip_vcf)]
 
     tabix_cmd = ["tabix",
                  "-p",
                  "vcf",
-                 "{}.gz".format(input_vcf)]
+                 "{}".format(bgzip_vcf)]
 
     bgzip_logfile = "{}.{}.bgzip.log".format(sample, caller)
     tabix_logfile = "{}.{}.tabix.log".format(sample, caller)
@@ -179,7 +179,7 @@ def add_refcontig_info_header(job, config, sample, caller, input_vcf):
                "{}.fai".format(config['reference']),
                "-o",
                "{}".format(output_vcf),
-               "{}.gz".format(input_vcf)]
+               "{}".format(input_vcf)]
 
     job.fileStore.logToMaster("BCFTools Reheader Command: {}\n".format(command))
     pipeline.run_and_log_command(" ".join(command), logfile)
