@@ -187,7 +187,7 @@ def add_refcontig_info_header(job, config, sample, caller, input_vcf):
     return output_vcf
 
 
-def filter_low_quality_variants(job, config, sample, caller, input_vcf):
+def filter_low_support_variants(job, config, sample, caller, input_vcf):
     """Filter out very low quality calls from VCFs so they are not included in database
     :param config: The configuration dictionary.
     :type config: dict.
@@ -198,9 +198,9 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
     :returns:  str -- The output vcf file name.
     """
 
-    output_vcf = "{}.{}.low_qual_filtered.vcf".format(sample, caller)
+    output_vcf = "{}.{}.low_support_filtered.vcf".format(sample, caller)
 
-    job.fileStore.logToMaster("Filtering VCF {}\n".format(interim_vcf))
+    job.fileStore.logToMaster("Filtering VCF {}\n".format(input_vcf))
     parse_functions = {'mutect': vcf_parsing.parse_mutect_vcf_record,
                        'freebayes': vcf_parsing.parse_freebayes_vcf_record,
                        'vardict': vcf_parsing.parse_vardict_vcf_record,
@@ -208,8 +208,8 @@ def filter_low_quality_variants(job, config, sample, caller, input_vcf):
                        'platypus': vcf_parsing.parse_platypus_vcf_record,
                        'pindel': vcf_parsing.parse_pindel_vcf_record}
 
-    vcf = VCF(interim_vcf)
-    writer = Writer(output_vcf, interim_vcf)
+    vcf = VCF(input_vcf)
+    writer = Writer(output_vcf, input_vcf)
 
     for variant in vcf:
         pass_filter = True
