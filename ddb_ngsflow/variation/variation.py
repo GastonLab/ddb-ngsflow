@@ -253,7 +253,6 @@ def filter_low_support_variants(job, config, sample, caller, input_vcf):
     if var_in_file < 1:
         command = ["cp",
                    "{}".format(input_vcf),
-                   ">",
                    "{}".format(output_vcf)]
         logfile = "{}.low_support_filter.log".format(sample)
         pipeline.run_and_log_command(" ".join(command), logfile)
