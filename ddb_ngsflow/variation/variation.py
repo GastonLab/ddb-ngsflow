@@ -243,7 +243,10 @@ def filter_low_support_variants(job, config, sample, caller, input_vcf):
         var_in_file += 1
         pass_filter = True
         var_info = parse_functions[caller](variant)
+        var_length = variant.end - variant.start
         if float(var_info['Alt_Depth']) < 5.0:
+            pass_filter = False
+        if var_length > 1000:
             pass_filter = False
         if pass_filter:
             writer.write_record(variant)
