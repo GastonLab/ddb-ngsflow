@@ -214,7 +214,8 @@ def PicardUpdateVCFDict(job, config, sample, caller, input_vcf):
 
 
 def filter_low_support_variants(job, config, sample, caller, input_vcf):
-    """Filter out very low quality calls from VCFs so they are not included in database
+    """Filter out very low quality calls from BGZipped VCFs so they are not
+    included in database
     :param config: The configuration dictionary.
     :type config: dict.
     :param sample: sample name.
@@ -251,8 +252,9 @@ def filter_low_support_variants(job, config, sample, caller, input_vcf):
 
     # Hack for cases where there are no variants in a given VCF file
     if var_in_file < 1:
+        uncompressed_vcf = input_vcf.rstrip(".gz")
         command = ["cp",
-                   "{}".format(input_vcf),
+                   "{}".format(uncompressed_vcf),
                    "{}".format(output_vcf)]
         logfile = "{}.low_support_filter.log".format(sample)
         pipeline.run_and_log_command(" ".join(command), logfile)
