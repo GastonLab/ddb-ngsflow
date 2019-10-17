@@ -228,12 +228,12 @@ def filter_low_support_variants(job, config, sample, caller, input_vcf):
     output_vcf = "{}.{}.low_support_filtered.vcf".format(sample, caller)
 
     job.fileStore.logToMaster("Filtering VCF {}\n".format(input_vcf))
-    parse_functions = {'mutect': vcf_parsing.parse_mutect_vcf_record,
-                       'freebayes': vcf_parsing.parse_freebayes_vcf_record,
-                       'vardict': vcf_parsing.parse_vardict_vcf_record,
-                       'scalpel': vcf_parsing.parse_scalpel_vcf_record,
-                       'platypus': vcf_parsing.parse_platypus_vcf_record,
-                       'pindel': vcf_parsing.parse_pindel_vcf_record}
+    parse_functions = {'mutect': vcf_parsing.parse_mutect_vcf_record_alt,
+                       'freebayes': vcf_parsing.parse_freebayes_vcf_record_alt,
+                       'vardict': vcf_parsing.parse_vardict_vcf_record_alt,
+                       'scalpel': vcf_parsing.parse_scalpel_vcf_record_alt,
+                       'platypus': vcf_parsing.parse_platypus_vcf_record_alt,
+                       'pindel': vcf_parsing.parse_pindel_vcf_record_alt}
 
     vcf = VCF(input_vcf)
     writer = Writer(output_vcf, vcf)
