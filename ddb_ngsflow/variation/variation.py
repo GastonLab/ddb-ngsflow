@@ -237,7 +237,9 @@ def filter_low_support_variants(job, config, sample, caller, input_vcf):
     vcf = VCF(input_vcf)
     writer = Writer(output_vcf, vcf)
 
+    var_in_file = 0
     for variant in vcf:
+        var_in_file += 1
         pass_filter = True
         var_info = parse_functions[caller](variant)
         if float(var_info['Alt_Depth']) < 5.0:
@@ -246,6 +248,16 @@ def filter_low_support_variants(job, config, sample, caller, input_vcf):
             writer.write_record(variant)
 
     writer.close()
+
+    # Hack for cases where there are no variants in a given VCF file
+    if var_in_file < 1:
+        command = ["cp",
+                   "{}".format(input_vcf),
+                   ">",
+                   "{}".format(output_vcf)]
+        logfile = "{}.low_support_filter.log".format(sample)
+        pipeline.run_and_log_command(" ".join(command), logfile)
+
     return output_vcf
 
 
